@@ -1,0 +1,16 @@
+{
+  "dependencies": {
+    "apexcharts": "^3.42.0",
+    "bootstrap": "^5.3.1",
+    "chart.js": "^4.4.0",
+    "chartjs-plugin-annotation": "^3.0.1",
+    "js-cookie": "^3.0.5",
+    "next": "^13.4.19",
+    "react-apexcharts": "^1.4.1",
+    "react-bootstrap": "^2.8.0",
+    "react-chartjs-2": "^5.2.0",
+    "react-helmet": "^6.1.0",
+    "react-icons": "^4.10.1",
+    "semantic-ui-react": "^2.1.4"
+  }
+}
