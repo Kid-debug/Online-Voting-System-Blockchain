@@ -1,5 +1,6 @@
+/* Login Page*/
 .loginPage {
-  background: url("public/vote.jpg");
+  background: url("/vote.jpg");
   background: linear-gradient(rgba(1, 11, 11, 0.5), rgba(10, 10, 10, 0.5)),
     url("public/vote.jpg");
   background-position: center;
@@ -12,170 +13,237 @@
   color: white;
 }
 
-.voter_image {
-  width: 55px;
-  height: 55px;
+.image {
+  width: 80px;
+  height: 90px;
   border-radius: 50%;
 }
 
-/* Dashboard.css */
-
-/* Add some general styles */
-body {
-  background-color: #f4f4f4;
-  font-family: Arial, sans-serif;
-}
-
-.content-wrapper {
-  padding: 20px;
-}
-
-/* Header styles */
-.content-header {
-  background-color: #367fa9;
-  color: #fff;
-  padding: 10px 0;
-  text-align: center;
-}
-
-.content-header h1 {
-  margin: 0;
-  font-size: 24px;
-}
-
-/* Breadcrumb styles */
-.breadcrumb {
-  background-color: transparent;
-  margin: 0;
-  padding: 0;
-}
-
-.breadcrumb li {
-  display: inline;
-  font-size: 16px;
-  margin-right: 5px;
-}
-
-.breadcrumb li.active {
-  font-weight: bold;
-  color: #333;
-}
-
-/* Small boxes (Stat box) styles */
-.small-box {
-  background-color: #fff;
-  border-radius: 4px;
-  margin-bottom: 20px;
-  padding: 10px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
-}
-
-.small-box .inner {
-  padding: 10px;
-}
-
-.small-box h3 {
-  font-size: 36px;
-  font-weight: bold;
-  margin: 0;
-  color: #333;
-}
-
-.small-box p {
-  font-size: 18px;
-  margin: 0;
-  color: #777;
-}
-
-/* Button styles */
-.btn-flat {
-  margin: 0;
-}
-
-/* Charts container styles */
-.chart {
-  background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  padding: 15px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
-}
-
-/* Additional styles for specific elements can be added here */
-
-/* Media query for responsiveness */
-@media (max-width: 768px) {
-  .content-header h1 {
-    font-size: 20px;
-  }
-
-  .breadcrumb li {
-    font-size: 14px;
-  }
-
-  .small-box h3 {
-    font-size: 28px;
-  }
-
-  .small-box p {
-    font-size: 16px;
-  }
-}
-
-.circle-tile {
-  margin: 0 15px 15px 0;
-  text-align: center;
-  padding: 15px;
-  border-radius: 5px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.circle-tile-heading {
-  border: 3px solid rgba(255, 255, 255, 0.3);
-  border-radius: 100%;
-  color: #ffffff;
-  height: 80px;
-  width: 80px;
+/* Default styles for larger screens */
+#msform {
+  max-width: 800px;
+  width: 100%;
   margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #ff9100; /* Default background color */
+  text-align: center;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0px 10px 15px rgba(0, 0, 0, 0.2);
+  padding: 10px;
+  box-sizing: border-box;
 }
 
-.circle-tile-content {
-  padding-top: 20px;
+#msform fieldset {
+  border: 0 none;
+  border-radius: 10px;
+  padding: 5% 10%;
+  font-family: "Open Sans", sans-serif;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0 auto;
+  max-width: 700px;
 }
 
-.circle-tile-description {
-  text-transform: uppercase;
-  color: #34495e; /* Default text color */
+/* Media query for smaller screens */
+@media (max-width: 768px) {
+  #msform {
+    max-width: 90%;
+    padding: 5%;
+  }
+
+  #msform fieldset {
+    padding: 5%;
+  }
+}
+/* Hide all except the first fieldset */
+#msform fieldset:not(:first-of-type) {
+  display: none;
+  font-family: "Open Sans", sans-serif;
 }
 
-.circle-tile-number {
-  font-size: 36px;
-  font-weight: 700;
-  line-height: 1;
-  padding: 5px 0 15px;
-  color: #34495e; /* Default text color */
+/* Inputs */
+#msform input,
+#msform textarea {
+  padding: 25px; /* Increase padding for inputs */
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: "Open Sans", sans-serif;
+  color: #000;
+  font-size: 18px; /* Increase the font size for inputs */
+  background: #fff;
 }
 
-.circle-tile-footer {
-  background-color: rgba(0, 0, 0, 0.1);
-  color: rgba(14, 10, 10, 0.729);
-  display: block;
-  padding: 5px;
-  transition: all 0.3s ease-in-out 0s;
+/* Buttons */
+#msform .action-button,
+#msform .previous {
+  width: 140px; /* Increase button width */
+  background: #2fc877;
+  font-weight: bold;
+  color: white;
+  border: 0 none;
+  border-radius: 40px;
+  cursor: pointer;
+  padding: 15px 30px; /* Adjust padding for buttons */
+  margin: 20px 10px; /* Adjust margin for buttons */
+  font-size: 18px; /* Adjust the font size for buttons */
+  transition: background-color 0.2s ease; /* Add a smooth transition effect */
 }
 
-.circle-tile-footer:hover {
-  background-color: rgba(0, 0, 0, 0.2);
-  color: rgba(0, 0, 0, 0.5);
-  text-decoration: none;
+#msform .previous {
+  background: #545153;
 }
 
-/* for the votes tally div */
-.bordered-div {
-  border: 2px solid black; 
-  padding: 15px; 
+/* Button hover/focus styles */
+#msform .action-button:hover,
+#msform .action-button:focus {
+  background: #52ba7e;
+}
+
+#msform .previous:hover,
+#msform .previous:focus {
+  background: #353334;
+}
+
+/* Headings */
+.h2 {
+  padding-top: 2%;
+  font-family: "Open Sans", sans-serif;
+  font-weight: 800;
+  font-size: 40px !important;
+  color: #2c3e50;
+  padding-bottom: 8%;
+}
+
+.h3 {
+  font-family: "Open Sans", sans-serif;
+  font-weight: 600;
+  font-size: 18px;
+  color: #333;
+}
+
+.h4 {
+  font-family: "Open Sans", sans-serif;
+  font-weight: 400;
+  font-style: italic;
+  font-size: 18px; /* Increase the font size for h3 */
+  color: #000080 !important;
+  padding-bottom: 5%;
+}
+
+#verification-image {
+  width: 200px; /* Adjust the width to your desired size */
+  height: auto; /* Maintain the aspect ratio */
+  display: block; /* Center the image horizontally */
+  margin: 0 auto;
+}
+
+/*Feedback*/
+section .feedback {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  background: url;
+}
+.container-feedback {
+  background-color: #1c1c1c; /* Dark Background Color */
+  color: #e0e0e0; /* Light Text Color for better contrast */
+  width: 30%;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.6);
+  opacity: 0.6;
+  margin: auto;
+  margin-top: 3%;
+  margin-bottom: 3%;
+}
+
+.container-feedback form {
+  width: 100%;
+  text-align: center;
+  padding: 25px 20px;
+}
+
+.container-feedback form h1 {
+  padding: 10px 0;
+}
+
+.container-feedback form .id {
+  position: relative;
+}
+
+.container-feedback form .id i {
+  position: absolute;
+  font-size: 20px;
+  top: 50%;
+  right: 20px;
+  transform: translateY(-35%);
+}
+
+.container-feedback form input {
+  width: 100%;
+  height: 50px;
+  margin: 4px;
+  margin-top: 15px;
+  border: 1px solid #5c5c5c;
+  border-radius: 3px;
+  padding: 0 15px;
+  padding-right: 45px;
+  font-size: 20px;
+}
+
+.container-feedback form textarea {
+  padding: 5px 15px;
+  margin-top: 15px !important;
+  border: 1px solid #5c5c5c;
+  border-radius: 3px;
+  font-size: 20px;
+  width: 100%;
+  margin: 4px;
+}
+
+.container-feedback form input:focus,
+.container-feedback form textarea:focus {
+  border: 1px solid black;
+  background-color: #333333; /* Slightly lighter than the container for visibility */
+  color: #e0e0e0; /* Light Text Color for better contrast */
+  transition: all 0.3s ease;
+}
+
+.container-feedback form input:focus::placeholder,
+.container-feedback form textarea:focus::placeholder {
+  padding-left: 4px;
+  color: #a0a0a0; /* Light gray placeholder text for visibility */
+  transition: all 0.3s ease;
+}
+
+.container-feedback form button {
+  margin-top: 10px;
+  border: none;
+  background: #0077ff; /* Blue Color for the submit button */
+  color: #ffffff; /* White text for the button */
+  padding: 10px 0;
+  width: 30%;
+  font-size: 20px;
+  font-weight: 800;
+  cursor: pointer;
+  border-radius: 200px;
+}
+
+/* style.css */
+.confirmation-text {
+  font-size: 18px;
+  color: black;
+  background-color: #f3f3f3; /* Background color for the container */
+  padding: 10px; /* Padding for the container */
+  border-radius: 5px; /* Border radius for rounded corners */
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2); /* Box shadow for a subtle effect */
+}
+
+/* style.css */
+.custom-height {
+  height: 30%; /* You can adjust the height as needed */
+}
+
+.feedback-icon {
+  color: #000;
 }
