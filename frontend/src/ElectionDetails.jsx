@@ -31,18 +31,7 @@ function ElectionDetails() {
             <p>
               <span>Status </span> In Progress
             </p>
-            <Link
-              to="/voting"
-              style={{
-                border: "none",
-                padding: "7px 20px",
-                borderRadius: "20px",
-                backgroundColor: "black",
-                color: "#e6e7e8",
-                textDecoration: "none", // Remove the default underline
-                display: "inline-block", // Make the link a block element
-              }}
-            >
+            <Link className="vote-btn" to="/voting">
               Vote
             </Link>
           </div>

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./style.css";
+import "./stylesheets/style.css";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -32,7 +32,6 @@ function Register() {
         <div className="text-danger">{error && error}</div>
         <h2>Create New Account</h2>
         <form onSubmit={handleSubmit}>
-
           <div className="mb-3">
             <label htmlFor="email">
               <strong>Email Address</strong>

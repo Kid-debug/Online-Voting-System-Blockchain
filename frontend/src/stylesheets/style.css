@@ -79,7 +79,7 @@
 #msform .action-button,
 #msform .previous {
   width: 140px; /* Increase button width */
-  background: #2fc877;
+  background: #0077ff;
   font-weight: bold;
   color: white;
   border: 0 none;
@@ -98,7 +98,7 @@
 /* Button hover/focus styles */
 #msform .action-button:hover,
 #msform .action-button:focus {
-  background: #52ba7e;
+  background: #006400;
 }
 
 #msform .previous:hover,
@@ -205,14 +205,19 @@ section .feedback {
 .container-feedback form textarea:focus {
   border: 1px solid black;
   background-color: #333333; /* Slightly lighter than the container for visibility */
-  color: #e0e0e0; /* Light Text Color for better contrast */
+  color: #ffffff; /* Light Text Color for better contrast */
   transition: all 0.3s ease;
+}
+
+.container-feedback form input:focus + .feedback-icon,
+.container-feedback form textarea:focus + .feedback-icon {
+  color: #ffffff;
 }
 
 .container-feedback form input:focus::placeholder,
 .container-feedback form textarea:focus::placeholder {
   padding-left: 4px;
-  color: #a0a0a0; /* Light gray placeholder text for visibility */
+  color: #ffffff; /* Light gray placeholder text for visibility */
   transition: all 0.3s ease;
 }
 
@@ -227,6 +232,10 @@ section .feedback {
   font-weight: 800;
   cursor: pointer;
   border-radius: 200px;
+}
+
+.container-feedback form button:hover {
+  background: #006400;
 }
 
 /* style.css */

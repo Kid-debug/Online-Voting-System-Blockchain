@@ -1,7 +1,7 @@
 import React from "react";
 import Header from "./container/Header";
 import Footer from "./container/Footer";
-import "./style.css";
+import "./stylesheets/style.css";
 
 function Feedback() {
   return (

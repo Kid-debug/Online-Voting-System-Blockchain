@@ -428,7 +428,7 @@ function Voting() {
       </div>
       {/* Final Submit Button */}
       <div className="text-center mt-4 mb-3">
-        <button className="btn btn-success" onClick={handleSubmit}>
+        <button className="vote-submit" onClick={handleSubmit}>
           Submit
         </button>
       </div>

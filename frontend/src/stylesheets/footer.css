@@ -135,13 +135,18 @@ footer {
   margin-top: 10px;
 }
 .right form .btn button {
-  background: #fff8dc;
-  font-weight: 500;
+  border: none;
+  background: #0077ff; /* Blue Color for the submit button */
+  color: #ffffff; /* White text for the button */
+  padding: 10px 20px 10px;
+  width: 100%;
+  font-size: 20px;
+  font-weight: 800;
   cursor: pointer;
-  transition: 0.3s;
+  border-radius: 200px;
 }
 .right form .btn button:hover {
-  background: #7fffd4;
+  background: #006400;
 }
 .bottom center {
   padding: 5px;

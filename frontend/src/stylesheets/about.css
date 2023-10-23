@@ -75,7 +75,7 @@
   color: black;
   border: 2px solid rebeccapurple;
 }
-@media screen and (max-width: 2000px) {
+@media screen and (max-width: 2500px) {
   .about-container {
     width: 90%;
   }

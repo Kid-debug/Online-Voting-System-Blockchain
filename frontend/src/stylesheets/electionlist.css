@@ -222,16 +222,15 @@
 
 /* Vote Button Styles */
 .vote-btn {
-  display: inline-block;
-  padding: 10px 20px;
-  background-color: #44b478;
-  color: #ffffff;
   border: none;
-  border-radius: 5px;
-  margin-top: 20px;
-  cursor: pointer;
+  padding: 7px 20px;
+  border-radius: 20px;
+  background-color: black;
+  color: #e6e7e8;
+  text-decoration: none;
+  display: inline-block;
 }
 
 .vote-btn:hover {
-  background-color: #379f65;
+  background: #006400;
 }
