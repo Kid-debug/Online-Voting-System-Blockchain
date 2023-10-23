@@ -1,9 +1,7 @@
 import React, { useState } from "react";
 import Header from "./container/Header";
 import Footer from "./container/Footer";
-import { Link } from "react-router-dom";
-import "./header.css";
-import "./about.css";
+import "./stylesheets/about.css";
 
 function About() {
   const [showFullText, setShowFullText] = useState(false);

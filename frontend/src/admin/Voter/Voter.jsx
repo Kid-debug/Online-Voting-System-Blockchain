@@ -1,5 +1,5 @@
 import React from "react";
-import "../../list.css";
+import "../../stylesheets/list.css";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -52,12 +52,7 @@ function Voter() {
     },
   ];
 
-  const columns = [
-    "ID",
-    "Name",
-    "Email",
-    "Action",
-  ];
+  const columns = ["ID", "Name", "Email", "Action"];
 
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);

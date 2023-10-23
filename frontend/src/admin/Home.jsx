@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Row, Col, Button, Dropdown, DropdownButton } from "react-bootstrap"; // Import Dropdown and DropdownButton
 import { FaBriefcase, FaUsers, FaUser, FaVoteYea } from "react-icons/fa"; // Import icons
-import ".././home.css";
+import "../stylesheets/home.css";
 import { Link } from "react-router-dom";
 import ApexChart from "./VoteTally"; // Import the ApexChart component
 

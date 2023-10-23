@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import ".././footer.css";
+import "../stylesheets/footer.css";
 
 function Footer() {
   // State to track whether the scroll-to-top button should be displayed

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Header from "./container/Header";
 import Footer from "./container/Footer";
-import "./profile.css";
+import "./stylesheets/profile.css";
 
 const TAB_ACCOUNT = "account-general";
 const TAB_CHANGE_PASSWORD = "account-change-password";

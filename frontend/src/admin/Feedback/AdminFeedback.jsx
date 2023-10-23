@@ -1,5 +1,5 @@
 import React from "react";
-import "../../list.css";
+import "../../stylesheets/list.css";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -41,14 +41,8 @@ function AdminFeedback() {
       Action: "Edit",
     },
   ];
-  
-  const columns = [
-    "ID",
-    "User Name",
-    "Content Description",
-    "Date",
-    "Action",
-  ];
+
+  const columns = ["ID", "User Name", "Content Description", "Date", "Action"];
 
   const [expandedCategory, setExpandedCategory] = useState(null);
 

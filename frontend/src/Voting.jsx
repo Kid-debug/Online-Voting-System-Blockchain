@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "./container/Header";
 import Footer from "./container/Footer";
-import "./voting.css"; // Import your CSS file here
+import "./stylesheets/voting.css";
 
 const presidentCandidates = [
   {

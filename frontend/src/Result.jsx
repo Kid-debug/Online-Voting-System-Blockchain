@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import Header from "./container/Header";
 import Footer from "./container/Footer";
-import "./result.css";
-import ApexChart from "./admin/VoteTally"; // Import the ApexChart component
+import "./stylesheets/result.css";
 
 const candidateData = [
   {

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Header from "./container/Header";
 import Footer from "./container/Footer";
 import { Link } from "react-router-dom";
-import "./voterhome.css";
+import "./stylesheets/voterhome.css";
 
 function VoterDashboard() {
   const cardData = [
@@ -191,13 +191,16 @@ function VoterDashboard() {
           completed the registration process as described in the previous
           section.
           <h5>2. Selecting an Category</h5>
-          From your dashboard, you will see a list of categories. Click on the category you wish to participate in to access
-          the election list.
+          From your dashboard, you will see a list of categories. Click on the
+          category you wish to participate in to access the election list.
           <h5>3. Selecting an Election</h5>
-          From your election list page, you will see a list of elections. Click on the election you wish to participate in to access
-          more election details.
+          From your election list page, you will see a list of elections. Click
+          on the election you wish to participate in to access more election
+          details.
           <h5>3. Viewing the election details</h5>
-          From your election details page, you will see a the details such as date and time. Click on the vote button if you want to continue the voting process.
+          From your election details page, you will see a the details such as
+          date and time. Click on the vote button if you want to continue the
+          voting process.
           <h5>4. Reviewing Candidates</h5>
           Before casting your vote, take the time to review the candidates
           running in the election. You can typically find candidate profiles and

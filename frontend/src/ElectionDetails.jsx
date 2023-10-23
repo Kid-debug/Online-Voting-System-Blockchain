@@ -1,7 +1,7 @@
 import React from "react";
 import Header from "./container/Header";
 import Footer from "./container/Footer";
-import "./electionlist.css";
+import "./stylesheets/electionlist.css";
 import { Link } from "react-router-dom";
 
 function ElectionDetails() {
