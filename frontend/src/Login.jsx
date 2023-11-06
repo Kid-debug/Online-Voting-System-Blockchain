@@ -86,7 +86,10 @@ function Login() {
             Log in
           </button>
           <Link to="/register" className="btn btn-light w-100 mb-2">
-            Create Account
+            Create User Account
+          </Link>
+          <Link to="/adminregister" className="btn btn-secondary w-100 mb-2">
+            Create Admin Account
           </Link>
         </form>
       </div>

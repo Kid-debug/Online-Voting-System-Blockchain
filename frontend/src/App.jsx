@@ -1,6 +1,7 @@
 import React from "react";
 import Login from "./Login";
 import Register from "./Register";
+import AdminRegister from "./AdminRegister";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Dashboard from "./admin/Dashboard";
 import Category from "./admin/Category/Category";
@@ -38,46 +39,46 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Separate top-level routes for login and user-specific dashboards */}
+        <Route path="/" element={<Login />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/adminregister" element={<AdminRegister />} />
+
         {/* Admin Routes */}
-        <Route path="/" element={<Dashboard />}>
-          <Route path="" element={<Home />}></Route>
-          <Route path="/category" element={<Category />}></Route>
-          <Route path="/position" element={<Position />}></Route>
-          <Route path="/candidate" element={<Candidate />}></Route>
-          <Route path="/voter" element={<Voter />}></Route>
-          <Route path="/election" element={<Election />}></Route>
-          <Route path="/adminfeedback" element={<AdminFeedback />}></Route>
-          <Route path="/reportsummary" element={<ReportSummary />}></Route>
-          <Route path="/editfeedback" element={<EditFeedback />}></Route>
-          <Route path="/createVoter" element={<AddVoter />}></Route>
-          <Route path="/editVoter" element={<EditVoter />}></Route>
-          <Route path="/createCategory" element={<AddCategory />}></Route>
-          <Route path="/editCategory" element={<EditCategory />}></Route>
-          <Route path="/createPosition" element={<AddPosition />}></Route>
-          <Route path="/editPosition" element={<EditPosition />}></Route>
-          <Route path="/createCandidate" element={<AddCandidate />}></Route>
-          <Route path="/editCandidate" element={<EditCandidate />}></Route>
-          <Route path="/createElection" element={<AddElection />}></Route>
-          <Route path="/editElection" element={<EditElection />}></Route>
-        </Route>
-        {/* Login and Register Routes */}
-        <Route path="/login" element={<Login />}></Route>
-        <Route path="/register" element={<Register />}></Route>
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/home" element={<Home />} />
+        <Route path="/category" element={<Category />} />
+        <Route path="/position" element={<Position />} />
+        <Route path="/candidate" element={<Candidate />} />
+        <Route path="/voter" element={<Voter />} />
+        <Route path="/election" element={<Election />} />
+        <Route path="/adminfeedback" element={<AdminFeedback />} />
+        <Route path="/reportsummary" element={<ReportSummary />} />
+        <Route path="/editfeedback" element={<EditFeedback />} />
+        <Route path="/createVoter" element={<AddVoter />} />
+        <Route path="/editVoter" element={<EditVoter />} />
+        <Route path="/createCategory" element={<AddCategory />} />
+        <Route path="/editCategory" element={<EditCategory />} />
+        <Route path="/createPosition" element={<AddPosition />} />
+        <Route path="/editPosition" element={<EditPosition />} />
+        <Route path="/createCandidate" element={<AddCandidate />} />
+        <Route path="/editCandidate" element={<EditCandidate />} />
+        <Route path="/createElection" element={<AddElection />} />
+        <Route path="/editElection" element={<EditElection />} />
+
         {/* Voter/User Routes */}
-        <Route path="/voterdashboard" element={<VoterDashboard />}></Route>
-        <Route path="/about" element={<About />}></Route>
-        <Route path="/electionList" element={<ElectionList />}></Route>
-        <Route path="/electionDetails" element={<ElectionDetails />}></Route>
-        <Route path="/voting" element={<Voting />}></Route>
-        <Route path="/verification" element={<Verification />}></Route>
-        <Route path="/feedback" element={<Feedback />}></Route>
-        <Route path="/profile" element={<Profile />}></Route>
-        <Route path="/result" element={<Result />}></Route>
-        <Route path="/forgotPass" element={<ForgotPassword />}></Route>
-        <Route
-          path="/resetPass"
-          element={<PasswordResetConfirmation />}
-        ></Route>
+        <Route path="/voterdashboard" element={<VoterDashboard />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/electionList" element={<ElectionList />} />
+        <Route path="/electionDetails" element={<ElectionDetails />} />
+        <Route path="/voting" element={<Voting />} />
+        <Route path="/verification" element={<Verification />} />
+        <Route path="/feedback" element={<Feedback />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/result" element={<Result />} />
+        <Route path="/forgotPass" element={<ForgotPassword />} />
+        <Route path="/resetPass" element={<PasswordResetConfirmation />} />
       </Routes>
     </BrowserRouter>
   );

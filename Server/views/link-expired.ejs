@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Link Expired</title>
+  <!-- Add your stylesheet links here -->
+</head>
+<body>
+  <h1>Verification Link Expired</h1>
+  <p>Your verification link has expired. Please click the button below to send a new verification email.</p>
+  <form action="/resend-verification-email" method="post">
+    <input type="hidden" name="email" value="<%= userEmail %>">
+    <button type="submit">Resend Verification Email</button>
+  </form>
+</body>
+</html>
