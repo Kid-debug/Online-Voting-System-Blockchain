@@ -58,9 +58,9 @@ const registerUser = (req, res) => {
                   randomToken +
                   "</a></p>" +
                   "<p>Need help?</p>" +
-                  "<p>Please contact the email at xxx@student.tarc.edu.my</p>" +
+                  "<p>Please contact the email at nghs-wm20@student.tarc.edu.my</p>" +
                   "<p>Best Regards,</p>" +
-                  "<p>xxx</p>";
+                  "<p>Ng Hooi Seng</p>";
 
                 sendMail(req.body.email, mailSubject, content);
 
@@ -139,9 +139,9 @@ const registerAdmin = (req, res) => {
                   randomToken +
                   "</a></p>" +
                   "<p>Need help?</p>" +
-                  "<p>Please contact the email at xxx@student.tarc.edu.my</p>" +
+                  "<p>Please contact the email at nghs-wm20@student.tarc.edu.my</p>" +
                   "<p>Best Regards,</p>" +
-                  "<p>xxx</p>";
+                  "<p>Ng Hooi Seng</p>";
 
                 sendMail(req.body.email, mailSubject, content);
 
@@ -296,11 +296,10 @@ const resendVerificationMail = (req, res) => {
             newToken +
             "'>http://localhost:3000/mail-verification?token=" +
             newToken +
-            "</a></p>" +
             "<p>Need help?</p>" +
-            "<p>Please contact the email at xxx@student.tarc.edu.my</p>" +
+            "<p>Please contact the email at nghs-wm20@student.tarc.edu.my</p>" +
             "<p>Best Regards,</p>" +
-            "<p>xxx</p>";
+            "<p>Ng Hooi Seng</p>";
 
           sendMail(email, mailSubject, content);
 
