@@ -251,9 +251,9 @@ const resendVerificationMail = (req, res) => {
     return res.status(400).send({ msg: "No email provided" });
   }
 
-  // Check if the user exists and is not verified yet
+  // Check if the user exists, is not verified, and the cooldown has passed
   db.query(
-    `SELECT * FROM users WHERE LOWER(email) = LOWER(${db.escape(
+    `SELECT token_created_at FROM users WHERE LOWER(email) = LOWER(${db.escape(
       email
     )}) AND is_verified = 0;`,
     (err, result) => {
@@ -267,12 +267,27 @@ const resendVerificationMail = (req, res) => {
           .send({ msg: "User does not exist or is already verified" });
       }
 
+      const user = result[0];
+      const timeElapsed = new Date() - new Date(user.token_created_at);
+      const waitTime = 15 * 60 * 1000; // 15 minutes in milliseconds
+
+      if (timeElapsed < waitTime) {
+        // If the time elapsed since the last token was created is less than the wait time
+        const timeToWait = waitTime - timeElapsed;
+        const minutesToWait = Math.ceil(timeToWait / 60000); // Convert milliseconds to minutes and round up
+        return res
+          .status(429)
+          .send({
+            msg: `Please wait ${minutesToWait} more minute(s) before requesting a new verification email.`,
+          });
+      }
+
       // Generate a new token
       const newToken = randomstring.generate();
 
       // Update the user with the new token and timestamp
       db.query(
-        `UPDATE users SET token=?, token_created_at=NOW(), token_updated_at=NOW() WHERE LOWER(email) = LOWER(?);`,
+        `UPDATE users SET token=?, token_created_at=NOW(), token_updated_at=NULL WHERE LOWER(email) = LOWER(?);`,
         [newToken, email],
         (updateErr) => {
           if (updateErr) {

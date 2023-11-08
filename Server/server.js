@@ -16,7 +16,6 @@ app.set("views", "./views");
 app.use(express.static("public"));
 
 const userRouter = require("./routes/userRoute");
-const adminRouter = require("./routes/adminRoute");
 const webRouter = require("./routes/webRoute");
 
 app.use(express.json());
@@ -28,7 +27,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors(corsOptions));
 
 app.use("/api", userRouter);
-app.use("/api", adminRouter);
 app.use("/", webRouter);
 
 // Error handling
