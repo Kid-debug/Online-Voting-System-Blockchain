@@ -112,7 +112,7 @@ function AdminRegister() {
           >
             Sign Up
           </button>
-          <Link to="/login" className="btn btn-light w-100 mb-2">
+          <Link to="/" className="btn btn-light w-100 mb-2">
             Back to Login
           </Link>
         </form>

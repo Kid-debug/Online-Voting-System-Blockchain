@@ -100,7 +100,7 @@ function EditElection() {
           </button>
         </div>
       </form>
-      <Link to="/election" className="btn btn-secondary mb-3">
+      <Link to="/admin/election" className="btn btn-secondary mb-3">
         Back
       </Link>
     </div>

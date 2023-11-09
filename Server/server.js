@@ -1,14 +1,24 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
-// Specific Origin
+const allowedOrigins = ["http://localhost:5173", "http://localhost:3000"];
+
 const corsOptions = {
-  origin: "http://localhost:5173", // Only allow this origin
+  origin: function (origin, callback) {
+    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  methods: ["POST", "GET"],
   optionsSuccessStatus: 200, // For legacy browser support
   credentials: true, // Because the Access-Control-Allow-Credentials: true header is needed
 };
 
 const bodyParser = require("body-parser");
+const cookieParser = require("cookie-parser");
+const session = require("express-session");
 require("./config/dbConnection");
 
 app.set("view engine", "ejs");
@@ -22,7 +32,22 @@ app.use(express.json());
 
 app.use(bodyParser.json());
 
+app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(
+  session({
+    key: "userId",
+    secret: "secret", // the key will sign the cookie to the browser
+    resave: false, // for every request to the server we want to create a new session even if we don't care about if it's the same user or browser and we don't want this
+    saveUninitialized: false, // if we have not touched or modified the session, we don't want it to save
+    cookie: {
+      secure: false,
+      expires: 60 * 60 * 24 * 1000,
+      httpOnly: true,
+    }, // set the session cookie properties
+  })
+);
 
 app.use(cors(corsOptions));
 

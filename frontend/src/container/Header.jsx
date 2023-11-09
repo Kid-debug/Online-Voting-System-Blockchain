@@ -6,11 +6,15 @@ function Header() {
   const navigate = useNavigate();
   const handleLogout = () => {
     axios
-      .get("http://localhost:8081/logout")
-      .then((res) => {
-        navigate("/login");
+      .get("http://localhost:3000/api/logout")
+      .then(() => {
+        // Logout successful
+        navigate("/");
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        // Handle errors
+        console.error("Logout error", err);
+      });
   };
 
   return (

@@ -134,7 +134,7 @@ function Election() {
     <div className="container mt-5">
       <h2>Election List</h2>
       <Link
-        to="/createElection"
+        to="/admin/createElection"
         className="btn btn-success mb-3"
         style={{ marginLeft: "auto" }}
       >
@@ -180,7 +180,7 @@ function Election() {
                   {column === "Action" ? (
                     <>
                       <Link
-                        to={`/editElection`}
+                        to={`/admin/editElection`}
                         className="btn btn-primary btn-sm"
                       >
                         <i className="fs-4 bi-pencil"></i>

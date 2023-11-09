@@ -134,7 +134,7 @@ function Voter() {
     <div className="container mt-5">
       <h2>Voter List</h2>
       <Link
-        to="/createVoter"
+        to="/admin/createVoter"
         className="btn btn-success mb-3"
         style={{ marginLeft: "auto" }}
       >
@@ -182,7 +182,7 @@ function Voter() {
                   ) : column === "Action" ? (
                     <>
                       <Link
-                        to={`/editVoter`}
+                        to={`/admin/editVoter`}
                         className="btn btn-primary btn-sm"
                       >
                         <i className="fs-4 bi-pencil"></i>

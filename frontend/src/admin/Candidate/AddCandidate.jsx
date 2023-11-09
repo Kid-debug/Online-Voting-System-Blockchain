@@ -117,7 +117,7 @@ function AddCandidate() {
           </button>
         </div>
       </form>
-      <Link to="/candidate" className="btn btn-secondary mb-3">
+      <Link to="/admin/candidate" className="btn btn-secondary mb-3">
         Back
       </Link>
     </div>

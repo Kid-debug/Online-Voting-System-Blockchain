@@ -218,7 +218,7 @@ function Candidate() {
     <div className="container mt-5">
       <h2>Candidate List</h2>
       <Link
-        to="/createCandidate"
+        to="/admin/createCandidate"
         className="btn btn-success mb-3"
         style={{ marginLeft: "auto" }}
       >
@@ -293,7 +293,7 @@ function Candidate() {
                   ) : column === "Action" ? (
                     <>
                       <Link
-                        to={`/editCandidate`}
+                        to={`/admin/editCandidate`}
                         className="btn btn-primary btn-sm"
                       >
                         <i className="fs-4 bi-pencil"></i>

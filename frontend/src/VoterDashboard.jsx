@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import Header from "./container/Header";
 import Footer from "./container/Footer";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./stylesheets/voterhome.css";
+import axios from "axios";
 
 function VoterDashboard() {
   const cardData = [
@@ -105,10 +106,28 @@ function VoterDashboard() {
   //   window.scrollTo(0, 0);
   // }, []);
 
+  const [email, setEmail] = useState("");
+  const navigate = useNavigate();
+
+  axios.defaults.withCredentials = true;
+  useEffect(() => {
+    axios
+      .get("http://localhost:3000/api/get-user")
+      .then((res) => {
+        if (res.data.valid) {
+          setEmail(res.data.email);
+        } else {
+          navigate("/");
+        }
+      })
+      .catch((err) => console.log(err));
+  }, []);
+
   return (
     <div>
       <Header />
       <h2 className="mt-4">VOTER PORTAL</h2>
+      <h2 style={{ fontSize: "20px" }}>({email})</h2>
 
       <div className="container bg-primary mt-4 border border-dark-subtle">
         <div className="heading-container">

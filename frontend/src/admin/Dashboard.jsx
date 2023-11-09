@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -12,20 +12,11 @@ function Dashboard() {
   const [isVotersOpen, setIsVotersOpen] = useState(false);
   const [isElectionOpen, setIsElectionOpen] = useState(false);
 
-  useEffect(() => {
-    axios.get("http://localhost:8081/dashboard").then((res) => {
-      if (res.data.Status === "Success") {
-      } else {
-        navigate("/login");
-      }
-    });
-  }, []);
-
   const handleLogout = () => {
     axios
-      .get("http://localhost:8081/logout")
+      .get("http://localhost:3000/api/logout")
       .then((res) => {
-        navigate("/login");
+        navigate("/");
       })
       .catch((err) => console.log(err));
   };
@@ -56,7 +47,7 @@ function Dashboard() {
         <div className="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-dark">
           <div className="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100">
             <a
-              href="/"
+              href="/admin/home"
               className="d-flex align-items-center pb-3 mb-md-1 mt-md-3 me-md-auto text-white text-decoration-none"
             >
               <span className="fs-5 fw-bolder d-none d-sm-inline">
@@ -68,7 +59,10 @@ function Dashboard() {
               id="menu"
             >
               <li>
-                <a href="/" className="nav-link px-0 align-middle text-white">
+                <a
+                  href="/admin/home"
+                  className="nav-link px-0 align-middle text-white"
+                >
                   <i className="fs-4 bi-speedometer2"></i>{" "}
                   <span className="ms-1 d-none d-sm-inline">Dashboard</span>
                 </a>
@@ -88,7 +82,7 @@ function Dashboard() {
                   <ul>
                     <li>
                       <Link
-                        to="/category"
+                        to="/admin/category"
                         className="nav-link px-0 align-middle text-white"
                       >
                         Display Category
@@ -96,7 +90,7 @@ function Dashboard() {
                     </li>
                     <li>
                       <Link
-                        to="/createCategory"
+                        to="/admin/createCategory"
                         className="nav-link px-0 align-middle text-white"
                       >
                         Add New Category
@@ -120,7 +114,7 @@ function Dashboard() {
                   <ul>
                     <li>
                       <Link
-                        to="/position"
+                        to="/admin/position"
                         className="nav-link px-0 align-middle text-white"
                       >
                         Display Position
@@ -128,7 +122,7 @@ function Dashboard() {
                     </li>
                     <li>
                       <Link
-                        to="/createPosition"
+                        to="/admin/createPosition"
                         className="nav-link px-0 align-middle text-white"
                       >
                         Add New Position
@@ -152,7 +146,7 @@ function Dashboard() {
                   <ul>
                     <li>
                       <Link
-                        to="/candidate"
+                        to="/admin/candidate"
                         className="nav-link px-0 align-middle text-white"
                       >
                         Display Candidates
@@ -160,7 +154,7 @@ function Dashboard() {
                     </li>
                     <li>
                       <Link
-                        to="/createCandidate"
+                        to="/admin/createCandidate"
                         className="nav-link px-0 align-middle text-white"
                       >
                         Add New Candidate
@@ -182,7 +176,7 @@ function Dashboard() {
                   <ul>
                     <li>
                       <Link
-                        to="/voter"
+                        to="/admin/voter"
                         className="nav-link px-0 align-middle text-white"
                       >
                         Display Voters
@@ -190,7 +184,7 @@ function Dashboard() {
                     </li>
                     <li>
                       <Link
-                        to="/createVoter"
+                        to="/admin/createVoter"
                         className="nav-link px-0 align-middle text-white"
                       >
                         Add New Voter
@@ -214,7 +208,7 @@ function Dashboard() {
                   <ul>
                     <li>
                       <Link
-                        to="/election"
+                        to="/admin/election"
                         className="nav-link px-0 align-middle text-white"
                       >
                         Display Elections
@@ -222,7 +216,7 @@ function Dashboard() {
                     </li>
                     <li>
                       <Link
-                        to="/createElection"
+                        to="/admin/createElection"
                         className="nav-link px-0 align-middle text-white"
                       >
                         Add New Election
@@ -233,7 +227,7 @@ function Dashboard() {
               </li>
               <li>
                 <a
-                  href="/adminfeedback"
+                  href="/admin/adminfeedback"
                   className="nav-link px-0 align-middle text-white"
                 >
                   <i className="fs-4 bi-chat-dots"></i>{" "}
@@ -242,7 +236,7 @@ function Dashboard() {
               </li>
               <li>
                 <a
-                  href="/reportsummary"
+                  href="/admin/reportsummary"
                   className="nav-link px-0 align-middle text-white"
                 >
                   <i className="fs-4 bi-graph-up"></i>{" "}

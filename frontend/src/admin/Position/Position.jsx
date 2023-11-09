@@ -145,7 +145,7 @@ function Position() {
     <div className="container mt-5">
       <h2>Position List</h2>
       <Link
-        to="/createPosition"
+        to="/admin/createPosition"
         className="btn btn-success mb-3"
         style={{ marginLeft: "auto" }}
       >
@@ -218,7 +218,7 @@ function Position() {
                   ) : column === "Action" ? (
                     <>
                       <Link
-                        to={`/editPosition`}
+                        to={`/admin/editPosition`}
                         className="btn btn-primary btn-sm"
                       >
                         <i className="fs-4 bi-pencil"></i>

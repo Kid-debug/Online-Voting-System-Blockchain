@@ -275,11 +275,9 @@ const resendVerificationMail = (req, res) => {
         // If the time elapsed since the last token was created is less than the wait time
         const timeToWait = waitTime - timeElapsed;
         const minutesToWait = Math.ceil(timeToWait / 60000); // Convert milliseconds to minutes and round up
-        return res
-          .status(429)
-          .send({
-            msg: `Please wait ${minutesToWait} more minute(s) before requesting a new verification email.`,
-          });
+        return res.status(429).send({
+          msg: `Please wait ${minutesToWait} more minute(s) before requesting a new verification email.`,
+        });
       }
 
       // Generate a new token
@@ -327,9 +325,105 @@ const resendVerificationMail = (req, res) => {
   );
 };
 
+const getUser = (req, res) => {
+  if (req.session.email) {
+    return res.json({
+      valid: true,
+      email: req.session.email,
+      path: req.session.path,
+    });
+  } else {
+    return res.json({ valid: false });
+  }
+};
+
+const login = (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  db.query(
+    `SELECT * FROM users WHERE email = ${db.escape(req.body.email)};`,
+    (err, result) => {
+      if (err) {
+        return res.status(400).send({ msg: err });
+      }
+
+      if (result.length > 0) {
+        // Check if the user is verified
+        if (result[0]["is_verified"] == 1) {
+          bcrypt.compare(
+            req.body.password,
+            result[0]["password"],
+            (bErr, bResult) => {
+              if (bErr) {
+                return res.status(400).send({ msg: bErr });
+              }
+              if (bResult) {
+                const userRole = result[0]["role"];
+                let path;
+                if (userRole === "U") {
+                  // User role
+                  req.session.email = result[0].email;
+                  console.log(req.session.email);
+                  path = "voterdashboard";
+                  req.session.path = path;
+                } else if (userRole === "A") {
+                  // Admin role
+                  req.session.email = result[0].email;
+                  console.log(req.session.email);
+                  path = "admin/home";
+                  req.session.path = path;
+                }
+
+                // Now handle the Remember Me functionality
+                if (req.body.rememberMe) {
+                  req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // Extend session cookie's lifetime for 30 days
+                } else {
+                  // If Remember Me isn't checked, session cookie will use default expiration set in session middleware
+                  req.session.cookie.maxAge = 24 * 60 * 60 * 1000; // Reset maxAge to default (24 hours)
+                }
+                return res.status(200).send({
+                  Login: true,
+                  path: path,
+                });
+              } else {
+                return res.status(401).send({
+                  Login: false,
+                  msg: "Email or Password is incorrect!",
+                });
+              }
+            }
+          );
+        } else {
+          return res.status(401).send({
+            msg: "You are required to verify your email before login!",
+          });
+        }
+      } else {
+        return res.status(401).send({ msg: "User doesn't exist" });
+      }
+    }
+  );
+};
+
+const logout = (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).send({ msg: "Logout failed", error: err });
+    }
+    res.clearCookie("userId", { path: "/" });
+    return res.status(200).send({ msg: "Logged out" });
+  });
+};
+
 module.exports = {
   registerUser,
   registerAdmin,
   verifyMail,
   resendVerificationMail,
+  getUser,
+  login,
+  logout,
 };

@@ -200,7 +200,7 @@ function AdminFeedback() {
                   ) : column === "Action" ? (
                     <>
                       <Link
-                        to={`/editFeedback`}
+                        to={`/admin/editFeedback`}
                         className="btn btn-primary btn-sm"
                       >
                         <i className="fs-4 bi-pencil"></i>

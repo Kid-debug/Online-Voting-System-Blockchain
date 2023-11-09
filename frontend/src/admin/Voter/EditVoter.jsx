@@ -38,7 +38,7 @@ function EditVoter() {
             </button>
           </div>
         </form>
-        <Link to="/voter" className="btn btn-secondary mb-3">
+        <Link to="/admin/voter" className="btn btn-secondary mb-3">
           Back
         </Link>
       </div>

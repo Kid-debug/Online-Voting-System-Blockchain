@@ -45,7 +45,7 @@ function AddPosition() {
           </button>
         </div>
       </form>
-      <Link to="/position" className="btn btn-secondary mb-3">
+      <Link to="/admin/position" className="btn btn-secondary mb-3">
         Back
       </Link>
     </div>

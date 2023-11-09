@@ -149,7 +149,7 @@ function Category() {
     <div className="container mt-5">
       <h2>Category List</h2>
       <Link
-        to="/createCategory"
+        to="/admin/createCategory"
         className="btn btn-success mb-3"
         style={{ marginLeft: "auto" }}
       >
@@ -222,7 +222,7 @@ function Category() {
                   ) : column === "Action" ? (
                     <>
                       <Link
-                        to={`/editCategory`}
+                        to={`/admin/editCategory`}
                         className="btn btn-primary btn-sm"
                       >
                         <i className="fs-4 bi-pencil"></i>

@@ -106,7 +106,7 @@ function EditFeedback() {
           </button>
         </div>
       </form>
-      <Link to="/adminfeedback" className="btn btn-secondary mb-3">
+      <Link to="/admin/adminfeedback" className="btn btn-secondary mb-3">
         Back
       </Link>
     </div>

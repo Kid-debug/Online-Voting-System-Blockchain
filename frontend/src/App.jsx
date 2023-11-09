@@ -39,33 +39,38 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Separate top-level routes for login and user-specific dashboards */}
+        {/* Default route goes to Login */}
         <Route path="/" element={<Login />} />
-        <Route path="/login" element={<Login />} />
+
+        {/* Separate top-level routes for registration and admin registration */}
         <Route path="/register" element={<Register />} />
         <Route path="/adminregister" element={<AdminRegister />} />
 
-        {/* Admin Routes */}
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/category" element={<Category />} />
-        <Route path="/position" element={<Position />} />
-        <Route path="/candidate" element={<Candidate />} />
-        <Route path="/voter" element={<Voter />} />
-        <Route path="/election" element={<Election />} />
-        <Route path="/adminfeedback" element={<AdminFeedback />} />
-        <Route path="/reportsummary" element={<ReportSummary />} />
-        <Route path="/editfeedback" element={<EditFeedback />} />
-        <Route path="/createVoter" element={<AddVoter />} />
-        <Route path="/editVoter" element={<EditVoter />} />
-        <Route path="/createCategory" element={<AddCategory />} />
-        <Route path="/editCategory" element={<EditCategory />} />
-        <Route path="/createPosition" element={<AddPosition />} />
-        <Route path="/editPosition" element={<EditPosition />} />
-        <Route path="/createCandidate" element={<AddCandidate />} />
-        <Route path="/editCandidate" element={<EditCandidate />} />
-        <Route path="/createElection" element={<AddElection />} />
-        <Route path="/editElection" element={<EditElection />} />
+        {/* Admin Dashboard Route */}
+        <Route path="/admin" element={<Dashboard />}>
+          {/* The "index" route represents the default child route */}
+          <Route index element={<Home />} />
+          <Route path="home" element={<Home />} />
+          <Route path="category" element={<Category />} />
+          <Route path="position" element={<Position />} />
+          <Route path="candidate" element={<Candidate />} />
+          <Route path="voter" element={<Voter />} />
+          <Route path="election" element={<Election />} />
+          <Route path="adminfeedback" element={<AdminFeedback />} />
+          <Route path="reportsummary" element={<ReportSummary />} />
+          <Route path="editfeedback" element={<EditFeedback />} />
+          <Route path="createVoter" element={<AddVoter />} />
+          <Route path="editVoter" element={<EditVoter />} />
+          <Route path="createCategory" element={<AddCategory />} />
+          <Route path="editCategory" element={<EditCategory />} />
+          <Route path="createPosition" element={<AddPosition />} />
+          <Route path="editPosition" element={<EditPosition />} />
+          <Route path="createCandidate" element={<AddCandidate />} />
+          <Route path="editCandidate" element={<EditCandidate />} />
+          <Route path="createElection" element={<AddElection />} />
+          <Route path="editElection" element={<EditElection />} />
+          {/* ... more nested admin routes */}
+        </Route>
 
         {/* Voter/User Routes */}
         <Route path="/voterdashboard" element={<VoterDashboard />} />

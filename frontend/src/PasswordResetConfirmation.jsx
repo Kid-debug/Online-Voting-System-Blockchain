@@ -13,7 +13,7 @@ function PasswordResetConfirmation() {
           to your inbox.{" "}
           <div>Please check your email and follow the instructions.</div>
         </p>
-        <Link to="/login" className="btn btn-success w-25 mt-1">
+        <Link to="/" className="btn btn-success w-25 mt-1">
           Back to Login
         </Link>
       </div>

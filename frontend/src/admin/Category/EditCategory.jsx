@@ -24,7 +24,7 @@ function EditCategory() {
           </button>
         </div>
       </form>
-      <Link to="/category" className="btn btn-secondary mb-3">
+      <Link to="/admin/category" className="btn btn-secondary mb-3">
         Back
       </Link>
     </div>

@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Row, Col, Button, Dropdown, DropdownButton } from "react-bootstrap"; // Import Dropdown and DropdownButton
 import { FaBriefcase, FaUsers, FaUser, FaVoteYea } from "react-icons/fa"; // Import icons
 import "../stylesheets/home.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import ApexChart from "./VoteTally"; // Import the ApexChart component
+import axios from "axios";
 
 function Home() {
   // State initialization
@@ -87,10 +88,40 @@ function Home() {
     setSelectedElection(election);
   };
 
+  const [email, setEmail] = useState("");
+  const navigate = useNavigate();
+
+  axios.defaults.withCredentials = true;
+  useEffect(() => {
+    axios
+      .get("http://localhost:3000/api/get-user")
+      .then((res) => {
+        if (res.data.valid) {
+          setEmail(res.data.email);
+        } else {
+          navigate("/");
+        }
+      })
+      .catch((err) => console.log(err));
+  }, []);
+
   return (
     <div className="content-wrapper">
       <section className="content-header mb-5">
         <h1>Dashboard</h1>
+        <h1>
+          (
+          <span
+            style={{
+              textTransform: "lowercase",
+              fontWeight: "normal",
+              fontSize: "20px",
+            }}
+          >
+            {email}
+          </span>
+          )
+        </h1>
       </section>
 
       <section className="content">
