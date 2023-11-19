@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import "./stylesheets/style.css";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import { EyeInvisibleOutlined, EyeOutlined } from "@ant-design/icons";
 
 function Register() {
   const [email, setEmail] = useState("");
@@ -9,6 +10,8 @@ function Register() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [backendErrors, setBackendErrors] = useState([]);
   const [successMessage, setSuccessMessage] = useState("");
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
 
   const handleRegister = async (event) => {
     event.preventDefault();
@@ -78,32 +81,48 @@ function Register() {
             />
           </div>
 
-          <div className="mb-3">
+          <div className="mb-3 position-relative">
             <label htmlFor="password">
               <strong>Password</strong>
             </label>
             <input
-              type="password"
+              type={passwordVisible ? "text" : "password"}
               placeholder="Enter Password"
               name="password"
               className="form-control rounded-0"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
+            <i
+              className="eye-icon"
+              onClick={() => setPasswordVisible(!passwordVisible)}
+            >
+              {passwordVisible ? <EyeOutlined /> : <EyeInvisibleOutlined />}
+            </i>
           </div>
 
-          <div className="mb-3">
-            <label htmlFor="password-confirm">
+          <div className="mb-3 position-relative">
+            <label htmlFor="confirmPassword">
               <strong>Confirm Password</strong>
             </label>
             <input
-              type="password"
+              type={confirmPasswordVisible ? "text" : "password"}
               placeholder="Enter Confirm Password"
-              name="password-confirm"
+              name="confirmPassword"
               className="form-control rounded-0"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
             />
+            <i
+              className="eye-icon"
+              onClick={() => setConfirmPasswordVisible(!confirmPasswordVisible)}
+            >
+              {confirmPasswordVisible ? (
+                <EyeOutlined />
+              ) : (
+                <EyeInvisibleOutlined />
+              )}
+            </i>
           </div>
 
           <button

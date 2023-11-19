@@ -1,63 +1,87 @@
 import React, { useState } from "react";
-import "./stylesheets/style.css";
 import axios from "axios";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import "./stylesheets/style.css";
 
 function ForgotPassword() {
   const [email, setEmail] = useState("");
   const navigate = useNavigate();
-  axios.defaults.withCredentials = true;
-  const [error, setError] = useState("");
+  const [backendErrors, setBackendErrors] = useState([]);
   const [successMessage, setSuccessMessage] = useState("");
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    axios
-      .post("http://localhost:8081/forgot-password", { email })
-      .then((res) => {
-        if (res.data.Status === "Success") {
-          setSuccessMessage("Password reset email sent. Check your inbox.");
-          // Navigate to the /resetPass route after a successful request
-          navigate("/resetPass");
+    setBackendErrors([]);
+    setSuccessMessage("");
+
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/api/forget-password",
+        { email }
+      );
+      // Handle success response
+      setSuccessMessage(response.data.msg);
+      navigate("/resetPass", { state: { successMessage: response.data.msg } });
+    } catch (error) {
+      if (error.response) {
+        // If the backend sends an array of errors
+        if (error.response.data.errors) {
+          setBackendErrors(error.response.data.errors);
         } else {
-          setError(res.data.Error);
+          // If the backend sends a single error message
+          setBackendErrors([{ msg: error.response.data.msg }]);
         }
-      })
-      .catch((err) => console.log(err));
+      } else {
+        // Handle other errors like network errors
+        setBackendErrors([{ msg: "Network error or server not responding." }]);
+      }
+    }
   };
 
   return (
     <div className="d-flex justify-content-center align-items-center vh-100 loginPage">
       <div className="p-3 rounded w-25 border loginForm">
-        <div className="text-danger">{error && error}</div>
-        <div className="text-success">{successMessage && successMessage}</div>
+        {successMessage && (
+          <div className="alert alert-success" role="alert">
+            {successMessage}
+          </div>
+        )}
+        {backendErrors.length > 0 && (
+          <div className="alert alert-danger" role="alert">
+            {backendErrors.map((error, index) => (
+              <div key={index}>{error.msg}</div>
+            ))}
+          </div>
+        )}
         <h2>Forgot Password</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-3">
-            <label htmlFor="email">
+            <label htmlFor="email" className="form-label">
               <strong>Email Address</strong>
             </label>
             <input
               type="email"
+              id="email"
               placeholder="Enter Email Address"
-              name="email"
+              className="form-control"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="form-control rounded-0"
-              autoComplete="off"
+              required
             />
           </div>
-
-          <Link
-            to="/resetPass"
+          <button
+            type="submit"
             className="btn btn-success w-100 rounded-0 mb-3"
           >
-            Continue
-          </Link>
-
-          <Link to="/" className="btn btn-light w-100 mb-2">
+            Send Reset Password Link
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate("/")}
+            className="btn btn-light w-100 mb-2"
+          >
             Back to Login
-          </Link>
+          </button>
         </form>
       </div>
     </div>

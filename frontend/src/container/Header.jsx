@@ -1,70 +1,96 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import useAuth from "../hooks/useAuth";
 
 function Header() {
+  const [isNavExpanded, setIsNavExpanded] = useState(false); // State to manage navbar collapse
+  const { logout } = useAuth();
   const navigate = useNavigate();
-  const handleLogout = () => {
-    axios
-      .get("http://localhost:3000/api/logout")
-      .then(() => {
-        // Logout successful
-        navigate("/");
-      })
-      .catch((err) => {
-        // Handle errors
-        console.error("Logout error", err);
+
+  const handleLogout = async (event) => {
+    event.preventDefault(); // Prevent the default anchor behavior
+    try {
+      await axios.get("http://localhost:3000/api/logout", {
+        withCredentials: true,
       });
+      logout();
+      navigate("/");
+      setIsNavExpanded(false); // Collapse the navbar on logout
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
   };
 
   return (
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark p-3">
-      <div class="container-fluid">
-        <Link to="/VoterDashboard" class="navbar-brand text-white">
+    <nav className="navbar navbar-expand-lg navbar-dark bg-dark p-3">
+      <div className="container-fluid">
+        <Link to="/voterdashboard" className="navbar-brand text-white">
           Online Voting System
         </Link>
         <button
-          class="navbar-toggler"
+          className="navbar-toggler"
           type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNavDropdown"
           aria-controls="navbarNavDropdown"
-          aria-expanded="false"
+          aria-expanded={isNavExpanded ? "true" : "false"}
           aria-label="Toggle navigation"
+          onClick={() => setIsNavExpanded(!isNavExpanded)}
         >
-          <span class="navbar-toggler-icon"></span>
+          <span className="navbar-toggler-icon"></span>
         </button>
-
-        <div class=" collapse navbar-collapse" id="navbarNavDropdown">
-          <ul class="navbar-nav ms-auto ">
-            <li class="nav-item">
-              <Link to="/voterdashboard" class="nav-link mx-2">
+        <div
+          className={`navbar-collapse collapse ${isNavExpanded ? "show" : ""}`}
+          id="navbarNavDropdown"
+        >
+          <ul className="navbar-nav ms-auto">
+            <li className="nav-item">
+              <Link
+                to="/voterdashboard"
+                className="nav-link mx-2"
+                onClick={() => setIsNavExpanded(false)}
+              >
                 Home
               </Link>
             </li>
-            <li class="nav-item">
-              <Link to="/about" class="nav-link mx-2">
+            <li className="nav-item">
+              <Link
+                to="/about"
+                className="nav-link mx-2"
+                onClick={() => setIsNavExpanded(false)}
+              >
                 About
               </Link>
             </li>
-            <li class="nav-item">
-              <Link to="/profile" class="nav-link mx-2">
+            <li className="nav-item">
+              <Link
+                to="/profile"
+                className="nav-link mx-2"
+                onClick={() => setIsNavExpanded(false)}
+              >
                 Profile
               </Link>
             </li>
-            <li class="nav-item">
-              <Link to="/result" class="nav-link mx-2">
+            <li className="nav-item">
+              <Link
+                to="/result"
+                className="nav-link mx-2"
+                onClick={() => setIsNavExpanded(false)}
+              >
                 Vote History
               </Link>
             </li>
-            <li class="nav-item">
-              <Link to="/feedback" class="nav-link mx-2">
+            <li className="nav-item">
+              <Link
+                to="/feedback"
+                className="nav-link mx-2"
+                onClick={() => setIsNavExpanded(false)}
+              >
                 Feedback
               </Link>
             </li>
-            <li class="nav-item" onClick={handleLogout}>
-              <a class="nav-link mx-2" href="#">
-                <i className="fs bi-power"></i> Logout
+            <li className="nav-item">
+              <a href="/" className="nav-link mx-2" onClick={handleLogout}>
+                Logout
               </a>
             </li>
           </ul>

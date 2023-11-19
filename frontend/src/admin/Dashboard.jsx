@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import axios from "axios";
-
+import useAuth from "../hooks/useAuth";
 function Dashboard() {
   const navigate = useNavigate();
   axios.defaults.withCredentials = true;
@@ -12,13 +12,24 @@ function Dashboard() {
   const [isVotersOpen, setIsVotersOpen] = useState(false);
   const [isElectionOpen, setIsElectionOpen] = useState(false);
 
-  const handleLogout = () => {
-    axios
-      .get("http://localhost:3000/api/logout")
-      .then((res) => {
-        navigate("/");
-      })
-      .catch((err) => console.log(err));
+  const { logout } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      // Send a logout request to the server
+      await axios.get(
+        "http://localhost:3000/api/logout",
+        {},
+        { withCredentials: true }
+      );
+      // Call the logout function from the context
+      logout();
+
+      // Navigate to the login page
+      navigate("/");
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
   };
 
   const toggleCategory = () => {

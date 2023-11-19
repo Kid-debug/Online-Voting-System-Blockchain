@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reset Link Expired</title>
+    <style>
+      body {
+        font-family: "Arial", sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        text-align: center;
+      }
+
+      .card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        padding: 40px;
+        margin: 16px;
+        width: 500px; /* Adjust width as needed */
+        position: relative;
+      }
+
+      h1 {
+        color: #333;
+        font-size: 24px;
+        margin-top: -50px; /* Adjust if needed */
+        margin-bottom: 30px;
+      }
+
+      p {
+        font-size: 18px;
+      }
+
+      ol {
+        color: #101010;
+        margin-bottom: 30px;
+      }
+
+      ol {
+        text-align: left;
+        display: inline-block;
+        margin-left: 0;
+        padding-left: 20px;
+      }
+
+      button {
+        background-color: #006400; /* Dark green background */
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+
+      button:hover {
+        background-color: #45a049; /* Lighter green on hover */
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <img
+        src="https://static.vecteezy.com/system/resources/thumbnails/010/834/231/small/broken-chain-as-a-symbol-of-freedom-from-slavery-link-damage-vector.jpg"
+        alt="Broken Link"
+      />
+      <h1><%= message %></h1>
+      <p>To reset your password, please follow these steps:</p>
+      <ol>
+        <li>Click the button below to go to the Forgot Password page.</li>
+        <li>Enter your email to request a new password.</li>
+      </ol>
+      <button onclick="redirectToForgotPassword()">
+        Go To Forgot Password Page
+      </button>
+    </div>
+
+    <script>
+      function redirectToForgotPassword() {
+        window.location.href = "http://localhost:5173/forgotPass";
+      }
+    </script>
+  </body>
+</html>

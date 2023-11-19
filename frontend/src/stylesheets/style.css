@@ -2,7 +2,7 @@
 .loginPage {
   background: url("/vote.jpg");
   background: linear-gradient(rgba(1, 11, 11, 0.5), rgba(10, 10, 10, 0.5)),
-    url("public/vote.jpg");
+    url("/vote.jpg");
   background-position: center;
   background-size: 100% 120%;
   background-repeat: no-repeat;
@@ -11,6 +11,15 @@
 .loginForm {
   background-color: rgba(1, 32, 93, 0.6);
   color: white;
+}
+
+.eye-icon {
+  position: absolute;
+  color: black;
+  top: 65% !important;
+  right: 10px !important;
+  transform: translateY(-50%);
+  cursor: pointer;
 }
 
 .image {

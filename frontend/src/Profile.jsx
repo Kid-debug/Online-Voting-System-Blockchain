@@ -15,8 +15,6 @@ function Profile() {
 
   // Initial form state
   const initialFormState = {
-    firstName: "2205500",
-    lastName: "Ng Hooi Seng",
     email: "nghs-wm20@student.tarc.edu.my",
     phoneNumber: "0111345678",
     currentPassword: "",
@@ -87,22 +85,6 @@ function Profile() {
                     <div className="card-body">
                       <div className="row">
                         <div className="col-md-12 mb-3 mt-3">
-                          <label htmlFor="fullName" className="form-label">
-                            Full Name
-                          </label>
-                          <input
-                            id="fullName"
-                            name="fullName"
-                            type="text"
-                            className="form-control"
-                            value={formData.lastName}
-                            onChange={handleInputChange}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="row">
-                        <div className="col-md-12 mb-3">
                           <label htmlFor="email" className="form-label">
                             E-mail
                           </label>
@@ -113,6 +95,7 @@ function Profile() {
                             className="form-control"
                             value={formData.email}
                             onChange={handleInputChange}
+                            disabled="true"
                           />
                         </div>
 
@@ -128,9 +111,10 @@ function Profile() {
                     }`}
                     id={TAB_CHANGE_PASSWORD}
                   >
+                    <hr className="border-light m-0" />
                     <div className="card-body pb-2">
                       <div className="form-group mb-2">
-                        <label htmlFor="currentPassword" className="form-label">
+                        <label htmlFor="currentPassword" className="form-label mt-3">
                           Current password
                         </label>
                         <input
