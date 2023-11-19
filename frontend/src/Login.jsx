@@ -27,7 +27,7 @@ function Login() {
     const dataToSend = {
       email: values.email,
       password: values.password,
-      remember: remember, 
+      remember: remember,
     };
 
     try {
@@ -46,6 +46,7 @@ function Login() {
         setAuthData({
           accessToken: response.data.accessToken,
           userRole: response.data.userRole,
+          email: values.email,
         });
         navigate(`/${response.data.path}`);
       } else {

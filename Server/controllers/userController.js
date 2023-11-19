@@ -310,9 +310,27 @@ const login = async (req, res) => {
 
     if (user) {
       if (user.is_verified === 1) {
+        // Check if the account is locked
+        if (req.session.lockoutUntil && req.session.lockoutUntil > Date.now()) {
+          const lockoutRemaining = moment.duration(
+            req.session.lockoutUntil - Date.now()
+          );
+
+          // Calculate minutes and seconds
+          const minutesRemaining = lockoutRemaining.minutes();
+          const secondsRemaining = lockoutRemaining.seconds();
+
+          return res.status(401).json({
+            msg: `Account locked. Please try again after ${minutesRemaining} minutes and ${secondsRemaining} seconds.`,
+          });
+        }
+
         const match = await bcrypt.compare(req.body.password, user.password);
 
         if (match) {
+          // Reset the login attempts counter upon successful login
+          req.session.loginAttempts = 0;
+
           const accessTokenExpiry = "2h";
           const refreshTokenExpiry = req.body.remember ? "30d" : "1d";
           console.log(refreshTokenExpiry);
@@ -356,7 +374,23 @@ const login = async (req, res) => {
             .status(200)
             .send({ path, accessToken, userRole: user.role });
         } else {
-          return res.status(401).json({ msg: "Password is incorrect!" });
+          // Increment the login attempts counter in session
+          req.session.loginAttempts = (req.session.loginAttempts || 0) + 1;
+
+          // Check if the user has exceeded the maximum number of login attempts
+          const maxAttempts = 5;
+
+          if (req.session.loginAttempts >= maxAttempts) {
+            // Lock the account and set a lockout duration in session (5 minutes in milliseconds)
+            const lockoutDuration = 5 * 60 * 1000; // 5 minutes
+            req.session.lockoutUntil = Date.now() + lockoutDuration;
+
+            return res.status(401).json({
+              msg: `Account locked. Exceeded ${maxAttempts} login attempts. Please try again after 5 minutes.`,
+            });
+          } else {
+            return res.status(401).json({ msg: "Password is incorrect." });
+          }
         }
       } else {
         return res.status(401).json({ msg: "Please verify your email first." });
@@ -407,7 +441,9 @@ const handleRefreshToken = async (req, res) => {
 
 const logout = async (req, res) => {
   const cookies = req.cookies;
-  if (!cookies?.jwt) return res.sendStatus(204); // No content, no cookie to clear
+  if (!cookies?.jwt) {
+    return res.sendStatus(204); // No content, no cookie to clear
+  }
 
   const refreshToken = cookies.jwt;
 
@@ -648,6 +684,67 @@ const resetPassword = async (req, res) => {
   }
 };
 
+const changePassword = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const token = req.headers.authorization?.split(" ")[1] || req.cookies.jwt;
+
+  if (!token) {
+    return res
+      .status(401)
+      .json({ msg: "No token provided, authorization denied." });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
+    const userEmail = decoded.email;
+
+    const user = await User.findOne({ where: { email: userEmail } });
+    if (user) {
+      const { currentPassword, newPassword } = req.body;
+      const isMatch = await bcrypt.compare(currentPassword, user.password);
+
+      if (isMatch) {
+        if (newPassword !== currentPassword) {
+          const newHashedPassword = await bcrypt.hash(newPassword, 10);
+          const [updatedRows] = await User.update(
+            { password: newHashedPassword },
+            { where: { email: userEmail } }
+          );
+
+          if (updatedRows > 0) {
+            return res
+              .status(201)
+              .json({ msg: "Password successfully updated." });
+          } else {
+            return res.status(500).json({
+              msg: "Failed to update password. Please try again.",
+            });
+          }
+        } else {
+          return res.status(400).json({
+            msg: "New password must be different from the current password.",
+          });
+        }
+      } else {
+        return res.status(400).json({ msg: "Current password is incorrect." });
+      }
+    } else {
+      return res.status(404).json({ msg: "User not found." });
+    }
+  } catch (error) {
+    console.error("Error in changePassword:", error);
+    if (error.name === "TokenExpiredError") {
+      return res.status(401).json({ msg: "Token expired." });
+    } else {
+      return res.status(401).json({ msg: "Invalid token." });
+    }
+  }
+};
+
 module.exports = {
   registerUser,
   registerAdmin,
@@ -659,4 +756,5 @@ module.exports = {
   forgetPassword,
   resetPasswordLoad,
   resetPassword,
+  changePassword,
 };
