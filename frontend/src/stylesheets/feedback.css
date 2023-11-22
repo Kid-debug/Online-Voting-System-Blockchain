@@ -1,0 +1,174 @@
+@import url("https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css");
+
+/* General reset and base styles */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Open Sans", sans-serif;
+  line-height: 1.6;
+  background-color: #f4f4f4;
+}
+
+/* Container for the feedback section */
+.container-feedback {
+  background-color: #f8faff; /* Light background color for the form */
+  color: #4b537c; /* Dark text for better readability */
+  width: 100%;
+  max-width: 600px; /* Increased max-width for a larger form */
+  margin: 40px auto;
+  padding: 40px; /* Increased padding for more space inside the form */
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+/* Title styling */
+.feedback-title {
+  margin-bottom: 30px;
+  font-size: 40px;
+  color: #4b537c;
+}
+
+/* Emotion icons styling */
+.feedback-level {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.level {
+  background: white;
+  padding: 16px;
+  border-radius: 7px;
+  border: solid 0.5px #e0e9fe;
+  cursor: pointer;
+  transition: box-shadow 0.3s ease;
+}
+
+.level i {
+  font-size: 36px;
+  color: #333;
+  transition: color 0.3s ease;
+}
+
+.level.active i {
+  color: #6f00ff;
+}
+
+.level:hover i {
+  color: #6f00ff;
+}
+
+.level:hover,
+.level.active {
+  box-shadow: 0 2px 5px #6f00ff;
+}
+
+/* Input and textarea styling */
+.input-group {
+  position: relative;
+  margin-bottom: 15px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.input-group input,
+.feedback-textarea {
+  width: 100%;
+  padding: 15px;
+  border: none;
+  background: transparent;
+  font-size: 18px;
+}
+
+.feedback-textarea {
+  height: 150px;
+  border: 1px solid #ddd;
+  background: #fff;
+  margin-bottom: 10px;
+}
+
+/* Icon positioning inside input */
+.feedback-icon {
+  font-size: 25px;
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  color: #333;
+}
+
+/* Button styling */
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.submit-btn,
+.cancel-btn {
+  border: none;
+  border-radius: 4px;
+  padding: 15px 30px;
+  cursor: pointer;
+  font-size: 18px;
+  width: calc(50% - 10px);
+}
+
+.submit-btn {
+  background-color: #007bff;
+  color: white;
+}
+
+.cancel-btn {
+  background-color: #6c757d;
+  color: white;
+}
+
+.submit-btn:hover,
+.cancel-btn:hover {
+  opacity: 0.9;
+}
+
+/* Responsive styling */
+@media (max-width: 768px) {
+  .container-feedback {
+    width: 95%;
+    margin-top: 5%;
+    margin-bottom: 5%;
+    padding: 20px;
+  }
+
+  /* Adjust other elements as needed for smaller screens */
+  .feedback-title {
+    font-size: 32px;
+  }
+
+  .level i {
+    font-size: 24px;
+  }
+
+  .input-group input,
+  .feedback-textarea {
+    font-size: 16px;
+    padding: 12px;
+  }
+
+  .feedback-icon {
+    font-size: 18px;
+  }
+
+  .submit-btn,
+  .cancel-btn {
+    padding: 12px 24px;
+    font-size: 16px;
+  }
+}
