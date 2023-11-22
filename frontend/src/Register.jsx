@@ -50,8 +50,8 @@ function Register() {
   };
 
   return (
-    <div className="d-flex justify-content-center align-items-center vh-100 loginPage">
-      <div className="p-3 rounded w-25 border loginForm">
+    <div className="loginPage">
+      <div className="loginForm">
         <h2>Create User Account</h2>
         {successMessage && (
           <div className="alert alert-success" role="alert">

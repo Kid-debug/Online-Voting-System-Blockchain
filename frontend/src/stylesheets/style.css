@@ -1,16 +1,27 @@
 /* Login Page*/
 .loginPage {
-  background: url("/vote.jpg");
+  display: flex; /* This will make the child elements align center */
+  justify-content: center; /* Horizontally center the children */
+  align-items: center; /* Vertically center the children */
+  height: 100vh; /* Full viewport height */
   background: linear-gradient(rgba(1, 11, 11, 0.5), rgba(10, 10, 10, 0.5)),
     url("/vote.jpg");
   background-position: center;
-  background-size: 100% 120%;
+  background-size: cover; /* Ensure the background covers the full area */
   background-repeat: no-repeat;
 }
 
 .loginForm {
   background-color: rgba(1, 32, 93, 0.6);
   color: white;
+  width: 100%; /* Allow the form to take up to 100% of its parent */
+  max-width: 450px; /* Set a max-width for larger screens */
+  margin: 1rem; /* Add some margin */
+  padding: 1rem; /* Padding inside the form */
+  border-radius: 10px; /* Optional: if you want rounded corners */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional: if you want a shadow for depth */
+  border: 2px solid white; /* Add a white border */
+  box-sizing: border-box;
 }
 
 .eye-icon {
@@ -54,9 +65,20 @@
 
 /* Media query for smaller screens */
 @media (max-width: 768px) {
+  .loginPage {
+    /* Adjust the background size or position if necessary */
+    background-size: auto 100%;
+  }
+
   #msform {
     max-width: 90%;
     padding: 5%;
+  }
+
+  .loginForm {
+    max-width: none; /* Allow the form to take full width of its parent */
+    width: 350px; /* Set width to auto for smaller screens */
+    margin: 1rem; /* Keep the margin consistent */
   }
 
   #msform fieldset {
@@ -67,6 +89,12 @@
 #msform fieldset:not(:first-of-type) {
   display: none;
   font-family: "Open Sans", sans-serif;
+}
+
+@media (max-width: 1200px) {
+  .container-feedback {
+    width: 380px !important;
+  }
 }
 
 /* Inputs */

@@ -16,15 +16,18 @@ function PasswordResetConfirmation() {
   }, [successMessage, navigate]);
 
   return (
-    <div className="d-flex justify-content-center align-items-center vh-100 loginPage">
-      <div className="p-3 rounded w-50 border loginForm custom-height d-flex flex-column align-items-center">
-        {successMessage && <h2 className="mt-3">{successMessage}</h2>}
+    <div className="loginPage">
+      <div className="loginForm">
+        {successMessage && (
+          <div className="alert alert-success" role="alert">
+            {successMessage}
+          </div>
+        )}
         <p className="confirmation-text mt-3">
           An email with instructions on how to reset your password has been sent
-          to your inbox.
-          <div>Please check your email and follow the instructions.</div>
+          to your inbox. Please check your email and follow the instructions.
         </p>
-        <Link to="/" className="btn btn-success w-25 mt-3">
+        <Link to="/" className="btn btn-success w-100 mb-2">
           Back to Login
         </Link>
       </div>

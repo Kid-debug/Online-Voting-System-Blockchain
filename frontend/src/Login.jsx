@@ -14,7 +14,7 @@ function Login() {
     email: "",
     password: "",
   });
-  const [visible, setVisible] = useState(true);
+  const [visible, setVisible] = useState(false);
   const navigate = useNavigate();
   // const { updateAuth } = useContext(AuthContext);
   const [backendErrors, setBackendErrors] = useState([]);
@@ -70,8 +70,8 @@ function Login() {
   };
 
   return (
-    <div className="d-flex justify-content-center align-items-center vh-100 loginPage">
-      <div className="p-3 rounded w-25 border loginForm">
+    <div className="loginPage">
+      <div className="loginForm">
         {backendErrors.length > 0 && (
           <div className="alert alert-danger" role="alert">
             {backendErrors.map((error, index) => (
@@ -139,7 +139,7 @@ function Login() {
             className="btn btn-success w-100 rounded-0 mb-3"
           >
             {" "}
-            Log in
+            Login
           </button>
           <Link to="/register" className="btn btn-light w-100 mb-2">
             Create User Account

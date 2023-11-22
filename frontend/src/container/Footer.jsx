@@ -61,12 +61,14 @@ function Footer() {
           <h2>Address</h2>
           <div className="content">
             <div className="phone">
-              <span className="fas fa-phone-alt"></span>
-              <span className="text">+011-12345678</span>
+              <span className="fas fa"></span>
+              <span className="text">+011-1078 9007</span>
+              <span className="text">nghs-wm20@student.tarc.edu.my</span>
             </div>
             <div className="email">
-              <span className="fas fa-envelope"></span>
-              <span className="text">xxx-wm20@student.tarc.edu.my</span>
+              <span className="fas fa"></span>
+              <span className="text">+011-2346 8376</span>
+              <span className="text">woonzl-wm20@student.tarc.edu.my</span>
             </div>
           </div>
         </div>
@@ -102,7 +104,7 @@ function Footer() {
       <div className="bottom">
         <center>
           <span className="credit">
-            Created By <a href="https://www.codingnepalweb.com">Hooi Seng</a> |{" "}
+            Created By <a href="#">Hooi Seng & Zhong Liang</a> |{" "}
           </span>
           <span className="far fa-copyright"></span>
           <span> 2023 All rights reserved.</span>

@@ -3,16 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Page Not Found</title>
+    <title>404 Page Not Found</title>
     <style>
       body {
         text-align: center;
-        font-family: Georgia, serif;
-        background-color: #fff;
+        font-family: "Rubik", sans-serif;
+        background-color: #fcfefb;
       }
       .four_zero_four_bg {
+        margin-top: -120px;
         background-image: url("https://media.tenor.com/mHN7u3KLMysAAAAC/arknights-error.gif");
-        height: 660px;
+        height: 550px;
         background-size: contain;
         background-repeat: no-repeat;
         background-position: center;
@@ -20,7 +21,9 @@
       .page_not_found {
         margin-top: -60px;
       }
-
+      .four_zero_four {
+        margin-top: -20px;
+      }
       h1 {
         font-size: 80px;
         color: #555;
@@ -44,9 +47,8 @@
     </style>
   </head>
   <body>
-    <div class="four_zero_four_bg">
-      <h1>404</h1>
-    </div>
+    <div class="four_zero_four"><h1>404</h1></div>
+    <div class="four_zero_four_bg"></div>
     <div class="page_not_found">
       <h2>Page Not Found</h2>
       <% if (typeof message !== 'undefined' && message) { %>
