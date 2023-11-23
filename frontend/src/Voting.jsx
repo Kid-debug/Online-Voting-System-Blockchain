@@ -434,46 +434,28 @@ function Voting() {
       </div>
 
       {/* Confirmation Modal */}
-      <div
-        className={`modal fade ${showConfirmationModal ? "show" : ""}`}
-        id="confirmationModal"
-        tabIndex="-1"
-        aria-labelledby="confirmationModalLabel"
-        aria-hidden={!showConfirmationModal}
-        role="dialog"
-        style={{ display: showConfirmationModal ? "block" : "none" }}
-      >
-        <div className="modal-dialog">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title" id="confirmationModalLabel">
-                Confirmation
-              </h5>
+      {showConfirmationModal && (
+        <div className="confirm">
+          <div className="confirm__window">
+            <div className="confirm__titlebar">
+              <span className="confirm__title">
+                Vote Submission Confirmation
+              </span>
               <button
-                type="button"
-                className="btn-close"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-                onClick={() => setShowConfirmationModal(false)}
-              ></button>
-            </div>
-            <div className="modal-body">
-              Are you sure you want to submit your vote?
-            </div>
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                data-bs-dismiss="modal"
+                className="confirm__close"
                 onClick={() => setShowConfirmationModal(false)}
               >
-                Cancel
+                &times;
               </button>
+            </div>
+            <div className="confirm__content">
+              Are you sure you want to submit your vote?
+            </div>
+            <div className="confirm__buttons">
               <button
-                type="button"
-                className="btn btn-success"
+                className="confirm__button confirm__button--ok confirm__button--fill"
                 onClick={() => {
-                  // Handle the final submission here
+                  // Replace the following with your actual vote submission logic
                   alert(
                     "Your vote is pending, need to go to email verification to verify your vote!!!"
                   );
@@ -481,12 +463,18 @@ function Voting() {
                   setShowConfirmationModal(false);
                 }}
               >
-                Confirm
+                OK
+              </button>
+              <button
+                className="confirm__button confirm__button--cancel"
+                onClick={() => setShowConfirmationModal(false)}
+              >
+                Cancel
               </button>
             </div>
           </div>
         </div>
-      </div>
+      )}
       <Footer />
     </div>
   );
