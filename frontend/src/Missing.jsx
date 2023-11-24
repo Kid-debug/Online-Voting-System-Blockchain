@@ -28,7 +28,7 @@ const Missing = () => {
     h1: {
       fontSize: "80px",
       fontWeight: "bold",
-      color: "#555",
+      color: "#333",
     },
     h2: {
       fontSize: "40px",

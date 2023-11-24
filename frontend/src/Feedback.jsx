@@ -2,16 +2,30 @@ import React, { useState } from "react";
 import Header from "./container/Header";
 import Footer from "./container/Footer";
 import "./stylesheets/feedback.css";
-import useAuth from "./hooks/useAuth";
 import Swal from "sweetalert";
 
 function Feedback() {
-  const { auth } = useAuth();
   const [selectedEmotion, setSelectedEmotion] = useState(null);
   const [showConfirmation, setShowConfirmation] = useState(false); // New state for showing the confirmation prompt
 
+  const [feedbackText, setFeedbackText] = useState(""); // State to store the feedback text
+  const characterLimit = 300; // Character limit for the textarea
+
   const handleEmotionSelect = (emotion) => {
     setSelectedEmotion(emotion);
+  };
+
+  // Function to handle text changes in the textarea
+  const handleTextChange = (e) => {
+    if (e.target.value.length <= characterLimit) {
+      setFeedbackText(e.target.value);
+    }
+  };
+  // Add a function to get the appropriate class for character count
+  const getCharacterCountClass = () => {
+    return feedbackText.length === characterLimit
+      ? "character-count limit-reached"
+      : "character-count";
   };
 
   // New function to handle the form submission
@@ -72,7 +86,7 @@ function Feedback() {
               name="email"
               type="email"
               className="form-control"
-              value={auth.email}
+              value=""
               disabled="true"
             />
             <i className="las la-envelope feedback-icon"></i>
@@ -86,7 +100,14 @@ function Feedback() {
             cols="15"
             rows="5"
             placeholder="Enter your feedback content here..."
-          ></textarea>
+            value={feedbackText}
+            onChange={handleTextChange}
+            maxLength={300}
+          />
+          {/* Move the character count display out of the textarea tag */}
+          <div className={getCharacterCountClass()}>
+            {feedbackText.length} / {characterLimit}
+          </div>
           <div className="form-actions">
             <button className="submit-btn">Submit</button>
           </div>

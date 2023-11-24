@@ -1,25 +1,14 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import useAuth from "../hooks/useAuth";
 
 function Header() {
   const [isNavExpanded, setIsNavExpanded] = useState(false); // State to manage navbar collapse
-  const { logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = async (event) => {
     event.preventDefault(); // Prevent the default anchor behavior
-    try {
-      await axios.get("http://localhost:3000/api/logout", {
-        withCredentials: true,
-      });
-      logout();
       navigate("/");
-      setIsNavExpanded(false); // Collapse the navbar on logout
-    } catch (error) {
-      console.error("Logout failed", error);
-    }
   };
 
   return (

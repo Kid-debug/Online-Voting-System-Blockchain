@@ -56,13 +56,6 @@ app.use(cors(corsOptions));
 
 app.use("/api", userRouter);
 app.use("/", webRouter);
-app.use("/refresh", refreshRouter);
-
-// Your GET route to verify the token
-app.get("/api/verifyToken", verifyJWT, (req, res) => {
-  // If the middleware doesn't send a response, it means the token is valid
-  res.status(200).send("You have accessed a protected route");
-});
 
 // Test database connection and sync models
 sequelize

@@ -1,4 +1,5 @@
 const { check } = require("express-validator");
+const { body } = require("express-validator");
 
 exports.signUpValidation = [
   // Check if email is not empty and stop validation chain if empty
@@ -130,6 +131,45 @@ exports.changePasswordValidation = [
     .custom((value, { req }) => {
       if (value !== req.body.newPassword) {
         throw new Error("•Confirm New Password must match New Password");
+      }
+      return true;
+    }),
+];
+
+exports.feedbackValidation = [
+  // Validate the emotion selection
+  body("selectedEmotion", "Please select an emotion for your feedback")
+    .not()
+    .isEmpty(),
+
+  // Validate the full name
+  body("fullName", "Full name must be at least 2 characters long")
+    .not()
+    .isEmpty()
+    .isLength({ min: 2 })
+    .matches(/^[a-zA-Z\s,.'-]+$/)
+    .withMessage(
+      "Full name must only contain letters and certain special characters"
+    ),
+
+  // Validate the feedback text
+  body(
+    "feedbackText",
+    "Feedback cannot be empty and must not exceed 300 characters"
+  )
+    .not()
+    .isEmpty()
+    .isLength({ max: 300 }),
+
+  body(
+    "email",
+    "Email must be a valid address and end with @student.tarc.edu.my"
+  )
+    .optional({ checkFalsy: true })
+    .isEmail()
+    .custom((email) => {
+      if (email && !email.endsWith("@student.tarc.edu.my")) {
+        throw new Error("Email must be a @student.tarc.edu.my");
       }
       return true;
     }),
