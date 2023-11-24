@@ -28,8 +28,6 @@ app.use(express.static("public"));
 
 const userRouter = require("./routes/userRoute");
 const webRouter = require("./routes/webRoute");
-const refreshRouter = require("./routes/refreshRoute");
-const verifyJWT = require("./middleware/verifyJWT");
 
 app.use(express.json());
 
