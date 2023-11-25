@@ -332,10 +332,10 @@ const forgetPassword = async (req, res) => {
         <p>We heard that you lost your password.</p>  
         <p>Don't worry, please click the following link below to reset it.</p>
         <p><a href='http://localhost:3000/reset-password?token=${token}'>http://localhost:3000/reset-password?token=${token}</a></p>
-        <p>Please be reminded that the code is valid for 24 hours.</p>
         <p>If you did not request for password reset, please ignore this email.</p>
         <p>Thank you.</p>
       `;
+      //ltr add on this: <p>Please be reminded that the code is valid for 24 hours.</p>
 
       // Send the password reset email
       await sendMail(email, "Forget Password", content);

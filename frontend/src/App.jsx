@@ -34,8 +34,8 @@ import ElectionDetails from "./ElectionDetails";
 import ForgotPassword from "./ForgotPassword";
 import PasswordResetConfirmation from "./PasswordResetConfirmation";
 import ReportSummary from "./admin/ReportSummary";
-import Missing from "./Missing";
-import Unauthorized from "./Unauthorized";
+import Missing from "./component/Missing";
+import Unauthorized from "./component/Unauthorized";
 
 // const ROLES = {
 //   User: "U",

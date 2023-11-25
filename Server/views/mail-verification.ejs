@@ -24,6 +24,11 @@
         align-items: center;
         font-family: "Khand", sans-serif;
         background-color: #f7f7f7;
+        background: linear-gradient(rgba(1, 11, 11, 0.5), rgba(10, 10, 10, 0.5)),
+          url("http://localhost:5173/public/vote.jpg");
+        background-position: center;
+        background-size: cover; /* Ensure the background covers the full area */
+        background-repeat: no-repeat;
       }
 
       .wrapperAlert {
@@ -192,6 +197,13 @@
         }
         100% {
           transform: translateY(-500px) rotate(600deg);
+        }
+      }
+
+      @media (max-width: 768px) {
+        body {
+          /* Adjust the background size or position if necessary */
+          background-size: auto 100%;
         }
       }
     </style>

@@ -1,22 +1,16 @@
 "use strict";
 
 module.exports = {
-  up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable("category", {
-      category_id: {
-        type: Sequelize.INTEGER,
-        primaryKey: true,
-        autoIncrement: true,
-        allowNull: false,
-      },
-      category_name: {
-        type: Sequelize.STRING(100),
-        allowNull: false,
-      },
-    });
+  up: async (queryInterface) => {
+    await queryInterface.sequelize.query(`
+      CREATE TABLE IF NOT EXISTS category (
+        category_id INT AUTO_INCREMENT PRIMARY KEY,
+        category_name VARCHAR(100) NOT NULL
+      )
+    `);
   },
 
-  down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable("category");
+  down: async (queryInterface) => {
+    await queryInterface.sequelize.query("DROP TABLE IF EXISTS category");
   },
 };

@@ -2,54 +2,83 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto:300,400,700"
+      rel="stylesheet"
+    />
     <title>404 Page Not Found</title>
     <style>
+      :root {
+        --light-text-color: #f5f5f5; /* Updated light text color */
+        --dark-text-color: #e57373; /* Updated dark text color */
+        --background-gradient: linear-gradient(
+          #1a1a1a,
+          #333,
+          #1a1a1a
+        ); /* Updated background gradient */
+      }
+
+      html,
       body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         text-align: center;
-        font-family: "Rubik", sans-serif;
-        background-color: #fcfefb;
+        background: var(
+          --background-gradient
+        ); 
+        font-family: "Roboto", sans-serif;
       }
-      .four_zero_four_bg {
-        margin-top: -120px;
-        background-image: url("https://media.tenor.com/mHN7u3KLMysAAAAC/arknights-error.gif");
-        height: 550px;
-        background-size: contain;
-        background-repeat: no-repeat;
-        background-position: center;
+
+      .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
       }
-      .page_not_found {
-        margin-top: -60px;
-      }
-      .four_zero_four {
-        margin-top: -20px;
-      }
+
       h1 {
-        font-size: 80px;
-        color: #333;
+        font-size: 128px;
+        color: var(--dark-text-color);
+        margin: 0;
       }
+
       h2 {
-        font-size: 40px;
-        color: #555;
+        font-weight: 300;
+        color: var(--light-text-color);
+        margin: 12px 0;
       }
+
       p {
-        font-size: 20px;
-        color: #555;
+        color: var(--light-text-color);
+        margin-bottom: 32px;
       }
-      a {
-        color: #ffffff;
-        background-color: #39ac31;
+
+      button {
+        background: transparent;
+        border: 2px solid var(--light-text-color);
+        color: var(--light-text-color);
         padding: 10px 20px;
-        text-decoration: none;
-        display: inline-block;
-        margin-top: 5px;
+        font-size: 1em;
+        border-radius: 3px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+
+      button:hover {
+        background-color: var(--dark-text-color);
+        color: #111;
       }
     </style>
   </head>
   <body>
-    <div class="four_zero_four"><h1>404</h1></div>
-    <div class="four_zero_four_bg"></div>
-    <div class="page_not_found">
+    <div class="container">
+      <h1>404</h1>
       <h2>Page Not Found</h2>
       <% if (typeof message !== 'undefined' && message) { %>
       <p><%= message %></p>
@@ -57,7 +86,13 @@
       <p>The page you are looking for does not exist.</p>
       <p>Please navigate back to the login page.</p>
       <% } %>
-      <a href="http://localhost:5173/">Go To Login Page</a>
+      <button onclick="goLogin()">Go To Login Page</button>
+
+      <script>
+        function goLogin() {
+          window.location.href = "http://localhost:5173/";
+        }
+      </script>
     </div>
   </body>
 </html>
