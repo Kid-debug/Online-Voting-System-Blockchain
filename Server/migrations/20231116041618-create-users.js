@@ -42,10 +42,6 @@ module.exports = {
         type: Sequelize.DATE,
         allowNull: true
       },
-      last_login: {
-        type: Sequelize.DATE,
-        allowNull: true
-      },
       created_at: {
         allowNull: false,
         type: Sequelize.DATE,
@@ -56,10 +52,6 @@ module.exports = {
         type: Sequelize.DATE,
         defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
       },
-      refresh_token: {
-        type: Sequelize.STRING(255),
-        allowNull: true
-      }
     });
   },
 

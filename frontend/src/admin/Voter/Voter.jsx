@@ -84,12 +84,20 @@ function Voter() {
   // Sort the filtered data
   const sortedData = sortColumn
     ? filterData(data).sort((a, b) => {
-        const aValue = a[sortColumn];
-        const bValue = b[sortColumn];
+        if (sortColumn === "ID") {
+          // Parse the values as numbers for numeric comparison
+          const aValue = parseInt(a[sortColumn]);
+          const bValue = parseInt(b[sortColumn]);
 
-        if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
-        if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
-        return 0;
+          return sortDirection === "asc" ? aValue - bValue : bValue - aValue;
+        } else {
+          const aValue = a[sortColumn];
+          const bValue = b[sortColumn];
+
+          return sortDirection === "asc"
+            ? aValue.localeCompare(bValue)
+            : bValue.localeCompare(aValue);
+        }
       })
     : filterData(data);
 

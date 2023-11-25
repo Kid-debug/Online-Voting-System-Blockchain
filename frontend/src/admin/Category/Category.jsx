@@ -1,73 +1,34 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import "../../stylesheets/list.css";
-import { useState } from "react";
 import { Link } from "react-router-dom";
+import axios from "../../api/axios";
 
 function Category() {
-  const data = [
-    {
-      ID: "1",
-      "Category Name": "Chemistry and Biology Society",
-      Action: "Edit",
-    },
-    {
-      ID: "2",
-      "Category Name": "Food Science Society",
-      Action: "Edit",
-    },
-    {
-      ID: "3",
-      "Category Name": "Sport and Exercise Science Society",
-      Action: "Edit",
-    },
-    {
-      ID: "4",
-      "Category Name": "Computer Science Society",
-      Action: "Edit",
-    },
-    {
-      ID: "5",
-      "Category Name": "Dancing Society",
-      Action: "Edit",
-    },
-    {
-      ID: "6",
-      "Category Name": "Badminton Club",
-      Action: "Edit",
-    },
-    {
-      ID: "7",
-      "Category Name": "Basketball Club",
-      Action: "Edit",
-    },
-    {
-      ID: "8",
-      "Category Name": "Chess Club",
-      Action: "Edit",
-    },
-    {
-      ID: "9",
-      "Category Name": "Football Club",
-      Action: "Edit",
-    },
-    {
-      ID: "10",
-      "Category Name": "Kendo Club",
-      Action: "Edit",
-    },
-  ];
+  const [categories, setCategories] = useState([]);
 
-  const columns = ["ID", "Category Name", "Action"];
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get("api/retrieveCategory");
+        console.log(response.data); // Log the response to the console
+        setCategories(response.data);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
 
-  const [expandedCategory, setExpandedCategory] = useState(null);
+    fetchCategories();
+  }, []);
 
-  const toggleExpand = (categoryID) => {
-    if (expandedCategory === categoryID) {
-      setExpandedCategory(null);
-    } else {
-      setExpandedCategory(categoryID);
-    }
+  // Define a mapping between API keys and display names
+  const columnMapping = {
+    category_id: "ID",
+    category_name: "Category Name",
+    Action: "Action",
   };
+
+  // Create an array of display names based on the API keys
+  const columns = ["category_id", "category_name", "Action"];
 
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -88,8 +49,8 @@ function Category() {
   };
 
   // Helper function to filter the data based on the search term
-  const filterData = (data) => {
-    return data.filter((item) =>
+  const filterData = (categories) => {
+    return categories.filter((item) =>
       Object.values(item).some((value) =>
         value.toString().toLowerCase().includes(searchTerm.toLowerCase())
       )
@@ -98,15 +59,23 @@ function Category() {
 
   // Sort the filtered data
   const sortedData = sortColumn
-    ? filterData(data).sort((a, b) => {
-        const aValue = a[sortColumn];
-        const bValue = b[sortColumn];
+    ? filterData(categories).sort((a, b) => {
+        if (sortColumn === "category_id") {
+          // Parse the values as numbers for numeric comparison
+          const aValue = parseInt(a[sortColumn]);
+          const bValue = parseInt(b[sortColumn]);
 
-        if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
-        if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
-        return 0;
+          return sortDirection === "asc" ? aValue - bValue : bValue - aValue;
+        } else {
+          const aValue = a[sortColumn];
+          const bValue = b[sortColumn];
+
+          return sortDirection === "asc"
+            ? aValue.localeCompare(bValue)
+            : bValue.localeCompare(aValue);
+        }
       })
-    : filterData(data);
+    : filterData(categories);
 
   // Get total number of pages
   const totalPages = Math.ceil(sortedData.length / itemsPerPage);
@@ -171,13 +140,11 @@ function Category() {
         />
       </div>
       <table className="data-table">
-        {" "}
-        {/* Added className to table element */}
         <thead>
           <tr>
             {columns.map((column, index) => (
               <th key={index} onClick={() => handleSort(column)}>
-                {column}
+                {columnMapping[column]}
                 {sortColumn === column && (
                   <span>
                     {sortDirection === "asc" ? <>&uarr;</> : <>&darr;</>}
@@ -192,34 +159,7 @@ function Category() {
             <tr key={rowIndex}>
               {columns.map((column, colIndex) => (
                 <td key={colIndex} className="data-cell">
-                  {column === "Description" ? (
-                    <>
-                      {row[column].length > 50 &&
-                      expandedCategory !== row.ID ? (
-                        <>
-                          {`${row[column].substring(0, 50)}... `}
-                          <button
-                            onClick={() => toggleExpand(row.ID)}
-                            className="btn btn-link p-0"
-                          >
-                            Read More
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          {row[column]}
-                          {row[column].length > 50 && (
-                            <button
-                              onClick={() => toggleExpand(row.ID)}
-                              className="btn btn-link p-0"
-                            >
-                              Read Less
-                            </button>
-                          )}
-                        </>
-                      )}
-                    </>
-                  ) : column === "Action" ? (
+                  {column === "Action" ? (
                     <>
                       <Link
                         to={`/admin/editCategory`}
@@ -232,7 +172,7 @@ function Category() {
                       </button>
                     </>
                   ) : (
-                    row[column]
+                    row[column.toLowerCase()]
                   )}
                 </td>
               ))}
@@ -255,7 +195,7 @@ function Category() {
             style={{
               fontWeight: page === currentPage ? "bold" : "normal",
             }}
-            className="page-button" // Added className to button element
+            className="page-button"
           >
             {page}
           </button>
@@ -263,7 +203,7 @@ function Category() {
         <button
           disabled={currentPage === totalPages}
           onClick={() => handlePageChange(currentPage + 1)}
-          className="page-button" // Added className to button element
+          className="page-button"
         >
           &#8250;&#8250;
         </button>
@@ -272,7 +212,7 @@ function Category() {
           <select
             value={itemsPerPage}
             onChange={(e) => handleItemsPerPageChange(parseInt(e.target.value))}
-            className="items-per-page-select" // Added className to select element
+            className="items-per-page-select"
           >
             <option value={5}>5</option>
             <option value={10}>10</option>

@@ -174,3 +174,19 @@ exports.feedbackValidation = [
       return true;
     }),
 ];
+
+//add category
+exports.createCategoryValidation = [
+  check("category_name")
+    .trim() // Trim leading and trailing whitespace
+    .notEmpty()
+    .withMessage("• Category name is required")
+    .isString()
+    .withMessage("• Category name must be a string")
+    .isLength({ min: 1, max: 100 })
+    .withMessage("• Category name must be between 1 and 100 characters")
+    .matches(/^[A-Za-z\s]+$/)
+    .withMessage(
+      "• Category name can only contain alphabetic characters and spaces"
+    ),
+];

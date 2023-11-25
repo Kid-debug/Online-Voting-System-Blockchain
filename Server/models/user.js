@@ -50,10 +50,6 @@ User.init(
       type: DataTypes.DATE,
       allowNull: true,
     },
-    last_login: {
-      type: DataTypes.DATE,
-      allowNull: true,
-    },
     created_at: {
       type: DataTypes.DATE,
       allowNull: false,
@@ -63,10 +59,6 @@ User.init(
       type: DataTypes.DATE,
       allowNull: false,
       defaultValue: DataTypes.NOW, // Sequelize manages created_at & updated_at
-    },
-    refresh_token: {
-      type: DataTypes.STRING(255),
-      allowNull: true,
     },
   },
   {

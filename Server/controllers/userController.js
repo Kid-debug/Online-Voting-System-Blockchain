@@ -41,7 +41,7 @@ const registerUser = async (req, res) => {
       password: hashedPassword,
       role: "U", //User Role
       token: randomToken,
-      token_created_at: sequelize.fn("NOW"), // Sets token_created_at to NOW()
+      token_created_at: new Date(), // Sets token_created_at to NOW()
     });
 
     // Send the verification email
@@ -60,10 +60,9 @@ const registerUser = async (req, res) => {
       "'>http://localhost:3000/mail-verification?token=" +
       randomToken +
       "</a></p>" +
-      "<p>Need help?</p>" +
-      "<p>Please contact the email at nghs-wm20@student.tarc.edu.my</p>" +
-      "<p>Best Regards,</p>" +
-      "<p>Ng Hooi Seng</p>";
+      "<p>Please be reminded that the verification token is only valid for 24 hours</p>" +
+      "<p>If you did not request for register email verification, please ignore this email.</p>" +
+      "<p>Thank you.</p>";
     await sendMail(newUser.email, mailSubject, content);
 
     return res.status(201).json({
@@ -105,7 +104,7 @@ const registerAdmin = async (req, res) => {
       password: hashedPassword,
       role: "A", //Admin Role
       token: randomToken,
-      token_created_at: sequelize.fn("NOW"), // Sets token_created_at to NOW()
+      token_created_at: new Date(), // Sets token_created_at to NOW()
     });
 
     // Send the verification email
@@ -124,10 +123,9 @@ const registerAdmin = async (req, res) => {
       "'>http://localhost:3000/mail-verification?token=" +
       randomToken +
       "</a></p>" +
-      "<p>Need help?</p>" +
-      "<p>Please contact the email at nghs-wm20@student.tarc.edu.my</p>" +
-      "<p>Best Regards,</p>" +
-      "<p>Ng Hooi Seng</p>";
+      "<p>Please be reminded that the verification token is only valid for 24 hours</p>" +
+      "<p>If you did not request for register email verification, please ignore this email.</p>" +
+      "<p>Thank you.</p>";
     await sendMail(newUser.email, mailSubject, content);
 
     return res.status(201).json({
@@ -177,7 +175,7 @@ const verifyMail = async (req, res) => {
       return res.status(400).render("link-expired", {
         userEmail: user.email,
         message:
-          "Your verification link has expired. Please request a new one.", // Default message
+          "Your verification link has expired. Please request a new one.",
       });
     }
 
@@ -280,10 +278,9 @@ const resendVerificationMail = async (req, res) => {
       "'>http://localhost:3000/mail-verification?token=" +
       newToken +
       "</a></p>" +
-      "<p>Need help?</p>" +
-      "<p>Please contact the email at nghs-wm20@student.tarc.edu.my</p>" +
-      "<p>Best Regards,</p>" +
-      "<p>Ng Hooi Seng</p>";
+      "<p>Please be reminded that the verification token is only valid for 24 hours</p>" +
+      "<p>If you did not request for register email verification, please ignore this email.</p>" +
+      "<p>Thank you.</p>";
     await sendMail(email, mailSubject, content);
 
     return res.status(200).render("mail-verification", {
@@ -333,14 +330,11 @@ const forgetPassword = async (req, res) => {
       // Prepare the email content
       const content = `
         <p>We heard that you lost your password.</p>  
-        <p>Don't worry, click the button below to reset it.</p>
-        <p><a href='http://localhost:3000/reset-password?token=${token}' style='background-color: darkblue; color: white; padding: 10px; text-decoration: none; display: inline-block;'>Reset Password</a></p>
-        <p>Can't see the button? Copy and paste this link into your browser:</p>
+        <p>Don't worry, please click the following link below to reset it.</p>
         <p><a href='http://localhost:3000/reset-password?token=${token}'>http://localhost:3000/reset-password?token=${token}</a></p>
-        <p>Need help?</p>
-        <p>Please contact the email at nghs-wm20@student.tarc.edu.my</p>
-        <p>Best Regards,</p>
-        <p>Ng Hooi Seng</p>
+        <p>Please be reminded that the code is valid for 24 hours.</p>
+        <p>If you did not request for password reset, please ignore this email.</p>
+        <p>Thank you.</p>
       `;
 
       // Send the password reset email
