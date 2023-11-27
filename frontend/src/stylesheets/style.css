@@ -1,0 +1,171 @@
+/* Login Page*/
+.loginPage {
+  display: flex; /* This will make the child elements align center */
+  justify-content: center; /* Horizontally center the children */
+  align-items: center; /* Vertically center the children */
+  height: 100vh; /* Full viewport height */
+  background: linear-gradient(rgba(1, 11, 11, 0.5), rgba(10, 10, 10, 0.5)),
+    url("/vote.jpg");
+  background-position: center;
+  background-size: cover; /* Ensure the background covers the full area */
+  background-repeat: no-repeat;
+}
+
+.loginForm {
+  background-color: rgba(1, 32, 93, 0.6);
+  color: white;
+  width: 100%; /* Allow the form to take up to 100% of its parent */
+  max-width: 450px; /* Set a max-width for larger screens */
+  margin: 1rem; /* Add some margin */
+  padding: 1rem; /* Padding inside the form */
+  border-radius: 10px; /* Optional: if you want rounded corners */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional: if you want a shadow for depth */
+  border: 2px solid white; /* Add a white border */
+  box-sizing: border-box;
+}
+
+.eye-icon {
+  position: absolute;
+  color: black;
+  top: 65% !important;
+  right: 10px !important;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+.image {
+  width: 80px;
+  height: 90px;
+  border-radius: 50%;
+}
+
+/* Default styles for larger screens */
+#msform {
+  max-width: 800px;
+  width: 100%;
+  margin: 0 auto;
+  text-align: center;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0px 10px 15px rgba(0, 0, 0, 0.2);
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+#msform fieldset {
+  border: 0 none;
+  border-radius: 10px;
+  padding: 5% 10%;
+  font-family: "Open Sans", sans-serif;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0 auto;
+  max-width: 700px;
+}
+
+/* Media query for smaller screens */
+@media (max-width: 768px) {
+  .loginPage {
+    /* Adjust the background size or position if necessary */
+    background-size: auto 100%;
+  }
+
+  #msform {
+    max-width: 90%;
+    padding: 5%;
+  }
+
+  .loginForm {
+    max-width: none; /* Allow the form to take full width of its parent */
+    width: 350px; /* Set width to auto for smaller screens */
+    margin: 1rem; /* Keep the margin consistent */
+  }
+
+  #msform fieldset {
+    padding: 5%;
+  }
+}
+/* Hide all except the first fieldset */
+#msform fieldset:not(:first-of-type) {
+  display: none;
+  font-family: "Open Sans", sans-serif;
+}
+
+/* Inputs */
+#msform input,
+#msform textarea {
+  padding: 25px; /* Increase padding for inputs */
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: "Open Sans", sans-serif;
+  color: #000;
+  font-size: 18px; /* Increase the font size for inputs */
+  background: #fff;
+}
+
+/* Buttons */
+#msform .action-button,
+#msform .previous {
+  width: 140px; /* Increase button width */
+  background: #0077ff;
+  font-weight: bold;
+  color: white;
+  border: 0 none;
+  border-radius: 40px;
+  cursor: pointer;
+  padding: 15px 30px; /* Adjust padding for buttons */
+  margin: 20px 10px; /* Adjust margin for buttons */
+  font-size: 18px; /* Adjust the font size for buttons */
+  transition: background-color 0.2s ease; /* Add a smooth transition effect */
+}
+
+#msform .previous {
+  background: #545153;
+}
+
+/* Button hover/focus styles */
+#msform .action-button:hover,
+#msform .action-button:focus {
+  background: #006400;
+}
+
+#msform .previous:hover,
+#msform .previous:focus {
+  background: #353334;
+}
+
+/* Headings */
+.h2 {
+  padding-top: 2%;
+  font-family: "Open Sans", sans-serif;
+  font-weight: 800;
+  font-size: 40px !important;
+  color: #2c3e50;
+  padding-bottom: 8%;
+}
+
+.h3 {
+  font-family: "Open Sans", sans-serif;
+  font-weight: 600;
+  font-size: 18px;
+  color: #333;
+}
+
+.h4 {
+  font-family: "Open Sans", sans-serif;
+  font-weight: 400;
+  font-style: italic;
+  font-size: 18px; /* Increase the font size for h3 */
+  color: #000080 !important;
+  padding-bottom: 5%;
+}
+
+#verification-image {
+  width: 200px; /* Adjust the width to your desired size */
+  height: auto; /* Maintain the aspect ratio */
+  display: block; /* Center the image horizontally */
+  margin: 0 auto;
+}

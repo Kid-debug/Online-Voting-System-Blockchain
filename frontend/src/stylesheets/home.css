@@ -1,0 +1,172 @@
+/* Home(Admin Dashboard) */
+body {
+  background-color: #f4f4f4;
+  font-family: Arial, sans-serif;
+}
+
+.content-wrapper {
+  padding: 20px;
+}
+
+/* Header styles */
+.content-header {
+  background-color: #367fa9;
+  color: #fff;
+  padding: 10px 0;
+  text-align: center;
+}
+
+.content-header h1 {
+  margin: 0;
+  font-size: 24px;
+}
+
+/* Breadcrumb styles */
+.breadcrumb {
+  background-color: transparent;
+  margin: 0;
+  padding: 0;
+}
+
+.breadcrumb li {
+  display: inline;
+  font-size: 16px;
+  margin-right: 5px;
+}
+
+.breadcrumb li.active {
+  font-weight: bold;
+  color: #333;
+}
+
+/* Small boxes (Stat box) styles */
+.small-box {
+  background-color: #fff;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  padding: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.small-box .inner {
+  padding: 10px;
+}
+
+.small-box h3 {
+  font-size: 36px;
+  font-weight: bold;
+  margin: 0;
+  color: #333;
+}
+
+.small-box p {
+  font-size: 18px;
+  margin: 0;
+  color: #777;
+}
+
+/* Button styles */
+.btn-flat {
+  margin: 0;
+}
+
+/* Charts container styles */
+.chart {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 15px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+/* Additional styles for specific elements can be added here */
+
+/* Media query for responsiveness */
+@media (max-width: 768px) {
+  .content-header h1 {
+    font-size: 20px;
+  }
+
+  .breadcrumb li {
+    font-size: 14px;
+  }
+
+  .small-box h3 {
+    font-size: 28px;
+  }
+
+  .small-box p {
+    font-size: 16px;
+  }
+}
+
+.circle-tile {
+  margin: 0 15px 15px 0;
+  text-align: center;
+  padding: 15px;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.circle-tile-heading {
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 100%;
+  color: #ffffff;
+  height: 80px;
+  width: 80px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ff9100; /* Default background color */
+}
+
+.circle-tile-content {
+  padding-top: 20px;
+}
+
+.circle-tile-description {
+  text-transform: uppercase;
+  color: #34495e; /* Default text color */
+}
+
+.circle-tile-number {
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 5px 0 15px;
+  color: #34495e; /* Default text color */
+}
+
+.circle-tile-footer {
+  background-color: rgba(0, 0, 0, 0.1);
+  color: rgba(14, 10, 10, 0.729);
+  display: block;
+  padding: 5px;
+  transition: all 0.3s ease-in-out 0s;
+}
+
+.circle-tile-footer:hover {
+  background-color: rgba(0, 0, 0, 0.2);
+  color: rgba(0, 0, 0, 0.5);
+  text-decoration: none;
+}
+
+/* for the votes tally div */
+.bordered-div {
+  border: 2px solid black;
+  padding: 15px;
+}
+
+.home-container {
+  padding: 20px;
+}
+
+.home-container div {
+  margin-bottom: 20px;
+}
+
+.home-container select {
+  padding: 5px 10px;
+  margin-left: 10px;
+}

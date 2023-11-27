@@ -1,0 +1,363 @@
+@import url("https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css");
+@import url("https://fonts.googleapis.com/css?family=Noto+Sans:400,700&display=swap");
+
+/* General reset and base styles */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Open Sans", sans-serif;
+  line-height: 1.6;
+  background-color: #f4f4f4;
+}
+
+/* Container for the feedback section */
+.container-feedback {
+  background-color: #f8faff; /* Light background color for the form */
+  color: #4b537c; /* Dark text for better readability */
+  width: 100%;
+  max-width: 600px; /* Increased max-width for a larger form */
+  margin: 40px auto;
+  padding: 40px; /* Increased padding for more space inside the form */
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+/* Title styling */
+.feedback-title {
+  margin-bottom: 30px;
+  font-size: 40px;
+  color: #4b537c;
+}
+
+/* Emotion icons styling */
+.feedback-level {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.level {
+  background: white;
+  padding: 16px;
+  border-radius: 7px;
+  border: solid 0.5px #e0e9fe;
+  cursor: pointer;
+  transition: box-shadow 0.3s ease;
+}
+
+.level i {
+  font-size: 36px;
+  color: #333;
+  transition: color 0.3s ease;
+}
+
+.level.active i {
+  color: #6f00ff;
+}
+
+.level:hover i {
+  color: #6f00ff;
+}
+
+.level:hover,
+.level.active {
+  box-shadow: 0 2px 5px #6f00ff;
+}
+
+/* Input and textarea styling */
+.input-group {
+  position: relative;
+  margin-bottom: 30px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+/* New CSS class for the character count display */
+.character-count {
+  color: #333;
+  font-size: 0.9rem;
+  text-align: right;
+  transition: color 0.3s; /* Add transition for smooth color change */
+}
+
+.character-count.limit-reached {
+  color: red; /* Change text color to red */
+}
+
+.input-group input,
+.feedback-textarea {
+  width: 100%;
+  padding: 15px;
+  border: none;
+  background: transparent;
+  font-size: 18px;
+}
+
+.feedback-textarea {
+  height: 150px;
+  border: 1px solid #ddd;
+  background: #fff;
+  margin-bottom: 10px;
+}
+
+/* Icon positioning inside input */
+.feedback-icon {
+  font-size: 25px;
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  color: #333;
+}
+
+/* Button styling */
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.submit-btn {
+  border: none;
+  border-radius: 4px;
+  margin: auto;
+  padding: 15px 30px;
+  cursor: pointer;
+  font-size: 18px;
+  width: calc(50% - 10px);
+}
+
+.submit-btn {
+  background-color: #007bff;
+  color: white;
+}
+
+.submit-btn:hover {
+  opacity: 0.9;
+}
+
+/* Responsive styling */
+@media (max-width: 768px) {
+  .container-feedback {
+    width: 95%;
+    margin-top: 5%;
+    margin-bottom: 5%;
+    padding: 20px;
+  }
+
+  /* Adjust other elements as needed for smaller screens */
+  .feedback-title {
+    font-size: 32px;
+  }
+
+  .level i {
+    font-size: 24px;
+  }
+
+  .input-group input,
+  .feedback-textarea {
+    font-size: 16px;
+    padding: 12px;
+  }
+
+  .character-count {
+    right: 12px;
+    bottom: -18px;
+  }
+
+  .feedback-icon {
+    font-size: 18px;
+  }
+
+  .submit-btn {
+    margin: auto;
+    font-size: 16px;
+    padding: 12px 24px;
+  }
+}
+
+/* confirmation */
+.confirm {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 10px;
+  box-sizing: border-box;
+
+  opacity: 0;
+  animation-name: confirm---open;
+  animation-duration: 0.2s;
+  animation-fill-mode: forwards;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.confirm--close {
+  animation-name: confirm---close;
+}
+
+.confirm__window {
+  width: 100%;
+  max-width: 600px;
+  background: white;
+  font-size: 14px;
+  font-family: "Noto Sans", sans-serif;
+  border-radius: 5px;
+  overflow: hidden;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  transform: scale(0.75);
+  animation-name: confirm__window---open;
+  animation-duration: 0.2s;
+  animation-fill-mode: forwards;
+  animation-delay: 0.2s;
+}
+
+.confirm__titlebar,
+.confirm__content,
+.confirm__buttons {
+  padding: 18px;
+}
+
+.confirm__titlebar {
+  background: #222222;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.confirm__title {
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.confirm__close {
+  background: none;
+  outline: none;
+  border: none;
+  transform: scale(2.5);
+  color: #ffffff;
+  transition: color 0.15s;
+}
+
+.confirm__close:hover {
+  color: #ff0000;
+  cursor: pointer;
+}
+
+.confirm__content {
+  text-align: left;
+  font-size: 18px;
+  line-height: 28px;
+}
+
+.confirm__buttons {
+  background: #eeeeee;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.confirm__button {
+  padding: 6px 12px;
+  border: 2px solid #009879;
+  border-radius: 5px;
+  background: #ffffff;
+  color: #009879;
+  font-weight: bold;
+  font-size: 16px;
+  font-family: "Noto Sans", sans-serif;
+  margin-left: 10px;
+  cursor: pointer;
+  outline: none;
+}
+
+.confirm__button--fill {
+  background: #009879;
+  color: #ffffff;
+}
+
+.confirm__button:focus {
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+}
+
+@keyframes confirm---open {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes confirm---close {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes confirm__window---open {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+  .confirm__window {
+    max-width: 90%; /* Make the window width responsive to screen size */
+    font-size: 12px; /* Smaller font size for smaller screens */
+  }
+
+  .confirm__title {
+    font-size: 16px; /* Smaller title for smaller screens */
+  }
+
+  .confirm__content {
+    font-size: 14px; /* Smaller content font size for smaller screens */
+    line-height: 20px; /* Adjust line height for readability */
+  }
+
+  .confirm__button {
+    padding: 6px 10px; /* Adjust button padding for smaller screens */
+    font-size: 14px; /* Smaller button text for smaller screens */
+  }
+
+  .confirm__buttons {
+    justify-content: center; /* Center buttons on smaller screens if desired */
+  }
+}
+
+/* Even smaller screens, such as mobile phones */
+@media (max-width: 480px) {
+  .confirm__window {
+    max-width: 95%; /* Allow more width for the window on very small screens */
+  }
+
+  .confirm__title {
+    font-size: 14px; /* Even smaller title for tiny screens */
+  }
+
+  .confirm__content,
+  .confirm__button {
+    font-size: 12px; /* Smaller font size for content and buttons */
+  }
+}
