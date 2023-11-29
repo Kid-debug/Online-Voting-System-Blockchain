@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 //500
 //401
 import React, { useState, useEffect } from "react";
@@ -78,6 +77,3 @@ const Errorpage = () => {
 };
 
 export default Errorpage;
-=======
-//500
->>>>>>> ba75df34aeaaefc52b8bbc4c45b1cdcd0f6e1fd9

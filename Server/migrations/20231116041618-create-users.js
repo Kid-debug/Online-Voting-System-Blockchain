@@ -14,12 +14,8 @@ module.exports = {
         token_created_at TIMESTAMP NULL,
         token_updated_at TIMESTAMP NULL,
         created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-<<<<<<< HEAD
         updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         refresh_token TEXT
-=======
-        updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
->>>>>>> ba75df34aeaaefc52b8bbc4c45b1cdcd0f6e1fd9
       )
     `);
   },
