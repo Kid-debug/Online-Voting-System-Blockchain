@@ -28,6 +28,7 @@ app.use(express.static("public"));
 
 const userRouter = require("./routes/userRoute");
 const webRouter = require("./routes/webRoute");
+const verifyJWT = require("./middleware/verifyJWT");
 
 app.use(express.json());
 
@@ -54,6 +55,11 @@ app.use(cors(corsOptions));
 
 app.use("/api", userRouter);
 app.use("/", webRouter);
+// Your GET route to verify the token
+app.get("/api/verifyToken", verifyJWT, (req, res) => {
+  // If the middleware doesn't send a response, it means the token is valid
+  res.status(200).send("You have accessed a protected route");
+});
 
 // Test database connection and sync models
 sequelize

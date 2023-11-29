@@ -3,6 +3,7 @@ import Header from "./container/Header";
 import Footer from "./container/Footer";
 import "./stylesheets/profile.css";
 import axios from "axios";
+import useAuth from "./hooks/useAuth";
 import { EyeInvisibleOutlined, EyeOutlined } from "@ant-design/icons";
 
 const TAB_ACCOUNT = "account-general";
@@ -22,6 +23,8 @@ function Profile() {
   const [repeatNewPasswordVisible, setRepeatNewPasswordVisible] =
     useState(false);
 
+  // Retrieve the auth context
+  const { auth } = useAuth();
 
   const handleTabClick = (tabId) => {
     setActiveTab(tabId);
@@ -32,36 +35,36 @@ function Profile() {
     setBackendErrors([]);
     setSuccessMessage("");
 
-    // try {
-    //   // Replace with actual token from auth context or state management
-    //   const token = auth?.accessToken;
+    try {
+      // Replace with actual token from auth context or state management
+      const token = auth?.accessToken;
 
-    //   const response = await axios.post(
-    //     "http://localhost:3000/api/change-password",
-    //     {
-    //       ...values,
-    //       headers: {
-    //         Authorization: `Bearer ${token}`,
-    //       },
-    //     }
-    //   );
-    //   setSuccessMessage(response.data.msg);
-    //   handleReset();
-    // } catch (error) {
-    //   if (error.response) {
-    //     // If the backend sends an array of errors
-    //     if (error.response.data.errors) {
-    //       setBackendErrors(error.response.data.errors);
-    //     } else {
-    //       // If the backend sends a single error message
-    //       setBackendErrors([{ msg: error.response.data.msg }]);
-    //     }
-    //   } else {
-    //     // Handle other errors here
-    //     console.error("Updating Password error:", error);
-    //     setBackendErrors([{ msg: "Network error or server not responding." }]);
-    //   }
-    // }
+      const response = await axios.post(
+        "http://localhost:3000/api/change-password",
+        {
+          ...values,
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setSuccessMessage(response.data.msg);
+      handleReset();
+    } catch (error) {
+      if (error.response) {
+        // If the backend sends an array of errors
+        if (error.response.data.errors) {
+          setBackendErrors(error.response.data.errors);
+        } else {
+          // If the backend sends a single error message
+          setBackendErrors([{ msg: error.response.data.msg }]);
+        }
+      } else {
+        // Handle other errors here
+        console.error("Updating Password error:", error);
+        setBackendErrors([{ msg: "Network error or server not responding." }]);
+      }
+    }
   };
 
   // Reset the form fields to initial state
@@ -141,7 +144,7 @@ function Profile() {
                               name="email"
                               type="email"
                               className="form-control"
-                              value=""
+                              value={auth.email}
                               disabled="true"
                             />
                           </div>

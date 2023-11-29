@@ -36,65 +36,75 @@ import PasswordResetConfirmation from "./PasswordResetConfirmation";
 import ReportSummary from "./admin/ReportSummary";
 import Missing from "./component/Missing";
 import Unauthorized from "./component/Unauthorized";
+import Errorpage from "./component/Errorpage";
+import RequireAuth from "./component/RequireAuth";
+import { AuthProvider } from "./context/AuthProvider";
 
-// const ROLES = {
-//   User: "U",
-//   Admin: "A",
-// };
+const ROLES = {
+  User: "U",
+  Admin: "A",
+};
 
 function App() {
   return (
-    // <AuthProvider>
-    <BrowserRouter>
-      <Routes>
-        {/* Default route goes to Login */}
-        <Route path="/" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/adminregister" element={<AdminRegister />} />
-        <Route path="/forgotPass" element={<ForgotPassword />} />
-        <Route path="/resetPass" element={<PasswordResetConfirmation />} />
-        <Route path="/unauthorized" element={<Unauthorized />} />
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          {/* Default route goes to Login */}
+          <Route path="/" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/adminregister" element={<AdminRegister />} />
+          <Route path="/forgotPass" element={<ForgotPassword />} />
+          <Route path="/resetPass" element={<PasswordResetConfirmation />} />
+          <Route path="/unauthorized" element={<Unauthorized />} />
+          <Route path="/error" element={<Errorpage />} />
 
-        <Route path="/admin" element={<Dashboard />}>
-          {/* The "index" route represents the default child route */}
-          <Route index element={<Home />} />
-          <Route path="home" element={<Home />} />
-          <Route path="category" element={<Category />} />
-          <Route path="position" element={<Position />} />
-          <Route path="candidate" element={<Candidate />} />
-          <Route path="voter" element={<Voter />} />
-          <Route path="election" element={<Election />} />
-          <Route path="adminfeedback" element={<AdminFeedback />} />
-          <Route path="reportsummary" element={<ReportSummary />} />
-          <Route path="editfeedback" element={<EditFeedback />} />
-          <Route path="createVoter" element={<AddVoter />} />
-          <Route path="editVoter" element={<EditVoter />} />
-          <Route path="createCategory" element={<AddCategory />} />
-          <Route path="editCategory" element={<EditCategory />} />
-          <Route path="createPosition" element={<AddPosition />} />
-          <Route path="editPosition" element={<EditPosition />} />
-          <Route path="createCandidate" element={<AddCandidate />} />
-          <Route path="editCandidate" element={<EditCandidate />} />
-          <Route path="createElection" element={<AddElection />} />
-          <Route path="editElection" element={<EditElection />} />
-          {/* ... more nested admin routes */}
-        </Route>
+          <Route element={<RequireAuth allowedRoles={[ROLES.Admin]} />}>
+            <Route path="/admin" element={<Dashboard />}>
+              {/* The "index" route represents the default child route */}
+              <Route index element={<Home />} />
+              <Route path="home" element={<Home />} />
+              <Route path="category" element={<Category />} />
+              <Route path="position" element={<Position />} />
+              <Route path="candidate" element={<Candidate />} />
+              <Route path="voter" element={<Voter />} />
+              <Route path="election" element={<Election />} />
+              <Route path="adminfeedback" element={<AdminFeedback />} />
+              <Route path="reportsummary" element={<ReportSummary />} />
+              <Route path="editfeedback" element={<EditFeedback />} />
+              <Route path="createVoter" element={<AddVoter />} />
+              <Route path="editVoter" element={<EditVoter />} />
+              <Route path="createCategory" element={<AddCategory />} />
+              <Route path="editCategory" element={<EditCategory />} />
+              <Route path="createPosition" element={<AddPosition />} />
+              <Route path="editPosition" element={<EditPosition />} />
+              <Route path="createCandidate" element={<AddCandidate />} />
+              <Route path="editCandidate" element={<EditCandidate />} />
+              <Route path="createElection" element={<AddElection />} />
+              <Route path="editElection" element={<EditElection />} />
+              {/* ... more nested admin routes */}
+            </Route>
+          </Route>
 
-        <Route path="/voterdashboard" element={<VoterDashboard />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/electionList" element={<ElectionList />} />
-        <Route path="/electionDetails" element={<ElectionDetails />} />
-        <Route path="/voting" element={<Voting />} />
-        <Route path="/verification" element={<Verification />} />
-        <Route path="/feedback" element={<Feedback />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/result" element={<Result />} />
-
-        {/* Catch-all route for undefined paths */}
-        <Route path="*" element={<Missing />} />
-      </Routes>
-    </BrowserRouter>
-    // </AuthProvider>
+          <Route
+            element={<RequireAuth allowedRoles={[ROLES.User, ROLES.Admin]} />}
+          >
+            <Route path="/voterdashboard" element={<VoterDashboard />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/electionList" element={<ElectionList />} />
+            <Route path="/electionDetails" element={<ElectionDetails />} />
+            <Route path="/voting" element={<Voting />} />
+            <Route path="/verification" element={<Verification />} />
+            <Route path="/feedback" element={<Feedback />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/result" element={<Result />} />
+          </Route>
+          {/* Catch-all route for undefined paths */}
+          <Route path="*" element={<Missing />} />
+        </Routes>
+      </BrowserRouter>
+      //{" "}
+    </AuthProvider>
   );
 }
 
