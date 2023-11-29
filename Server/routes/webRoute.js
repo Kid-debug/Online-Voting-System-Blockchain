@@ -15,8 +15,11 @@ user_route.post(
   userController.resendVerificationMail
 );
 
+<<<<<<< HEAD
 user_route.get("/refresh", userController.handleRefreshToken);
 
+=======
+>>>>>>> ba75df34aeaaefc52b8bbc4c45b1cdcd0f6e1fd9
 user_route.get(
   "/reset-password",
   checkResetToken,

@@ -23,21 +23,34 @@ const Unauthorized = () => {
       margin: 0,
       padding: 0,
       background: "linear-gradient(#111, #333, #111)",
+<<<<<<< HEAD
       color: "#ffffff",
     },
     h1: {
       fontSize: "128px",
       color: "#ffffff",
+=======
+      color: "#03dac6",
+    },
+    h1: {
+      fontSize: "128px",
+      color: "#03dac6",
+>>>>>>> ba75df34aeaaefc52b8bbc4c45b1cdcd0f6e1fd9
       fontWeight: "bold",
       margin: 0,
     },
     h2: {
       fontWeight: 300,
+<<<<<<< HEAD
       color: "#e0e0e0",
+=======
+      color: "#c8fff4",
+>>>>>>> ba75df34aeaaefc52b8bbc4c45b1cdcd0f6e1fd9
       margin: "12px 0",
     },
     p: {
       fontSize: "16px",
+<<<<<<< HEAD
       color: "#e0e0e0",
       marginBottom: "32px",
     },
@@ -45,6 +58,15 @@ const Unauthorized = () => {
       background: isHovered ? "#ffffff" : "transparent",
       border: "2px solid #e0e0e0",
       color: isHovered ? "#111" : "#e0e0e0",
+=======
+      color: "#c8fff4",
+      marginBottom: "32px",
+    },
+    button: {
+      background: isHovered ? "#03dac6" : "transparent",
+      border: "2px solid #c8fff4",
+      color: isHovered ? "#111" : "#c8fff4",
+>>>>>>> ba75df34aeaaefc52b8bbc4c45b1cdcd0f6e1fd9
       padding: "10px 20px",
       fontSize: "16px",
       borderRadius: "3px",

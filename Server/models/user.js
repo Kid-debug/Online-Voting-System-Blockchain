@@ -60,10 +60,13 @@ User.init(
       allowNull: false,
       defaultValue: DataTypes.NOW, // Sequelize manages created_at & updated_at
     },
+<<<<<<< HEAD
     refresh_token: {
       type: DataTypes.TEXT,
       allowNull: true,
     },
+=======
+>>>>>>> ba75df34aeaaefc52b8bbc4c45b1cdcd0f6e1fd9
   },
   {
     sequelize,

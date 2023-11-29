@@ -2,7 +2,11 @@ import React, { useState } from "react";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import axios from "axios";
+<<<<<<< HEAD
 import useAuth from "../hooks/useAuth";
+=======
+
+>>>>>>> ba75df34aeaaefc52b8bbc4c45b1cdcd0f6e1fd9
 function Dashboard() {
   const navigate = useNavigate();
   axios.defaults.withCredentials = true;
@@ -12,6 +16,7 @@ function Dashboard() {
   const [isVotersOpen, setIsVotersOpen] = useState(false);
   const [isElectionOpen, setIsElectionOpen] = useState(false);
 
+<<<<<<< HEAD
   const { logout } = useAuth();
 
   const handleLogout = async () => {
@@ -30,6 +35,11 @@ function Dashboard() {
     } catch (error) {
       console.error("Logout failed", error);
     }
+=======
+  const handleLogout = async () => {
+    // Navigate to the login page
+    navigate("/");
+>>>>>>> ba75df34aeaaefc52b8bbc4c45b1cdcd0f6e1fd9
   };
 
   const toggleCategory = () => {
@@ -257,7 +267,11 @@ function Dashboard() {
                 </a>
               </li>
               <li onClick={handleLogout}>
+<<<<<<< HEAD
                 <a href="#" className="nav-link px-0 align-middle text-white">
+=======
+                <a href="/" className="nav-link px-0 align-middle text-white">
+>>>>>>> ba75df34aeaaefc52b8bbc4c45b1cdcd0f6e1fd9
                   <i className="fs-4 bi-power"></i>{" "}
                   <span className="ms-1 d-none d-sm-inline">Logout</span>{" "}
                 </a>
