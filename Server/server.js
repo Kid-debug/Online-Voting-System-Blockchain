@@ -11,7 +11,7 @@ const corsOptions = {
       callback(new Error("Not allowed by CORS"));
     }
   },
-  methods: ["POST", "GET"],
+  methods: ["POST", "GET", "PUT", "DELETE"],
   optionsSuccessStatus: 200, // For legacy browser support
   credentials: true, // Because the Access-Control-Allow-Credentials: true header is needed
 };

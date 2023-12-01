@@ -15,10 +15,12 @@ function AddCategory() {
       });
 
       Swal({
-        title: "Add Category Success!",
+        title: "Add Category Successfully!",
         text: response.data.msg,
         icon: "success",
-        confirmButtonText: "OK",
+        button: {
+          text: "OK",
+        },
       });
 
       setCategoryName(""); // Reset the form field
@@ -31,7 +33,9 @@ function AddCategory() {
             icon: "error",
             title: "Failed to Add Category!",
             text: error.response.data.errors.map((e) => e.msg).join("\n"),
-            confirmButtonText: "OK",
+            button: {
+              text: "OK",
+            },
           });
         } else {
           // If the backend sends a single error message
@@ -39,7 +43,9 @@ function AddCategory() {
             icon: "error",
             title: "Failed to Add Category!",
             text: error.response.data.msg,
-            confirmButtonText: "OK",
+            button: {
+              text: "OK",
+            },
           });
         }
       } else {
@@ -49,7 +55,9 @@ function AddCategory() {
           icon: "error",
           title: "Internal Server Error",
           text: "Network error occurred.",
-          confirmButtonText: "OK",
+          button: {
+            text: "OK",
+          },
         });
       }
     }

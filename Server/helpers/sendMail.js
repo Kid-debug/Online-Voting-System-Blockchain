@@ -1,6 +1,6 @@
 require("dotenv").config();
 
-const  nodemailer =  require("nodemailer");
+const nodemailer = require("nodemailer");
 const { SMTP_MAIL, SMTP_PASSWORD } = process.env;
 
 const sendMail = async (email, mailSubject, content) => {

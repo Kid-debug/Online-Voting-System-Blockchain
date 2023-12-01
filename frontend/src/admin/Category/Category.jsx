@@ -2,21 +2,29 @@ import React, { useState, useEffect } from "react";
 import "../../stylesheets/list.css";
 import { Link } from "react-router-dom";
 import axios from "../../api/axios";
+import Swal from "sweetalert";
 
 function Category() {
   const [categories, setCategories] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [sortColumn, setSortColumn] = useState(null);
+  const [sortDirection, setSortDirection] = useState(null);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState(null);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await axios.get("api/retrieveCategory");
+      console.log(response.data); // Log the response to the console
+      setCategories(response.data);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
 
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await axios.get("api/retrieveCategory");
-        console.log(response.data); // Log the response to the console
-        setCategories(response.data);
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-      }
-    };
-
     fetchCategories();
   }, []);
 
@@ -29,12 +37,6 @@ function Category() {
 
   // Create an array of display names based on the API keys
   const columns = ["category_id", "category_name", "Action"];
-
-  const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(5);
-  const [sortColumn, setSortColumn] = useState(null);
-  const [sortDirection, setSortDirection] = useState(null);
 
   // Function to handle sorting
   const handleSort = (column) => {
@@ -66,13 +68,17 @@ function Category() {
           const bValue = parseInt(b[sortColumn]);
 
           return sortDirection === "asc" ? aValue - bValue : bValue - aValue;
-        } else {
-          const aValue = a[sortColumn];
-          const bValue = b[sortColumn];
+        } else if (sortColumn !== "Action") {
+          // For non-numeric columns, use localeCompare for string comparison
+          const aValue = a[sortColumn].toString();
+          const bValue = b[sortColumn].toString();
 
           return sortDirection === "asc"
             ? aValue.localeCompare(bValue)
             : bValue.localeCompare(aValue);
+        } else {
+          // For "Action" column, maintain the order
+          return 0;
         }
       })
     : filterData(categories);
@@ -112,6 +118,63 @@ function Category() {
   const handleItemsPerPageChange = (value) => {
     setItemsPerPage(value);
     setCurrentPage(1); // Reset to the first page when changing items per page
+  };
+
+  const handleDeleteCategory = (categoryId) => {
+    setCategoryToDelete(categoryId);
+    setShowDeleteConfirmation(true);
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteConfirmation(false);
+    setCategoryToDelete(null);
+  };
+
+  const confirmDelete = async () => {
+    setShowDeleteConfirmation(false);
+
+    try {
+      const deleteResponse = await axios.delete(
+        `api/deleteCategory/${categoryToDelete}`
+      );
+
+      if (deleteResponse.status === 200) {
+        Swal({
+          title: "Delete Category Successfully!",
+          text: deleteResponse.data.msg,
+          icon: "success",
+          button: {
+            text: "OK",
+          },
+        });
+
+        // Fetch updated categories after deletion
+        fetchCategories();
+      } else {
+        // Handle non-200 responses
+        Swal({
+          title: "Error",
+          text: "Category could not be deleted.",
+          icon: "error",
+          button: "OK",
+        });
+      }
+    } catch (error) {
+      console.error("Error deleting category:", error);
+      Swal({
+        title: "Error",
+        text: "An error occurred while deleting category.",
+        icon: "error",
+        button: "OK",
+      });
+    }
+  };
+
+  const getConfirmationContent = () => {
+    return {
+      title: "Delete Category Confirmation",
+      content: "Are you sure you want to delete this category?",
+    };
   };
 
   return (
@@ -155,72 +218,118 @@ function Category() {
           </tr>
         </thead>
         <tbody>
-          {currentItems.map((row, rowIndex) => (
-            <tr key={rowIndex}>
-              {columns.map((column, colIndex) => (
-                <td key={colIndex} className="data-cell">
-                  {column === "Action" ? (
-                    <>
-                      <Link
-                        to={`/admin/editCategory`}
-                        className="btn btn-primary btn-sm"
-                      >
-                        <i className="fs-4 bi-pencil"></i>
-                      </Link>
-                      <button className="btn btn-danger btn-sm">
-                        <i className="fs-4 bi-trash"></i>
-                      </button>
-                    </>
-                  ) : (
-                    row[column.toLowerCase()]
-                  )}
-                </td>
-              ))}
+          {currentItems.length === 0 ? (
+            <tr>
+              <td colSpan={columns.length} className="text-center">
+                No matching records found
+              </td>
             </tr>
-          ))}
+          ) : (
+            currentItems.map((row, rowIndex) => (
+              <tr key={rowIndex}>
+                {columns.map((column, colIndex) => (
+                  <td key={colIndex} className="data-cell">
+                    {column === "Action" ? (
+                      <>
+                        <Link
+                          to={`/admin/editCategory/${row.category_id}`}
+                          className="btn btn-primary btn-sm"
+                        >
+                          <i className="fs-4 bi-pencil"></i>
+                        </Link>
+                        <button
+                          onClick={() => handleDeleteCategory(row.category_id)}
+                          className="btn btn-danger btn-sm"
+                        >
+                          <i className="fs-4 bi-trash"></i>
+                        </button>
+                      </>
+                    ) : (
+                      row[column.toLowerCase()]
+                    )}
+                  </td>
+                ))}
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
-      <div className="pagination-buttons">
-        <button
-          disabled={currentPage === 1}
-          onClick={() => handlePageChange(currentPage - 1)}
-          className="page-button"
-        >
-          &#8249;&#8249;
-        </button>
-        {generatePaginationButtons().map((page) => (
+      {showDeleteConfirmation && (
+        <div className="confirm">
+          <div className="confirm__window">
+            <div className="confirm__titlebar">
+              <span className="confirm__title">
+                {getConfirmationContent().title}
+              </span>
+              <button className="confirm__close" onClick={cancelDelete}>
+                &times;
+              </button>
+            </div>
+            <div className="confirm__content">
+              {getConfirmationContent().content}
+            </div>
+            <div className="confirm__buttons">
+              <button
+                className="confirm__button confirm__button--ok confirm__button--fill"
+                onClick={confirmDelete}
+              >
+                OK
+              </button>
+              <button
+                className="confirm__button confirm__button--cancel"
+                onClick={cancelDelete}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {categories.length > 0 && (
+        <div className="pagination-buttons">
           <button
-            key={page}
-            onClick={() => handlePageChange(page)}
-            style={{
-              fontWeight: page === currentPage ? "bold" : "normal",
-            }}
+            disabled={currentPage === 1}
+            onClick={() => handlePageChange(currentPage - 1)}
             className="page-button"
           >
-            {page}
+            &#8249;&#8249;
           </button>
-        ))}
-        <button
-          disabled={currentPage === totalPages}
-          onClick={() => handlePageChange(currentPage + 1)}
-          className="page-button"
-        >
-          &#8250;&#8250;
-        </button>
-        <label>
-          Items per page:
-          <select
-            value={itemsPerPage}
-            onChange={(e) => handleItemsPerPageChange(parseInt(e.target.value))}
-            className="items-per-page-select"
+          {generatePaginationButtons().map((page) => (
+            <button
+              key={page}
+              onClick={() => handlePageChange(page)}
+              style={{
+                fontWeight: page === currentPage ? "bold" : "normal",
+              }}
+              className="page-button"
+            >
+              {page}
+            </button>
+          ))}
+          <button
+            disabled={currentPage === totalPages}
+            onClick={() => handlePageChange(currentPage + 1)}
+            className="page-button"
           >
-            <option value={5}>5</option>
-            <option value={10}>10</option>
-            <option value={15}>15</option>
-            <option value={20}>20</option>
-          </select>
-        </label>
-      </div>
+            &#8250;&#8250;
+          </button>
+          <label>
+            Items per page:
+            <select
+              value={itemsPerPage}
+              onChange={(e) =>
+                handleItemsPerPageChange(parseInt(e.target.value))
+              }
+              className="items-per-page-select"
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={15}>15</option>
+              <option value={20}>20</option>
+            </select>
+          </label>
+        </div>
+      )}
     </div>
   );
 }

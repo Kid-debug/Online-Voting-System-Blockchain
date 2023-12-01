@@ -5,6 +5,7 @@ import "./stylesheets/profile.css";
 import axios from "axios";
 import useAuth from "./hooks/useAuth";
 import { EyeInvisibleOutlined, EyeOutlined } from "@ant-design/icons";
+import Swal from "sweetalert";
 
 const TAB_ACCOUNT = "account-general";
 const TAB_CHANGE_PASSWORD = "account-change-password";
@@ -16,8 +17,6 @@ function Profile() {
     repeatNewPassword: "",
   });
   const [activeTab, setActiveTab] = useState(TAB_ACCOUNT);
-  const [backendErrors, setBackendErrors] = useState([]);
-  const [successMessage, setSuccessMessage] = useState("");
   const [currentPasswordVisible, setCurrentPasswordVisible] = useState(false);
   const [newPasswordVisible, setNewPasswordVisible] = useState(false);
   const [repeatNewPasswordVisible, setRepeatNewPasswordVisible] =
@@ -32,8 +31,6 @@ function Profile() {
 
   const handleChangePassword = async (event) => {
     event.preventDefault();
-    setBackendErrors([]);
-    setSuccessMessage("");
 
     try {
       // Replace with actual token from auth context or state management
@@ -48,21 +45,48 @@ function Profile() {
           },
         }
       );
-      setSuccessMessage(response.data.msg);
+
+      Swal({
+        title: "Change Password Successfully!",
+        text: response.data.msg,
+        icon: "success",
+        button: {
+          text: "OK",
+        },
+      });
       handleReset();
     } catch (error) {
       if (error.response) {
         // If the backend sends an array of errors
         if (error.response.data.errors) {
-          setBackendErrors(error.response.data.errors);
+          Swal({
+            icon: "error",
+            title: "Failed to Change Password!",
+            text: error.response.data.errors.map((e) => e.msg).join("\n"),
+            button: {
+              text: "OK",
+            },
+          });
         } else {
           // If the backend sends a single error message
-          setBackendErrors([{ msg: error.response.data.msg }]);
+          Swal({
+            icon: "error",
+            title: "Failed to Change Password!",
+            text: error.response.data.msg,
+            button: {
+              text: "OK",
+            },
+          });
         }
       } else {
         // Handle other errors here
         console.error("Updating Password error:", error);
-        setBackendErrors([{ msg: "Network error or server not responding." }]);
+        Swal({
+          icon: "error",
+          title: "Internal Server Error",
+          text: "Network error occurred.",
+          confirmButtonText: "OK",
+        });
       }
     }
   };
@@ -80,18 +104,6 @@ function Profile() {
     <div className="app-container">
       <Header />
       <main>
-        {successMessage && (
-          <div className="alert alert-success" role="alert">
-            {successMessage}
-          </div>
-        )}
-        {backendErrors.length > 0 && (
-          <div className="alert alert-danger" role="alert">
-            {backendErrors.map((error, index) => (
-              <div key={index}>{error.msg}</div>
-            ))}
-          </div>
-        )}
         <form onSubmit={handleChangePassword}>
           <div className="container light-style flex-grow-1 container-p-y">
             <h2 className="font-weight-bold py-3 mb-4">Edit Profile</h2>

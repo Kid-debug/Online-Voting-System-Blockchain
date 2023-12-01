@@ -71,11 +71,17 @@ function App() {
               <Route path="election" element={<Election />} />
               <Route path="adminfeedback" element={<AdminFeedback />} />
               <Route path="reportsummary" element={<ReportSummary />} />
-              <Route path="editfeedback" element={<EditFeedback />} />
+              <Route
+                path="editfeedback/:feedbackId"
+                element={<EditFeedback />}
+              />
               <Route path="createVoter" element={<AddVoter />} />
               <Route path="editVoter" element={<EditVoter />} />
               <Route path="createCategory" element={<AddCategory />} />
-              <Route path="editCategory" element={<EditCategory />} />
+              <Route
+                path="editCategory/:categoryId"
+                element={<EditCategory />}
+              />
               <Route path="createPosition" element={<AddPosition />} />
               <Route path="editPosition" element={<EditPosition />} />
               <Route path="createCandidate" element={<AddCandidate />} />

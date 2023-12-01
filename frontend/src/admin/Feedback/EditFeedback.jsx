@@ -1,91 +1,138 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import { useParams, useNavigate } from "react-router-dom";
+import axios from "../../api/axios";
+import Swal from "sweetalert";
 
 function EditFeedback() {
-  const [electionName, setElectionName] = useState("Ng Hooi Seng");
-  const [contentDescription, setContentDescription] = useState(
-    "The voting process was smooth and easy to use."
-  );
-  const [startDate, setStartDate] = useState(new Date()); // Default to today's date
-  const [endDate, setEndDate] = useState(new Date()); // Default to today's date
-  const [status, setStatus] = useState("Mark as Reviewed");
+  const [userEmail, setUserEmail] = useState("");
+  const [content, setContent] = useState("");
+  const [rating, setRating] = useState(0);
+  const [createdDate, setCreatedDate] = useState("");
+  const [status, setStatus] = useState("");
 
-  const handleStartDateChange = (date) => {
-    setStartDate(date);
+  const navigate = useNavigate();
+  const { feedbackId } = useParams();
+
+  const formatDate = (timestamp) => {
+    const date = new Date(timestamp);
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
   };
 
-  const handleEndDateChange = (date) => {
-    setEndDate(date);
-  };
-
-  const handleStatusChange = (event) => {
-    setStatus(event.target.value);
-  };
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    // You can handle the form submission here, including sending the selected data to your backend.
-    console.log("Election Name:", electionName);
-    console.log("Start Date:", startDate);
-    console.log("End Date:", endDate);
-    console.log("Status:", status);
-  };
-
-  // Calculate and set the default end date to one week from today
   useEffect(() => {
-    const oneWeekFromToday = new Date();
-    oneWeekFromToday.setDate(oneWeekFromToday.getDate() + 7);
-    setEndDate(oneWeekFromToday);
-  }, []);
+    const fetchFeedback = async () => {
+      try {
+        const response = await axios.get(`/api/retrieveFeedback/${feedbackId}`);
+        const feedback = response.data;
+        setUserEmail(feedback.User.email);
+        setContent(feedback.content);
+        setRating(feedback.rating);
+        const formattedDate = formatDate(feedback.created_at);
+        setCreatedDate(formattedDate);
+        setStatus(feedback.status);
+      } catch (error) {
+        console.error("Error fetching feedback:", error);
+        navigate("/admin/adminfeedback", { replace: true });
+      }
+    };
+
+    if (feedbackId) {
+      fetchFeedback();
+    }
+  }, [feedbackId, navigate]);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    try {
+      const response = await axios.put(`/api/updateFeedback/${feedbackId}`, {
+        status: status,
+      });
+      if (response.status === 200) {
+        Swal({
+          title: "Update Feedback Successfully!",
+          text: response.data.msg,
+          icon: "success",
+          button: {
+            text: "OK",
+          },
+        });
+      } else {
+        // Handle non-200 responses
+        Swal({
+          title: "Error",
+          text: "Feedback failed to update.",
+          icon: "error",
+          button: "OK",
+        });
+      }
+    } catch (error) {
+      console.error("Error deleting feedback:", error);
+      Swal({
+        title: "Error",
+        text: "An error occurred while updating feedback.",
+        icon: "error",
+        button: "OK",
+      });
+    }
+  };
 
   return (
     <div className="d-flex flex-column align-items-center pt-4">
       <h2>Edit Feedback</h2>
       <form className="row g-3 w-50" onSubmit={handleSubmit}>
         <div className="col-12">
-          <label htmlFor="inputElectionname" className="form-label">
-            User Name
+          <label htmlFor="inputUseremail" className="form-label">
+            User Email
+          </label>
+          <input
+            type="email"
+            className="form-control"
+            id="inputUseremail"
+            name="inputUseremail"
+            value={userEmail}
+            disabled
+          />
+        </div>
+        <div className="col-12">
+          <label htmlFor="inputContent" className="form-label">
+            Content
           </label>
           <input
             type="text"
             className="form-control"
-            id="inputElectionname"
-            placeholder="Enter your election name"
-            value={electionName}
-            onChange={(e) => setElectionName(e.target.value)}
-            disabled={true} // Disable the input field
+            id="inputContent"
+            name="inputContent"
+            value={content}
+            disabled
           />
         </div>
         <div className="col-12">
-          <label htmlFor="inputElectiondesc" className="form-label">
-            Content Description
+          <label htmlFor="inputRating" className="form-label">
+            Rating
           </label>
           <input
-            type="text"
+            type="number"
             className="form-control"
-            id="inputElectiondesc"
-            placeholder="Enter your election name"
-            value={contentDescription}
-            onChange={(e) => setContentDescription(e.target.value)}
-            disabled={true} // Disable the input field
+            id="inputRating"
+            name="inputRating"
+            value={rating}
+            disabled
           />
         </div>
         <div className="col-12">
-          <label htmlFor="startDatePicker" className="form-label">
-            Start Date:
+          <label htmlFor="inputDate" className="form-label">
+            Created Date:
           </label>
-          <br />
-          <DatePicker
-            id="startDatePicker"
-            selected={startDate}
-            onChange={handleStartDateChange}
+          <input
+            id="inputDate"
+            name="inputDate"
+            value={createdDate}
             className="form-control"
-            disabled={true} // Disable the DatePicker component
+            disabled
           />
         </div>
-
         <div className="col-12">
           <label htmlFor="statusSelect" className="form-label">
             Status
@@ -94,7 +141,7 @@ function EditFeedback() {
             id="statusSelect"
             className="form-select"
             value={status}
-            onChange={handleStatusChange}
+            onChange={(e) => setStatus(e.target.value)}
           >
             <option value="Under Review">Under Review</option>
             <option value="Mark As Reviewed">Mark As Reviewed</option>
@@ -106,9 +153,9 @@ function EditFeedback() {
           </button>
         </div>
       </form>
-      <Link to="/admin/adminfeedback" className="btn btn-secondary mb-3">
+      <button onClick={() => navigate(-1)} className="btn btn-secondary mb-3">
         Back
-      </Link>
+      </button>
     </div>
   );
 }
