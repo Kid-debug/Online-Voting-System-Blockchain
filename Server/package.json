@@ -25,7 +25,7 @@
     "jsonwebtoken": "^9.0.2",
     "moment-timezone": "^0.5.43",
     "mysql": "^2.18.1",
-    "mysql2": "^3.6.3",
+    "mysql2": "^3.6.5",
     "nodemon": "^3.0.1",
     "sequelize": "^6.35.1",
     "tzdata": "^1.0.38"
