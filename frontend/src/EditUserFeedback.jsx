@@ -10,7 +10,6 @@ import axios from "./api/axios";
 function EditUserFeedback() {
   const [selectedEmotion, setSelectedEmotion] = useState(null);
   const [showConfirmation, setShowConfirmation] = useState(false); // New state for showing the confirmation prompt
-  const [feedbackID, setFeedbackID] = useState("");
   const [feedbackText, setFeedbackText] = useState(""); // State to store the feedback text
   const characterLimit = 300; // Character limit for the textarea
 
