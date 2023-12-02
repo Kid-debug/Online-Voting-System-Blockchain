@@ -15,6 +15,10 @@ ResetPassword.init(
       type: DataTypes.STRING(255),
       allowNull: false,
     },
+    verification_code: {
+      type: DataTypes.STRING(10),
+      allowNull: false,
+    },
     created_at: {
       type: DataTypes.DATE,
       allowNull: false,

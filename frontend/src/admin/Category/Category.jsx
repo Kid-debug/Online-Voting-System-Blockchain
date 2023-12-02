@@ -51,11 +51,14 @@ function Category() {
   };
 
   // Helper function to filter the data based on the search term
+  // Helper function to filter the data based on the search term
   const filterData = (categories) => {
-    return categories.filter((item) =>
-      Object.values(item).some((value) =>
-        value.toString().toLowerCase().includes(searchTerm.toLowerCase())
-      )
+    const searchTermLower = searchTerm.toString().toLowerCase();
+
+    return categories.filter(
+      (item) =>
+        item.category_id.toString().toLowerCase().includes(searchTermLower) ||
+        item.category_name.toLowerCase().includes(searchTermLower)
     );
   };
 

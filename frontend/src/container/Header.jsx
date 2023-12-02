@@ -5,6 +5,7 @@ import useAuth from "../hooks/useAuth";
 
 function Header() {
   const [isNavExpanded, setIsNavExpanded] = useState(false); // State to manage navbar collapse
+  const [isFeedbackMenuOpen, setIsFeedbackMenuOpen] = useState(false);
   const { logout } = useAuth();
   const navigate = useNavigate();
 
@@ -79,15 +80,52 @@ function Header() {
                 Vote History
               </Link>
             </li>
-            <li className="nav-item">
-              <Link
-                to="/feedback"
-                className="nav-link mx-2"
-                onClick={() => setIsNavExpanded(false)}
+            <li className="nav-item dropdown">
+              <a
+                href="/"
+                className="nav-link mx-2 dropdown-toggle"
+                id="feedbackDropdown"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded={isFeedbackMenuOpen ? "true" : "false"}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setIsFeedbackMenuOpen(!isFeedbackMenuOpen);
+                }}
               >
                 Feedback
-              </Link>
+              </a>
+              <ul
+                className={`dropdown-menu ${isFeedbackMenuOpen ? "show" : ""}`}
+                aria-labelledby="feedbackDropdown"
+              >
+                <li>
+                  <Link
+                    to="/userfeedbacklist"
+                    className="dropdown-item"
+                    onClick={() => {
+                      setIsNavExpanded(false);
+                      setIsFeedbackMenuOpen(false);
+                    }}
+                  >
+                    View Feedback
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/feedback"
+                    className="dropdown-item"
+                    onClick={() => {
+                      setIsNavExpanded(false);
+                      setIsFeedbackMenuOpen(false);
+                    }}
+                  >
+                    Submit Feedback
+                  </Link>
+                </li>
+              </ul>
             </li>
+
             <li className="nav-item">
               <a href="/" className="nav-link mx-2" onClick={handleLogout}>
                 Logout

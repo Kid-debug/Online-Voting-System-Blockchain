@@ -32,11 +32,11 @@ function AdminFeedback() {
   const columnMapping = {
     feedback_id: "ID",
     email: "User Email",
-    rating: "Rating",
+    rating: "Rating (1-5)",
     content: "Content",
     status: "Status",
-    created_at: "Created_At",
-    updated_at: "Updated_At",
+    created_at: "Created Date",
+    updated_at: "Updated Date",
     Action: "Action",
   };
 
@@ -62,27 +62,67 @@ function AdminFeedback() {
     }
   };
 
+  const formatDate = (timestamp) => {
+    const date = new Date(timestamp);
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
   const filterData = (feedbacks) => {
-    return feedbacks.filter((item) =>
-      Object.values(item).some((value) =>
-        value.toString().toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    );
+    const searchTermLower = searchTerm.toString().toLowerCase();
+
+    return feedbacks.filter((item) => {
+      // Convert all fields to string and lower case for comparison
+      const idString = item.feedback_id.toString().toLowerCase();
+      const emailString = item.User.email ? item.User.email.toLowerCase() : "";
+      const ratingString = item.rating.toString().toLowerCase();
+      const contentString = item.content.toLowerCase();
+      const statusString = item.status.toLowerCase();
+      const createdDateString = formatDate(item.created_at).toLowerCase();
+      const updatedDateString = formatDate(item.updated_at).toLowerCase();
+
+      // Check if the search term is included in any of the string conversions
+      return (
+        idString.includes(searchTermLower) ||
+        emailString.includes(searchTermLower) ||
+        ratingString.includes(searchTermLower) ||
+        contentString.includes(searchTermLower) ||
+        statusString.includes(searchTermLower) ||
+        createdDateString.includes(searchTermLower) ||
+        updatedDateString.includes(searchTermLower)
+      );
+    });
   };
 
   const sortedData = sortColumn
     ? filterData(feedbacks).sort((a, b) => {
         if (sortColumn === "feedback_id" || sortColumn === "rating") {
-          // Existing code for sorting by ID or rating
+          return sortDirection === "asc"
+            ? a[sortColumn] - b[sortColumn]
+            : b[sortColumn] - a[sortColumn];
         } else if (sortColumn === "email") {
-          // Adjust the sort comparison for the email
           const aValue = a.User && a.User.email ? a.User.email : "";
           const bValue = b.User && b.User.email ? b.User.email : "";
           return sortDirection === "asc"
             ? aValue.localeCompare(bValue)
             : bValue.localeCompare(aValue);
+        } else if (sortColumn === "content" || sortColumn === "status") {
+          // Add custom sorting logic for content and status
+          return sortDirection === "asc"
+            ? a[sortColumn].localeCompare(b[sortColumn])
+            : b[sortColumn].localeCompare(a[sortColumn]);
+        } else if (sortColumn === "created_at" || sortColumn === "updated_at") {
+          // Add custom sorting logic for date columns
+          const aValue = new Date(a[sortColumn]);
+          const bValue = new Date(b[sortColumn]);
+          return sortDirection === "asc" ? aValue - bValue : bValue - aValue;
         } else {
-          // Existing code for sorting other fields
+          // Default sorting for other columns
+          return sortDirection === "asc"
+            ? a[sortColumn].localeCompare(b[sortColumn])
+            : b[sortColumn].localeCompare(a[sortColumn]);
         }
       })
     : filterData(feedbacks);
@@ -117,14 +157,6 @@ function AdminFeedback() {
   const handleItemsPerPageChange = (value) => {
     setItemsPerPage(value);
     setCurrentPage(1);
-  };
-
-  const formatDate = (timestamp) => {
-    const date = new Date(timestamp);
-    const day = date.getDate().toString().padStart(2, "0");
-    const month = (date.getMonth() + 1).toString().padStart(2, "0");
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
   };
 
   const toggleExpand = (feedbackID) => {

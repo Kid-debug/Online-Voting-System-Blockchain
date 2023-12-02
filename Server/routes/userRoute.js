@@ -33,13 +33,21 @@ router.post(
   userController.changePassword
 );
 
-//feedback
+//feedback (user)
 router.post(
   "/submitFeedback",
   feedbackValidation,
   feedbackController.submitFeedback
 );
 
+router.get("/getUserFeedback", feedbackController.getFeedbackByUserId);
+router.put(
+  "/editUserFeedback/:feedbackId",
+  feedbackValidation,
+  feedbackController.editUserFeedback
+);
+
+//feedback (admin)
 router.get("/retrieveFeedback", feedbackController.retrieveFeedback);
 router.get("/retrieveFeedback/:feedbackId", feedbackController.getFeedbackById);
 router.put(

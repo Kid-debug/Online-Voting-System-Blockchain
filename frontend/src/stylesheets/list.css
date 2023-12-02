@@ -1,4 +1,4 @@
-/*Voter List (Admin)*/
+/* List (Table)*/
 .container {
   max-width: 100%;
   margin: 0 auto;
@@ -77,4 +77,43 @@ h2 {
 /* Optional: Add hover effect on table rows */
 .data-table tbody tr:hover {
   background-color: #f2f2f2;
+}
+
+.feedback-container {
+  max-width: 100%;
+  margin: 0 auto;
+  font-family: Arial, sans-serif;
+  overflow: auto;
+  margin-top: 6%;
+  margin-bottom: 6%;
+}
+
+.feedback-table {
+  margin-bottom: 5%;
+}
+
+.btn-block {
+  background-color: #d15b47 !important;
+  border-color: #d15b47 !important;
+  margin: 0px 10px 0 0 !important;
+  padding: 4px 15px 4px 8px !important;
+}
+
+.feedback-table thead th {
+  background-color: black !important;
+  color: #e6e7e8 !important;
+}
+
+.feedback-table tr:nth-child(even) {
+  background-color: #dddddd;
+}
+
+.feedback-table tr:nth-child(odd) {
+  background-color: #edeef1;
+}
+
+.feedback-table tr:hover td {
+  color: #44b478;
+  cursor: pointer;
+  background-color: #ffffff;
 }

@@ -28,6 +28,8 @@ import ElectionList from "./ElectionList";
 import Voting from "./Voting";
 import Verification from "./Verification";
 import Feedback from "./Feedback";
+import UserFeedbackList from "./UserFeedbackList";
+import EditUserFeedback from "./EditUserFeedback";
 import Profile from "./Profile";
 import Result from "./Result";
 import ElectionDetails from "./ElectionDetails";
@@ -102,6 +104,11 @@ function App() {
             <Route path="/voting" element={<Voting />} />
             <Route path="/verification" element={<Verification />} />
             <Route path="/feedback" element={<Feedback />} />
+            <Route path="/userfeedbacklist" element={<UserFeedbackList />} />
+            <Route
+              path="/edituserfeedback/:feedbackId"
+              element={<EditUserFeedback />}
+            />
             <Route path="/profile" element={<Profile />} />
             <Route path="/result" element={<Result />} />
           </Route>
@@ -109,7 +116,6 @@ function App() {
           <Route path="*" element={<Missing />} />
         </Routes>
       </BrowserRouter>
-      //{" "}
     </AuthProvider>
   );
 }

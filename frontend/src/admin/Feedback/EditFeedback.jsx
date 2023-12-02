@@ -99,7 +99,7 @@ function EditFeedback() {
           <label htmlFor="inputContent" className="form-label">
             Content
           </label>
-          <input
+          <textarea
             type="text"
             className="form-control"
             id="inputContent"
