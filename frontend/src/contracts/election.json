@@ -1,0 +1,439 @@
+[
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "eventId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "eventName",
+				"type": "string"
+			}
+		],
+		"name": "CandidateAdded",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "categoryId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "categoryName",
+				"type": "string"
+			}
+		],
+		"name": "CategoryAdded",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "eventId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "eventName",
+				"type": "string"
+			}
+		],
+		"name": "EventAdded",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "voterId",
+				"type": "uint256"
+			},
+			{
+				"indexed": true,
+				"internalType": "string",
+				"name": "categoryEvent",
+				"type": "string"
+			},
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "candidate",
+				"type": "uint256"
+			}
+		],
+		"name": "VoteEvent",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_categoryName",
+				"type": "string"
+			}
+		],
+		"name": "addCategory",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_categoryId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "_eventName",
+				"type": "string"
+			},
+			{
+				"internalType": "string[]",
+				"name": "_candidateNames",
+				"type": "string[]"
+			}
+		],
+		"name": "addEvent",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getAllCandidates",
+		"outputs": [
+			{
+				"internalType": "string[]",
+				"name": "",
+				"type": "string[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getAllCategory",
+		"outputs": [
+			{
+				"internalType": "string[]",
+				"name": "",
+				"type": "string[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_categoryId",
+				"type": "uint256"
+			}
+		],
+		"name": "getAllCategoryEvent",
+		"outputs": [
+			{
+				"internalType": "string[]",
+				"name": "foundEvent",
+				"type": "string[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_categoryId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "_eventName",
+				"type": "string"
+			}
+		],
+		"name": "getAllCategoryEventCandidate",
+		"outputs": [
+			{
+				"internalType": "string[]",
+				"name": "candidatesFound",
+				"type": "string[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getAllEvent",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "uint256",
+						"name": "eventId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "string",
+						"name": "eventName",
+						"type": "string"
+					},
+					{
+						"components": [
+							{
+								"internalType": "uint256",
+								"name": "id",
+								"type": "uint256"
+							},
+							{
+								"internalType": "string",
+								"name": "name",
+								"type": "string"
+							},
+							{
+								"internalType": "uint256",
+								"name": "CategoryId",
+								"type": "uint256"
+							},
+							{
+								"internalType": "string",
+								"name": "eventName",
+								"type": "string"
+							},
+							{
+								"internalType": "uint256",
+								"name": "voteCount",
+								"type": "uint256"
+							}
+						],
+						"internalType": "struct VotingSystem.Candidate[]",
+						"name": "candidates",
+						"type": "tuple[]"
+					},
+					{
+						"internalType": "uint256",
+						"name": "candidateCount",
+						"type": "uint256"
+					}
+				],
+				"internalType": "struct VotingSystem.Event[]",
+				"name": "",
+				"type": "tuple[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_candidateId",
+				"type": "uint256"
+			}
+		],
+		"name": "getCandidateVoteCount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "count",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_categoryId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_eventId",
+				"type": "uint256"
+			}
+		],
+		"name": "getVoteEventCandidate",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "uint256",
+						"name": "id",
+						"type": "uint256"
+					},
+					{
+						"internalType": "string",
+						"name": "name",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "CategoryId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "string",
+						"name": "eventName",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "voteCount",
+						"type": "uint256"
+					}
+				],
+				"internalType": "struct VotingSystem.Candidate[]",
+				"name": "",
+				"type": "tuple[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_voterId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_candidateId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_categoryId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_eventId",
+				"type": "uint256"
+			}
+		],
+		"name": "vote",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "voteEvents",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "id",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "voterId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "categoryId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "eventId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bool",
+				"name": "voted",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_categoryId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_eventId",
+				"type": "uint256"
+			}
+		],
+		"name": "whoIsTheWinner",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "uint256",
+						"name": "id",
+						"type": "uint256"
+					},
+					{
+						"internalType": "string",
+						"name": "name",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "CategoryId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "string",
+						"name": "eventName",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "voteCount",
+						"type": "uint256"
+					}
+				],
+				"internalType": "struct VotingSystem.Candidate",
+				"name": "",
+				"type": "tuple"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+]
