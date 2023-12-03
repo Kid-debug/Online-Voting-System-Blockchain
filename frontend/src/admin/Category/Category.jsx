@@ -3,7 +3,7 @@ import "../../stylesheets/list.css";
 import { Link } from "react-router-dom";
 import votingContract from "../../../../build/contracts/VotingSystem.json";
 import Web3 from "web3";
-import { contractAddress } from '../../config';
+import { contractAddress } from "../../config";
 
 function Category() {
   const [categories, setCategories] = useState([]);
@@ -29,13 +29,13 @@ function Category() {
 
         // Call the getAllCategory function in your smart contract
         const categoryList = await contract.methods.getAllCategory().call();
-        const formattedCategories = categoryList.map(category => ({
+        const formattedCategories = categoryList.map((category) => ({
           categoryId: Number(category.categoryId),
-          categoryName: category.categoryName
+          categoryName: category.categoryName,
         }));
 
-console.log('category',categoryList);
-      setCategories(formattedCategories);
+        console.log("category", categoryList);
+        setCategories(formattedCategories);
       } catch (error) {
         console.error("Error fetching categories:", error);
       }
@@ -218,114 +218,113 @@ console.log('category',categoryList);
           ) : (
             currentItems.map((row, rowIndex) => (
               <tr key={rowIndex}>
-              {columns.map((column, colIndex) => (
-               <td key={colIndex} className="data-cell">
-                {console.log( row[column])}
-               {column === "Action" ? (
-                 <>
-                   {console.log( row[column])}
-                   <Link
-                     to={`/admin/editCategory/${row.categoryId}`}
-                     className="btn btn-primary btn-sm"
-                   >
-                     <i className="fs-4 bi-pencil"></i>
-                   </Link>
-                   <button
-                     onClick={() => handleDeleteCategory(row.categoryId)}
-                     className="btn btn-danger btn-sm"
-                   >
-                     <i className="fs-4 bi-trash"></i>
-                   </button>
-                 </>
-               ) : (
-                 row[column]
-                 
-               )}
-             </td>
-              ))}
-            </tr>
-          ))
-        )}
-      </tbody>
-    </table>
-    {showDeleteConfirmation && (
-      <div className="confirm">
-        <div className="confirm__window">
-          <div className="confirm__titlebar">
-            <span className="confirm__title">
-              {getConfirmationContent().title}
-            </span>
-            <button className="confirm__close" onClick={cancelDelete}>
-              &times;
-            </button>
-          </div>
-          <div className="confirm__content">
-            {getConfirmationContent().content}
-          </div>
-          <div className="confirm__buttons">
-            <button
-              className="confirm__button confirm__button--ok confirm__button--fill"
-              onClick={confirmDelete}
-            >
-              OK
-            </button>
-            <button
-              className="confirm__button confirm__button--cancel"
-              onClick={cancelDelete}
-            >
-              Cancel
-            </button>
+                {columns.map((column, colIndex) => (
+                  <td key={colIndex} className="data-cell">
+                    {console.log(row[column])}
+                    {column === "Action" ? (
+                      <>
+                        {console.log(row[column])}
+                        <Link
+                          to={`/admin/editCategory/${row.categoryId}`}
+                          className="btn btn-primary btn-sm"
+                        >
+                          <i className="fs-4 bi-pencil"></i>
+                        </Link>
+                        <button
+                          onClick={() => handleDeleteCategory(row.categoryId)}
+                          className="btn btn-danger btn-sm"
+                        >
+                          <i className="fs-4 bi-trash"></i>
+                        </button>
+                      </>
+                    ) : (
+                      row[column]
+                    )}
+                  </td>
+                ))}
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
+      {showDeleteConfirmation && (
+        <div className="confirm">
+          <div className="confirm__window">
+            <div className="confirm__titlebar">
+              <span className="confirm__title">
+                {getConfirmationContent().title}
+              </span>
+              <button className="confirm__close" onClick={cancelDelete}>
+                &times;
+              </button>
+            </div>
+            <div className="confirm__content">
+              {getConfirmationContent().content}
+            </div>
+            <div className="confirm__buttons">
+              <button
+                className="confirm__button confirm__button--ok confirm__button--fill"
+                onClick={confirmDelete}
+              >
+                OK
+              </button>
+              <button
+                className="confirm__button confirm__button--cancel"
+                onClick={cancelDelete}
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    )}
-    {categories.length > 0 && (
-      <div className="pagination-buttons">
-        <button
-          disabled={currentPage === 1}
-          onClick={() => handlePageChange(currentPage - 1)}
-          className="page-button"
-        >
-          &#8249;&#8249;
-        </button>
-        {generatePaginationButtons().map((page) => (
+      )}
+      {categories.length > 0 && (
+        <div className="pagination-buttons">
           <button
-            key={page}
-            onClick={() => handlePageChange(page)}
-            style={{
-              fontWeight: page === currentPage ? "bold" : "normal",
-            }}
+            disabled={currentPage === 1}
+            onClick={() => handlePageChange(currentPage - 1)}
             className="page-button"
           >
-            {page}
+            &#8249;&#8249;
           </button>
-        ))}
-        <button
-          disabled={currentPage === totalPages}
-          onClick={() => handlePageChange(currentPage + 1)}
-          className="page-button"
-        >
-          &#8250;&#8250;
-        </button>
-        <label>
-          Items per page:
-          <select
-            value={itemsPerPage}
-            onChange={(e) =>
-              handleItemsPerPageChange(parseInt(e.target.value))
-            }
-            className="items-per-page-select"
+          {generatePaginationButtons().map((page) => (
+            <button
+              key={page}
+              onClick={() => handlePageChange(page)}
+              style={{
+                fontWeight: page === currentPage ? "bold" : "normal",
+              }}
+              className="page-button"
+            >
+              {page}
+            </button>
+          ))}
+          <button
+            disabled={currentPage === totalPages}
+            onClick={() => handlePageChange(currentPage + 1)}
+            className="page-button"
           >
-            <option value={5}>5</option>
-            <option value={10}>10</option>
-            <option value={15}>15</option>
-            <option value={20}>20</option>
-          </select>
-        </label>
-      </div>
-    )}
-  </div>
-);
+            &#8250;&#8250;
+          </button>
+          <label>
+            Items per page:
+            <select
+              value={itemsPerPage}
+              onChange={(e) =>
+                handleItemsPerPageChange(parseInt(e.target.value))
+              }
+              className="items-per-page-select"
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={15}>15</option>
+              <option value={20}>20</option>
+            </select>
+          </label>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default Category;

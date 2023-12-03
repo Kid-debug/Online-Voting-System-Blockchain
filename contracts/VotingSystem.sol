@@ -5,6 +5,7 @@ contract VotingSystem {
     struct Event {
         uint256 eventId;
         string eventName;
+        uint256 categoryId;
         Candidate[] candidates;
         uint256 candidateCount;
     }
@@ -17,9 +18,9 @@ contract VotingSystem {
 
     struct Candidate {
         uint256 id;
-        string name;  
+        string name;
         uint256 CategoryId;
-        string eventName;
+        uint256 eventId;
         uint256 voteCount;
     }
 
@@ -40,10 +41,10 @@ contract VotingSystem {
     mapping(uint256 => Candidate) candidates;
     mapping(uint256 => voteEventStruct) public voteEvents;
 
-    uint256  categoryCount;
-    uint256  candidateCount;
-    uint256  eventCount;
-    uint256  voteEventCount;
+    uint256 categoryCount;
+    uint256 candidateCount;
+    uint256 eventCount;
+    uint256 voteEventCount;
 
     event VoteEvent(
         uint256 indexed voterId,
@@ -73,28 +74,20 @@ contract VotingSystem {
         emit CategoryAdded(categoryCount, _categoryName);
     }
 
-    function addEvent(
-        uint256 _categoryId,
-        string memory _eventName,
-        string[] memory _candidateNames
-    ) public {
+    function addEvent(uint256 _categoryId, string memory _eventName) public {
         // check if the category has exists
         require(
             categories[_categoryId].categoryId != 0,
             "Category has not exists"
         );
 
+        require(
+            isEventExists(_categoryId, _eventName) == false,
+            "Event already exists"
+        );
+
         // find out the category in list by using the paramerter category name
         Category storage category = categories[_categoryId];
-
-        // search the event has been declare in the category
-        for (uint256 i = 0; i < category.events.length; i++) {
-            require(
-                keccak256(bytes(category.events[i].eventName)) !=
-                    keccak256(bytes(_eventName)),
-                "Event already exists"
-            );
-        }
 
         // add the event in the category list
         uint256 eventId = eventCount += 1;
@@ -102,31 +95,110 @@ contract VotingSystem {
         Event storage newEvent = category.events.push();
         newEvent.eventId = eventId;
         newEvent.eventName = _eventName;
-        newEvent.candidateCount = _candidateNames.length;
+        newEvent.categoryId = _categoryId;
 
-        // event list
-        Event storage listEvent = events[eventCount];
-        listEvent.eventId = eventId;
-        listEvent.eventName = _eventName;
-        listEvent.candidateCount = _candidateNames.length;
+        // // Add candidates to the event
+        // for (uint256 i = 0; i < _candidateNames.length; i++) {
+        //     string memory candidateName = _candidateNames[i];
+        //     candidateCount += 1;
+        //     // Create a new candidate
+        //     Candidate memory newCandidate = Candidate({
+        //         id: candidateCount,
+        //         name: candidateName,
+        //         CategoryId: _categoryId,
+        //         eventName: _eventName,
+        //         voteCount: 0
+        //     });
+        //     // Push the new candidate to the candidates array
+        //     candidates[candidateCount] = newCandidate;
+        //     listEvent.candidates.push(newCandidate);
+        //     newEvent.candidates.push(newCandidate);
+        // }
+    }
 
-        // Add candidates to the event
-        for (uint256 i = 0; i < _candidateNames.length; i++) {
-            string memory candidateName = _candidateNames[i];
-            candidateCount += 1;
-            // Create a new candidate
-            Candidate memory newCandidate = Candidate({
-                id: candidateCount,
-                name: candidateName,
-                CategoryId: _categoryId,
-                eventName: _eventName,
-                voteCount: 0
-            });
-            // Push the new candidate to the candidates array
-            candidates[candidateCount] = newCandidate;
-            listEvent.candidates.push(newCandidate);
-            newEvent.candidates.push(newCandidate);
+    function isEventExists(uint256 _categoryId, string memory _eventName)
+        public
+        view
+        returns (bool)
+    {
+        // Check if the category exists
+        require(
+            categories[_categoryId].categoryId != 0,
+            "Category does not exist"
+        );
+
+        // Loop through the events in the specified category
+        for (uint256 i = 0; i < categories[_categoryId].events.length; i++) {
+            if (
+                keccak256(bytes(categories[_categoryId].events[i].eventName)) ==
+                keccak256(bytes(_eventName))
+            ) {
+                // Event found
+                return true;
+            }
         }
+
+        // Event not found in the specified category
+        return false;
+    }
+
+    function addCandidateToEvent(
+        uint256 _categoryId,
+        uint256 _eventId,
+        string memory _candidateName
+    ) public {
+        require(
+            categories[_categoryId].categoryId != 0,
+            "Category has not exists"
+        );
+
+        require(
+            isEventExists(_categoryId, _eventId) == true,
+            "Event has not exists"
+        );
+
+        candidateCount += 1;
+        // Create a new candidate
+        Candidate memory newCandidate = Candidate({
+            id: candidateCount,
+            name: _candidateName,
+            CategoryId: _categoryId,
+            eventId: _eventId,
+            voteCount: 0
+        });
+
+        // find the certain category
+        Category storage category = categories[_categoryId];
+        // find the certain event in certain category
+        for (uint256 i = 0; i < category.events.length; i++) {
+            if (category.events[i].eventId == _eventId) {
+                category.events[i].candidates.push(newCandidate);
+                category.events[i].candidateCount += 1;
+            }
+        }
+    }
+
+    function isEventExists(uint256 _categoryId, uint256 _eventId)
+        public
+        view
+        returns (bool)
+    {
+        // Check if the category exists
+        require(
+            categories[_categoryId].categoryId != 0,
+            "Category does not exist"
+        );
+
+        // Loop through the events in the specified category
+        for (uint256 i = 0; i < categories[_categoryId].events.length; i++) {
+            if (categories[_categoryId].events[i].eventId == _eventId) {
+                // Event found
+                return true;
+            }
+        }
+
+        // Event not found in the specified category
+        return false;
     }
 
     function getAllCategoryEvent(uint256 _categoryId)
@@ -176,15 +248,22 @@ contract VotingSystem {
         }
     }
 
-    function getAllCandidates() public view returns (string[] memory) {
-        //Candidate[] memory candidatesFound = new Candidate[](candidateCount);
-        string[] memory name = new string[](candidateCount);
-        // Iterate through all stored structs
-        for (uint256 i = 1; i <= candidateCount; i++) {
-            name[i - 1] = candidates[i].name;
+    function getAllCandidates() public view returns (Candidate[] memory) {
+        Candidate[] memory candidatesFound = new Candidate[](candidateCount);
+        Event[] memory eventFound = new Event[](eventCount);
+
+        // get all the events
+        eventFound = getAllEvent();
+        uint256 count = 0;
+        // find the candidates inside all the event
+        for (uint256 i = 0; i < eventCount; i++) {
+            for (uint256 j = 0; j < eventFound[i].candidates.length; j++) {
+                candidatesFound[count] = eventFound[i].candidates[j];
+                count += 1;
+            }
         }
 
-        return name;
+        return candidatesFound;
     }
 
     function getAllCategory() public view returns (Category[] memory) {
@@ -192,18 +271,39 @@ contract VotingSystem {
         Category[] memory categoriesFound = new Category[](categoryCount);
         // Iterate through all stored structs
         for (uint256 i = 1; i <= categoryCount; i++) {
-            categoriesFound[i-1] = categories[i];
+            categoriesFound[i - 1] = categories[i];
+        }
+
+        return categoriesFound;
+    }
+
+    function getCategoryById(uint256 _categoryId)
+        public
+        view
+        returns (Category memory)
+    {
+        Category memory categoriesFound;
+        // Iterate through all stored structs
+        for (uint256 i = 1; i <= categoryCount; i++) {
+            if (categories[i].categoryId == _categoryId) {
+                categoriesFound = categories[i];
+            }
         }
 
         return categoriesFound;
     }
 
     function getAllEvent() public view returns (Event[] memory) {
-        //Candidate[] memory candidatesFound = new Candidate[](candidateCount);
+        // Initialize the array with the correct size
         Event[] memory eventFound = new Event[](eventCount);
-        // Iterate through all stored structs
-        for (uint256 i = 1; i <= eventCount; i++) {
-            eventFound[i - 1] = events[i];
+        uint256 count = 0;
+
+        // Iterate through all categories and events
+        for (uint256 i = 0; i < categoryCount; i++) {
+            for (uint256 j = 0; j < categories[i + 1].events.length; j++) {
+                eventFound[count] = categories[i + 1].events[j];
+                count += 1;
+            }
         }
 
         return eventFound;
@@ -329,17 +429,17 @@ contract VotingSystem {
 
         for (uint256 i = 0; i < eventsFound.length; i++) {
             if (eventsFound[i].eventId == _eventId) {
-               candidatesFound = eventsFound[i].candidates;
+                candidatesFound = eventsFound[i].candidates;
             }
         }
 
         Candidate memory winner = candidatesFound[0];
 
-         for (uint256 i = 0; i < candidatesFound.length-1; i++) {
-            if(winner.voteCount < candidatesFound[i+1].voteCount){
-                winner = candidatesFound[i+1];
+        for (uint256 i = 0; i < candidatesFound.length - 1; i++) {
+            if (winner.voteCount < candidatesFound[i + 1].voteCount) {
+                winner = candidatesFound[i + 1];
             }
-         }
+        }
 
         // If the event is not found, return an empty array or handle the situation accordingly
         return winner;
