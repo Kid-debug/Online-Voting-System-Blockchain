@@ -1,65 +1,40 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import axios from "../../api/axios";
-import Swal from "sweetalert";
+import votingContract from "../../../../build/contracts/VotingSystem.json"
+import Web3 from 'web3';
+import { contractAddress } from '../../config';
 
 function AddCategory() {
-  const [categoryName, setCategoryName] = useState("");
+  const [categoryName, setCategoryName] = useState('');
+
+  const handleCategoryChange = (event) => {
+    setCategoryName(event.target.value);
+  };
 
   const handleAddCategory = async (event) => {
-    event.preventDefault();
-
+    event.preventDefault(); // Prevent the default form submission
+  
     try {
-      const response = await axios.post("/api/createCategory", {
-        category_name: categoryName,
+      console.log('Attempting to add category...');
+      const web3 = new Web3(window.ethereum);
+      await window.ethereum.enable();
+      const accounts = await web3.eth.getAccounts();
+      console.log('contract address', contractAddress);
+
+  
+      const contract = new web3.eth.Contract(votingContract.abi, contractAddress);
+      
+      console.log('contract', contract);
+  
+      // Call the addCategory function in your smart contract
+      await contract.methods.addCategory(categoryName).send({
+        from: accounts[0],
       });
 
-      Swal({
-        title: "Add Category Successfully!",
-        text: response.data.msg,
-        icon: "success",
-        button: {
-          text: "OK",
-        },
-      });
 
-      setCategoryName(""); // Reset the form field
-      // Optionally, redirect user or handle the success case further...
+      console.log('Category added successfully');
     } catch (error) {
-      if (error.response) {
-        // If the backend sends an array of errors
-        if (error.response.data.errors) {
-          Swal({
-            icon: "error",
-            title: "Failed to Add Category!",
-            text: error.response.data.errors.map((e) => e.msg).join("\n"),
-            button: {
-              text: "OK",
-            },
-          });
-        } else {
-          // If the backend sends a single error message
-          Swal({
-            icon: "error",
-            title: "Failed to Add Category!",
-            text: error.response.data.msg,
-            button: {
-              text: "OK",
-            },
-          });
-        }
-      } else {
-        // Handle other errors here
-        console.error("Adding Category error:", error);
-        Swal({
-          icon: "error",
-          title: "Internal Server Error",
-          text: "Network error occurred.",
-          button: {
-            text: "OK",
-          },
-        });
-      }
+      console.error('Error adding category:', error);
     }
   };
 
@@ -85,7 +60,7 @@ function AddCategory() {
             id="inputCategoryName"
             placeholder="Enter your category name (e.g., Chess Club)"
             value={categoryName}
-            onChange={(e) => setCategoryName(e.target.value)}
+            onChange={handleCategoryChange}
           />
         </div>
         <div class="col-12">

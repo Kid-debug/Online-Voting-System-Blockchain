@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import "../../stylesheets/list.css";
 import { Link } from "react-router-dom";
-import axios from "../../api/axios";
-import Swal from "sweetalert";
+import votingContract from "../../../../build/contracts/VotingSystem.json";
+import Web3 from "web3";
+import { contractAddress } from '../../config';
 
 function Category() {
   const [categories, setCategories] = useState([]);
@@ -14,29 +15,44 @@ function Category() {
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState(null);
 
-  const fetchCategories = async () => {
-    try {
-      const response = await axios.get("api/retrieveCategory");
-      console.log(response.data); // Log the response to the console
-      setCategories(response.data);
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-    }
-  };
-
   useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const web3 = new Web3(window.ethereum);
+        await window.ethereum.enable();
+        const accounts = await web3.eth.getAccounts();
+
+        const contract = new web3.eth.Contract(
+          votingContract.abi,
+          contractAddress
+        );
+
+        // Call the getAllCategory function in your smart contract
+        const categoryList = await contract.methods.getAllCategory().call();
+        const formattedCategories = categoryList.map(category => ({
+          categoryId: Number(category.categoryId),
+          categoryName: category.categoryName
+        }));
+
+console.log('category',categoryList);
+      setCategories(formattedCategories);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+
     fetchCategories();
-  }, []);
+  }, []); // The empty dependency array ensures that this effect runs once, similar to componentDidMount
 
   // Define a mapping between API keys and display names
   const columnMapping = {
-    category_id: "ID",
-    category_name: "Category Name",
+    categoryId: "ID",
+    categoryName: "Category Name",
     Action: "Action",
   };
 
   // Create an array of display names based on the API keys
-  const columns = ["category_id", "category_name", "Action"];
+  const columns = ["categoryId", "categoryName", "Action"];
 
   // Function to handle sorting
   const handleSort = (column) => {
@@ -50,6 +66,7 @@ function Category() {
     }
   };
 
+  // search function
   // Helper function to filter the data based on the search term
   const filterData = (categories) => {
     return categories.filter((item) =>
@@ -62,7 +79,7 @@ function Category() {
   // Sort the filtered data
   const sortedData = sortColumn
     ? filterData(categories).sort((a, b) => {
-        if (sortColumn === "category_id") {
+        if (sortColumn === "categoryId") {
           // Parse the values as numbers for numeric comparison
           const aValue = parseInt(a[sortColumn]);
           const bValue = parseInt(b[sortColumn]);
@@ -134,39 +151,13 @@ function Category() {
     setShowDeleteConfirmation(false);
 
     try {
-      const deleteResponse = await axios.delete(
-        `api/deleteCategory/${categoryToDelete}`
-      );
+      // Handle category deletion from the smart contract if needed
+      console.log(`Deleting category with ID ${categoryToDelete}`);
 
-      if (deleteResponse.status === 200) {
-        Swal({
-          title: "Delete Category Successfully!",
-          text: deleteResponse.data.msg,
-          icon: "success",
-          button: {
-            text: "OK",
-          },
-        });
-
-        // Fetch updated categories after deletion
-        fetchCategories();
-      } else {
-        // Handle non-200 responses
-        Swal({
-          title: "Error",
-          text: "Category could not be deleted.",
-          icon: "error",
-          button: "OK",
-        });
-      }
+      // Fetch updated categories after deletion
+      fetchCategories();
     } catch (error) {
       console.error("Error deleting category:", error);
-      Swal({
-        title: "Error",
-        text: "An error occurred while deleting category.",
-        icon: "error",
-        button: "OK",
-      });
     }
   };
 
@@ -227,111 +218,114 @@ function Category() {
           ) : (
             currentItems.map((row, rowIndex) => (
               <tr key={rowIndex}>
-                {columns.map((column, colIndex) => (
-                  <td key={colIndex} className="data-cell">
-                    {column === "Action" ? (
-                      <>
-                        <Link
-                          to={`/admin/editCategory/${row.category_id}`}
-                          className="btn btn-primary btn-sm"
-                        >
-                          <i className="fs-4 bi-pencil"></i>
-                        </Link>
-                        <button
-                          onClick={() => handleDeleteCategory(row.category_id)}
-                          className="btn btn-danger btn-sm"
-                        >
-                          <i className="fs-4 bi-trash"></i>
-                        </button>
-                      </>
-                    ) : (
-                      row[column.toLowerCase()]
-                    )}
-                  </td>
-                ))}
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
-      {showDeleteConfirmation && (
-        <div className="confirm">
-          <div className="confirm__window">
-            <div className="confirm__titlebar">
-              <span className="confirm__title">
-                {getConfirmationContent().title}
-              </span>
-              <button className="confirm__close" onClick={cancelDelete}>
-                &times;
-              </button>
-            </div>
-            <div className="confirm__content">
-              {getConfirmationContent().content}
-            </div>
-            <div className="confirm__buttons">
-              <button
-                className="confirm__button confirm__button--ok confirm__button--fill"
-                onClick={confirmDelete}
-              >
-                OK
-              </button>
-              <button
-                className="confirm__button confirm__button--cancel"
-                onClick={cancelDelete}
-              >
-                Cancel
-              </button>
-            </div>
+              {columns.map((column, colIndex) => (
+               <td key={colIndex} className="data-cell">
+                {console.log( row[column])}
+               {column === "Action" ? (
+                 <>
+                   {console.log( row[column])}
+                   <Link
+                     to={`/admin/editCategory/${row.categoryId}`}
+                     className="btn btn-primary btn-sm"
+                   >
+                     <i className="fs-4 bi-pencil"></i>
+                   </Link>
+                   <button
+                     onClick={() => handleDeleteCategory(row.categoryId)}
+                     className="btn btn-danger btn-sm"
+                   >
+                     <i className="fs-4 bi-trash"></i>
+                   </button>
+                 </>
+               ) : (
+                 row[column]
+                 
+               )}
+             </td>
+              ))}
+            </tr>
+          ))
+        )}
+      </tbody>
+    </table>
+    {showDeleteConfirmation && (
+      <div className="confirm">
+        <div className="confirm__window">
+          <div className="confirm__titlebar">
+            <span className="confirm__title">
+              {getConfirmationContent().title}
+            </span>
+            <button className="confirm__close" onClick={cancelDelete}>
+              &times;
+            </button>
+          </div>
+          <div className="confirm__content">
+            {getConfirmationContent().content}
+          </div>
+          <div className="confirm__buttons">
+            <button
+              className="confirm__button confirm__button--ok confirm__button--fill"
+              onClick={confirmDelete}
+            >
+              OK
+            </button>
+            <button
+              className="confirm__button confirm__button--cancel"
+              onClick={cancelDelete}
+            >
+              Cancel
+            </button>
           </div>
         </div>
-      )}
-      {categories.length > 0 && (
-        <div className="pagination-buttons">
+      </div>
+    )}
+    {categories.length > 0 && (
+      <div className="pagination-buttons">
+        <button
+          disabled={currentPage === 1}
+          onClick={() => handlePageChange(currentPage - 1)}
+          className="page-button"
+        >
+          &#8249;&#8249;
+        </button>
+        {generatePaginationButtons().map((page) => (
           <button
-            disabled={currentPage === 1}
-            onClick={() => handlePageChange(currentPage - 1)}
+            key={page}
+            onClick={() => handlePageChange(page)}
+            style={{
+              fontWeight: page === currentPage ? "bold" : "normal",
+            }}
             className="page-button"
           >
-            &#8249;&#8249;
+            {page}
           </button>
-          {generatePaginationButtons().map((page) => (
-            <button
-              key={page}
-              onClick={() => handlePageChange(page)}
-              style={{
-                fontWeight: page === currentPage ? "bold" : "normal",
-              }}
-              className="page-button"
-            >
-              {page}
-            </button>
-          ))}
-          <button
-            disabled={currentPage === totalPages}
-            onClick={() => handlePageChange(currentPage + 1)}
-            className="page-button"
+        ))}
+        <button
+          disabled={currentPage === totalPages}
+          onClick={() => handlePageChange(currentPage + 1)}
+          className="page-button"
+        >
+          &#8250;&#8250;
+        </button>
+        <label>
+          Items per page:
+          <select
+            value={itemsPerPage}
+            onChange={(e) =>
+              handleItemsPerPageChange(parseInt(e.target.value))
+            }
+            className="items-per-page-select"
           >
-            &#8250;&#8250;
-          </button>
-          <label>
-            Items per page:
-            <select
-              value={itemsPerPage}
-              onChange={(e) =>
-                handleItemsPerPageChange(parseInt(e.target.value))
-              }
-              className="items-per-page-select"
-            >
-              <option value={5}>5</option>
-              <option value={10}>10</option>
-              <option value={15}>15</option>
-              <option value={20}>20</option>
-            </select>
-          </label>
-        </div>
-      )}
-    </div>
-  );
+            <option value={5}>5</option>
+            <option value={10}>10</option>
+            <option value={15}>15</option>
+            <option value={20}>20</option>
+          </select>
+        </label>
+      </div>
+    )}
+  </div>
+);
 }
 
 export default Category;
