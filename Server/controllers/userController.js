@@ -109,24 +109,27 @@ const registerAdmin = async (req, res) => {
     });
 
     // Send the verification email
-    const mailSubject = "Mail Verification";
+    const mailSubject = "Mail Verification (Online Voting System)";
     const content =
-      "<p>Hi there,</p>" +
+      "<p>Hi there,</p>\n" +
       "<p>We've received a verification request for " +
       req.body.email +
-      ". Please verify your email below.</p>" +
+      ". Please verify your email below.</p>\n" +
       "<p><a href='http://localhost:3000/mail-verification?token=" +
       randomToken +
-      "' style='background-color: darkblue; color: white; padding: 10px; text-decoration: none; display: inline-block;'>Verify Email</a></p>" +
-      "<p>Can't see the button? Copy and paste this link into your browser:</p>" +
+      "' style='background-color: darkblue; color: white; padding: 10px; text-decoration: none; display: inline-block;'>Verify Email</a></p>\n" +
+      "<p>Can't see the button? Copy and paste this link into your browser:</p>\n" +
       "<p><a href='http://localhost:3000/mail-verification?token=" +
       randomToken +
       "'>http://localhost:3000/mail-verification?token=" +
       randomToken +
-      "</a></p>" +
-      "<p>Please be reminded that the verification token is only valid for 24 hours</p>" +
-      "<p>If you did not request for register email verification, please ignore this email.</p>" +
-      "<p>Thank you.</p>";
+      "</a></p>\n" +
+      "<p>Please be reminded that the verification token is only valid for 24 hours</p>\n" +
+      "<p>If you did not request for register email verification, please ignore this email.</p>\n" +
+      "<p>Thank you.</p>" +
+      "<br><br><br>" +
+      "<p>[This is a computer generated message which requires no signature.]</p><br>" +
+      "<p>*** THIS IS AN AUTO GENERATED EMAIL NOTIFICATION. PLEASE DO NOT REPLY. ***</p>";
     await sendMail(newUser.email, mailSubject, content);
 
     return res.status(201).json({
@@ -264,24 +267,28 @@ const resendVerificationMail = async (req, res) => {
     );
 
     // Send verification email with the new token
-    let mailSubject = "Resent Mail Verification";
+    let mailSubject = "Resent Mail Verification (Online Voting System)";
     let content =
-      "<p>Hi there,</p>" +
+      "<p>Hi there,</p>\n" +
       "<p>We've received a verification request for " +
       req.body.email +
-      ". Please verify your email below.</p>" +
+      ". Please verify your email below.</p>\n" +
       "<p><a href='http://localhost:3000/mail-verification?token=" +
       newToken +
-      "' style='background-color: darkblue; color: white; padding: 10px; text-decoration: none; display: inline-block;'>Verify Email</a></p>" +
-      "<p>Can't see the button? Copy and paste this link into your browser:</p>" +
+      "' style='background-color: darkblue; color: white; padding: 10px; text-decoration: none; display: inline-block;'>Verify Email</a></p>\n" +
+      "<p>Can't see the button? Copy and paste this link into your browser:</p>\n" +
       "<p><a href='http://localhost:3000/mail-verification?token=" +
       newToken +
       "'>http://localhost:3000/mail-verification?token=" +
       newToken +
-      "</a></p>" +
-      "<p>Please be reminded that the verification token is only valid for 24 hours</p>" +
-      "<p>If you did not request for register email verification, please ignore this email.</p>" +
-      "<p>Thank you.</p>";
+      "</a></p>\n" +
+      "<p>Please be reminded that the verification token is only valid for 24 hours</p>\n" +
+      "<p>If you did not request for register email verification, please ignore this email.</p>\n" +
+      "<p>Thank you.</p>" +
+      "<br><br><br>" +
+      "<p>[This is a computer generated message which requires no signature.]</p><br>" +
+      "<p>*** THIS IS AN AUTO GENERATED EMAIL NOTIFICATION. PLEASE DO NOT REPLY. ***</p>";
+
     await sendMail(email, mailSubject, content);
 
     return res.status(200).render("mail-verification", {
@@ -478,6 +485,18 @@ const logout = async (req, res) => {
   }
 };
 
+function generateVerificationCode(length) {
+  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let code = "";
+
+  for (let i = 0; i < length; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    code += characters.charAt(randomIndex);
+  }
+
+  return code;
+}
+
 const forgetPassword = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -505,23 +524,30 @@ const forgetPassword = async (req, res) => {
         }
       }
 
-      // Generate a token with a 15-minute expiration
+      // Generate a token with a 24 hours expiration
       const token = jwt.sign({ email: email }, JWT_SECRET, {
-        expiresIn: "15m",
+        expiresIn: "1d",
       });
+
+      const verificationCode = generateVerificationCode(10);
+      console.log(verificationCode);
 
       // Prepare the email content
       const content = `
-        <p>We heard that you lost your password.</p>  
-        <p>Don't worry, please click the following link below to reset it.</p>
-        <p><a href='http://localhost:3000/reset-password?token=${token}'>http://localhost:3000/reset-password?token=${token}</a></p>
-        <p>If you did not request for password reset, please ignore this email.</p>
-        <p>Thank you.</p>
+        <p>We heard that you lost your password.</p>\n
+        <p>Don't worry. Please click the following link and enter the following code to change your password:</p>\n
+        <p><a href='http://localhost:3000/reset-password?token=${token}'>http://localhost:3000/reset-password?token=${token}</a></p>\n
+        <p>Code:${verificationCode}</p>\n
+        <p>Please be reminded that the code is valid for 24 hours</p>\n
+        <p>If you did not request for password reset, please ignore this email.</p>\n
+        <p>Thank you.</p>\n
+        <br><br><br>
+        <p>[This is a computer generated message which requires no signature.]</p><br>
+        <p>*** THIS IS AN AUTO GENERATED EMAIL NOTIFICATION. PLEASE DO NOT REPLY. ***</p>
       `;
-      //ltr add on this: <p>Please be reminded that the code is valid for 24 hours.</p>
 
       // Send the password reset email
-      await sendMail(email, "Forget Password", content);
+      await sendMail(email, "Forget Password (Online Voting System)", content);
 
       // Destroy any existing reset password entries for the email
       await ResetPassword.destroy({ where: { email: email } });
@@ -530,6 +556,7 @@ const forgetPassword = async (req, res) => {
       await ResetPassword.create({
         email: email,
         token: token,
+        verification_code: verificationCode,
         created_at: new Date(),
       });
 
@@ -571,9 +598,9 @@ const resetPasswordLoad = async (req, res) => {
     });
 
     if (resetPasswordEntry) {
-      // Add a check for the created_at timestamp to ensure it's within 15 minutes
+      // Add a check for the created_at timestamp is exceeded 24 hours or not
       const createdAt = resetPasswordEntry.created_at;
-      const expiryDate = new Date(createdAt.getTime() + 15 * 60000);
+      const expiryDate = new Date(createdAt.getTime() + 24 * 60 * 60 * 1000);
       if (new Date() > expiryDate) {
         return res.render("reset-expired", {
           message: "Your reset link has expired.",
@@ -611,6 +638,7 @@ const resetPassword = async (req, res) => {
   const userId = req.body.id || req.query.id;
   const userEmail = req.body.email || req.query.email;
   const userToken = req.body.token || req.query.token;
+  const verificationCode = req.body.code || req.query.code;
 
   // Prepare the context for rendering the page
   const context = {
@@ -630,6 +658,14 @@ const resetPassword = async (req, res) => {
 
       if (!resetPasswordEntry) {
         context.error_messages.push({ msg: "Invalid or expired token." });
+        return res.render("reset-password", context);
+      }
+
+      // Check if the verification code is invalid
+      if (resetPasswordEntry.verification_code !== verificationCode) {
+        context.error_messages.push({
+          msg: "Invalid verification code.",
+        });
         return res.render("reset-password", context);
       }
 

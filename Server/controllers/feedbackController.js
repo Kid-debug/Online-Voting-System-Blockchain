@@ -6,6 +6,7 @@ const { validationResult } = require("express-validator");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
+//user
 const submitFeedback = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -29,7 +30,6 @@ const submitFeedback = async (req, res) => {
       const selectedEmotion = req.body.selectedEmotion;
       const feedbackText = req.body.feedbackText;
 
-      console.log(selectedEmotion);
       if (![1, 2, 3, 4, 5].includes(selectedEmotion)) {
         return res.status(400).json({ msg: "Invalid emotion value." });
       }
@@ -68,6 +68,122 @@ const submitFeedback = async (req, res) => {
   }
 };
 
+const getFeedbackByUserId = async (req, res) => {
+  const token = req.cookies.jwt;
+
+  if (!token) {
+    return res
+      .status(401)
+      .json({ msg: "No token provided, authorization denied." });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
+    const userEmail = decoded.email;
+
+    const user = await User.findOne({ where: { email: userEmail } });
+    if (user) {
+      const userID = user.user_id;
+      try {
+        const feedbacks = await Feedback.findAll({
+          include: [
+            {
+              model: User,
+              attributes: ["email"],
+            },
+          ],
+          where: { user_id: userID },
+        });
+
+        if (feedbacks.length > 0) {
+          return res.status(200).json(feedbacks);
+        } else {
+          return res
+            .status(404)
+            .json({ msg: `No feedbacks found for ${userEmail}.` });
+        }
+      } catch (err) {
+        console.error(err);
+        return res
+          .status(500)
+          .json({ msg: "Server error while retrieving feedbacks." });
+      }
+    } else {
+      return res.status(404).json({ msg: "User not found." });
+    }
+  } catch (error) {
+    console.error("Error in retrieve feedback:", error);
+    if (error.name === "TokenExpiredError") {
+      return res.status(401).json({ msg: "Token expired." });
+    } else {
+      return res.status(401).json({ msg: "Invalid token." });
+    }
+  }
+};
+
+const editUserFeedback = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const token = req.headers.authorization?.split(" ")[1] || req.cookies.jwt;
+
+  if (!token) {
+    return res
+      .status(401)
+      .json({ msg: "No token provided, authorization denied." });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
+    const userEmail = decoded.email;
+
+    const user = await User.findOne({ where: { email: userEmail } });
+    if (user) {
+      const { feedbackId } = req.params;
+      const selectedEmotion = req.body.selectedEmotion;
+      const feedbackText = req.body.feedbackText;
+
+      if (![1, 2, 3, 4, 5].includes(selectedEmotion)) {
+        return res.status(400).json({ msg: "Invalid emotion value." });
+      }
+
+      // Check Feedback Length
+      if (feedbackText.length > 300) {
+        return res
+          .status(400)
+          .json({ msg: "Feedback text exceeds the maximum length." });
+      }
+      try {
+        // update feedback
+        await Feedback.update(
+          {
+            rating: selectedEmotion,
+            content: feedbackText,
+          },
+          { where: { feedback_id: feedbackId } }
+        );
+
+        return res.status(200).json({ msg: "Feedback updated successfully." });
+      } catch (error) {
+        console.error("Error updating feedback:", error);
+        return res.status(500).json({ msg: "Internal Server Error" });
+      }
+    } else {
+      return res.status(404).json({ msg: "User not found." });
+    }
+  } catch (error) {
+    console.error("Error in updateFeedback:", error);
+    if (error.name === "TokenExpiredError") {
+      return res.status(401).json({ msg: "Token expired." });
+    } else {
+      return res.status(401).json({ msg: "Invalid token." });
+    }
+  }
+};
+
+//admin
 const retrieveFeedback = async (req, res) => {
   try {
     const feedbacks = await Feedback.findAll({
@@ -198,6 +314,8 @@ const deleteFeedback = async (req, res) => {
 module.exports = {
   submitFeedback,
   retrieveFeedback,
+  editUserFeedback,
+  getFeedbackByUserId,
   getFeedbackById,
   updateFeedback,
   deleteFeedback,
