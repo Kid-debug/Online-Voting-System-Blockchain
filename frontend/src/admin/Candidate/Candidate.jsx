@@ -1,130 +1,78 @@
 import React from "react";
 import "../../stylesheets/list.css";
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { Link } from "react-router-dom";
+import votingContract from "../../../../build/contracts/VotingSystem.json";
+import Web3 from "web3";
+import { contractAddress } from "../../config";
 
 function Candidate() {
-  const data = [
-    {
-      ID: "1",
-      Name: "Chin Khai Ray",
-      Image: "public/img1.jpg",
-      "Student ID": "2205700",
-      Description:
-        "Chin Khai Ray is a dedicated student with a strong commitment to improving student life on campus. As a candidate for the President of the Student Council, he aims to bring positive changes and enhance student engagement.",
-      Position: "President",
-      Election: "2023 FOCS Election",
-      Action: "Edit",
-    },
-    {
-      ID: "2",
-      Name: "Chin Zi Xin",
-      Image: "public/img2.jpg",
-      "Student ID": "2205701",
-      Description:
-        "Chin Zi Xin is an enthusiastic student leader who believes in creating a more inclusive and vibrant campus community. She is running for the position of President to advocate for student rights and interests.",
-      Position: "President",
-      Election: "2023 FOCS Election",
-      Action: "Edit",
-    },
-    {
-      ID: "3",
-      Name: "Lim Er Hao",
-      Image: "public/img3.jpg",
-      "Student ID": "2205702",
-      Description:
-        "Lim Er Hao is a dedicated advocate for student welfare and academic excellence. As a candidate for President, he aims to promote transparency and accountability within the Student Council.",
-      Position: "President",
-      Election: "2023 FOCS Election",
-      Action: "Edit",
-    },
-    {
-      ID: "4",
-      Name: "Tee Fo Yo",
-      Image: "public/img4.jpg",
-      "Student ID": "2205703",
-      Description:
-        "Tee Fo Yo is a passionate student leader who believes in the power of collaboration and unity among students. Running for President, he aims to foster a sense of community and teamwork.",
-      Position: "President",
-      Election: "2023 FOCS Election",
-      Action: "Edit",
-    },
-    {
-      ID: "5",
-      Name: "Lee Sze Yen",
-      Image: "public/img5.jpg",
-      "Student ID": "2205704",
-      Description:
-        "Lee Sze Yen is a visionary student leader with a strong commitment to bringing innovative changes to the campus. She is a candidate for President, focusing on enhancing student experiences and opportunities.",
-      Position: "President",
-      Election: "2023 FOCS Election",
-      Action: "Edit",
-    },
-    {
-      ID: "6",
-      Name: "Tan Wei Jie",
-      Image: "public/img6.jpg",
-      "Student ID": "2205705",
-      Description:
-        "Tan Wei Jie is a driven and dedicated student leader who is passionate about creating a more sustainable and eco-friendly campus. Running for President, he aims to implement green initiatives and eco-conscious policies.",
-      Position: "President",
-      Election: "2023 FOCS Election",
-      Action: "Edit",
-    },
-    {
-      ID: "7",
-      Name: "Wong Mei Ling",
-      Image: "public/img7.jpg",
-      "Student ID": "2205706",
-      Description:
-        "Wong Mei Ling is a dynamic and approachable candidate who believes in fostering strong student-faculty relationships. As a President candidate, she aims to bridge the gap between students and faculty members.",
-      Position: "President",
-      Election: "2023 FOCS Election",
-      Action: "Edit",
-    },
-    {
-      ID: "8",
-      Name: "Lim Eng Chuan",
-      Image: "public/img8.jpg",
-      "Student ID": "2205707",
-      Description:
-        "Lim Eng Chuan is a visionary candidate who envisions a more innovative and tech-savvy campus. Running for President, he plans to introduce digital solutions to enhance campus life.",
-      Position: "President",
-      Election: "2023 FOCS Election",
-      Action: "Edit",
-    },
-    {
-      ID: "9",
-      Name: "Chong Mei Yen",
-      Image: "public/img9.jpg",
-      "Student ID": "2205708",
-      Description:
-        "Chong Mei Yen is a compassionate and empathetic candidate who advocates for mental health and well-being. She is running for President to create a more supportive and mentally healthy campus environment.",
-      Position: "President",
-      Election: "2023 FOCS Election",
-      Action: "Edit",
-    },
-    {
-      ID: "10",
-      Name: "Ng Wei Lun",
-      Image: "public/img10.jpg",
-      "Student ID": "2205709",
-      Description:
-        "Ng Wei Lun is an energetic and innovative candidate who aims to promote extracurricular activities and student engagement. Running for President, he plans to enhance student life outside the classroom.",
-      Position: "President",
-      Election: "2023 FOCS Election",
-      Action: "Edit",
-    },
-  ];
+  const [candidates, setCandidates] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [sortColumn, setSortColumn] = useState(null);
+  const [sortDirection, setSortDirection] = useState(null);
+
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const web3 = new Web3(window.ethereum);
+        await window.ethereum.enable();
+
+        const contract = new web3.eth.Contract(
+          votingContract.abi,
+          contractAddress
+        );
+
+        // Call the getAllEvent function in smart contract
+        const candidatesList = await contract.methods.getAllCandidates().call();
+        console.log('candidateList : ', candidatesList);
+
+        const candidatePromises = candidatesList.map(async (candidate) => {
+          const category = await contract.methods.getCategoryById(candidate.categoryId).call();
+          const event = await contract.methods.getEventById(candidate.categoryId, candidate.eventId).call();
+          return {
+            candidateId: Number(candidate.id),
+            candidateName: candidate.name,
+            candidateDesc: candidate.description,
+            candidateVoteCount : Number(candidate.voteCount),
+            categoryName: category.categoryName,
+            eventName: event.eventName,
+          };
+        });
+
+
+        const formattedEvents = await Promise.all(candidatePromises);
+        console.log("Event", formattedEvents);
+        setCandidates(formattedEvents);
+      } catch (error) {
+        console.error("Error fetching Event:", error);
+      }
+    };
+
+    fetchCategories();
+  }, []); // The empty dependency array ensures that this effect runs once, similar to componentDidMount
+
+   // Define a mapping between API keys and display names
+   const columnMapping = {
+    candidateId:  "ID",
+    categoryName: "Category Name",
+    eventName: "Event Name",
+    candidateName: "Candidate Name",
+    candidateDesc: "Description",
+    candidateVoteCount : "Vote Count",
+    Action: "Action",
+  };
 
   const columns = [
-    "ID",
-    "Name",
-    "Image",
-    "Student ID",
-    "Description",
-    "Position",
-    "Election",
+    "candidateId",
+    "categoryName",
+    "eventName",
+    "candidateName",
+    "candidateDesc",
+    "candidateVoteCount",
     "Action",
   ];
 
@@ -138,11 +86,6 @@ function Candidate() {
     }
   };
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(5);
-  const [sortColumn, setSortColumn] = useState(null);
-  const [sortDirection, setSortDirection] = useState(null);
 
   // Function to handle sorting
   const handleSort = (column) => {
@@ -157,8 +100,8 @@ function Candidate() {
   };
 
   // Helper function to filter the data based on the search term
-  const filterData = (data) => {
-    return data.filter((item) =>
+  const filterData = (candidates) => {
+    return candidates.filter((item) =>
       Object.values(item).some((value) =>
         value.toString().toLowerCase().includes(searchTerm.toLowerCase())
       )
@@ -167,7 +110,7 @@ function Candidate() {
 
   // Sort the filtered data
   const sortedData = sortColumn
-    ? filterData(data).sort((a, b) => {
+    ? filterData(candidates).sort((a, b) => {
         if (sortColumn === "ID") {
           // Parse the values as numbers for numeric comparison
           const aValue = parseInt(a[sortColumn]);
@@ -183,7 +126,7 @@ function Candidate() {
             : bValue.localeCompare(aValue);
         }
       })
-    : filterData(data);
+    : filterData(candidates);
 
   // Get total number of pages
   const totalPages = Math.ceil(sortedData.length / itemsPerPage);

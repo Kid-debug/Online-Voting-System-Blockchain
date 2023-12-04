@@ -15,7 +15,6 @@ function AddPosition() {
       try {
         const web3 = new Web3(window.ethereum);
         await window.ethereum.enable();
-        const accounts = await web3.eth.getAccounts();
 
         const contract = new web3.eth.Contract(
           votingContract.abi,

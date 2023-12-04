@@ -20,9 +20,11 @@ contract VotingSystem {
         uint256 id;
         string name;
         string description;
-        uint256 CategoryId;
+        uint256 studentId;
+        uint256 categoryId;
         uint256 eventId;
         uint256 voteCount;
+        bool win;
     }
 
     struct voteEventStruct {
@@ -147,7 +149,8 @@ contract VotingSystem {
         uint256 _categoryId,
         uint256 _eventId,
         string memory _candidateName,
-        string memory _description
+        string memory _description,
+        uint256 _studentId
     ) public {
         require(
             categories[_categoryId].categoryId != 0,
@@ -159,14 +162,23 @@ contract VotingSystem {
             "Event has not exists"
         );
 
+        require(
+            isCandidateExistsInEvent(_categoryId, _eventId, _studentId) ==
+                false,
+            "Candidate existed"
+        );
+
         candidateCount += 1;
+
         // Create a new candidate
         Candidate memory newCandidate = Candidate({
             id: candidateCount,
             name: _candidateName,
-            CategoryId: _categoryId,
+            studentId: _studentId,
+            categoryId: _categoryId,
             eventId: _eventId,
             description: _description,
+            win: false,
             voteCount: 0
         });
 
@@ -179,6 +191,62 @@ contract VotingSystem {
                 category.events[i].candidateCount += 1;
             }
         }
+    }
+
+    function isCandidateExistsInEvent(
+        uint256 _categoryId,
+        uint256 _eventId,
+        uint256 _studentId
+    ) public view returns (bool) {
+        // Check if the category exists
+        require(
+            categories[_categoryId].categoryId != 0,
+            "Category does not exist"
+        );
+
+        Candidate[] memory candidatesFound = getAllCandidatesInEvent(
+            _categoryId,
+            _eventId
+        );
+
+        // Loop through the events in the specified category
+
+        for (uint256 i = 0; i < candidatesFound.length; i++) {
+            if (candidatesFound[i].studentId == _studentId) {
+                return true;
+            }
+        }
+
+        // Event not found in the specified category
+        return false;
+    }
+
+     function isCandidateExistsInEventById(
+        uint256 _categoryId,
+        uint256 _eventId,
+        uint256 _candidateId
+    ) public view returns (bool) {
+        // Check if the category exists
+        require(
+            categories[_categoryId].categoryId != 0,
+            "Category does not exist"
+        );
+
+        Candidate[] memory candidatesFound = getAllCandidatesInEvent(
+            _categoryId,
+            _eventId
+        );
+
+        // Loop through the events in the specified category
+
+        for (uint256 i = 0; i < candidatesFound.length; i++) {
+            if (candidatesFound[i].id == _candidateId) {
+                return true;
+            }
+        }
+
+        // Event not found in the specified category
+        return false;
     }
 
     function isEventExists(uint256 _categoryId, uint256 _eventId)
@@ -223,19 +291,17 @@ contract VotingSystem {
         return (eventsFound);
     }
 
-    function getAllCategoryEventCandidate(
-        uint256 _categoryId,
-        string memory _eventName
-    ) public view returns (string[] memory candidatesFound) {
+    function getAllCandidatesInEvent(uint256 _categoryId, uint256 _eventId)
+        public
+        view
+        returns (Candidate[] memory foundCandidates)
+    {
         // find the certain category
         Category storage category = categories[_categoryId];
         // find the certain event in certain category
         for (uint256 i = 0; i < category.events.length; i++) {
-            if (
-                keccak256(bytes(category.events[i].eventName)) ==
-                keccak256(bytes(_eventName))
-            ) {
-                string[] memory candidatesName = new string[](
+            if (category.events[i].eventId == _eventId) {
+                Candidate[] memory candidatesFound = new Candidate[](
                     category.events[i].candidateCount
                 );
 
@@ -244,9 +310,9 @@ contract VotingSystem {
                     j < category.events[i].candidates.length;
                     j++
                 ) {
-                    candidatesName[j] = category.events[i].candidates[j].name;
+                    candidatesFound[j] = category.events[i].candidates[j];
                 }
-                return (candidatesName);
+                return (candidatesFound);
             }
         }
     }
@@ -285,15 +351,7 @@ contract VotingSystem {
         view
         returns (Category memory)
     {
-        Category memory categoriesFound;
-        // Iterate through all stored structs
-        for (uint256 i = 1; i <= categoryCount; i++) {
-            if (categories[i].categoryId == _categoryId) {
-                categoriesFound = categories[i];
-            }
-        }
-
-        return categoriesFound;
+        return categories[_categoryId];
     }
 
     function getAllEvent() public view returns (Event[] memory) {
@@ -306,6 +364,23 @@ contract VotingSystem {
             for (uint256 j = 0; j < categories[i + 1].events.length; j++) {
                 eventFound[count] = categories[i + 1].events[j];
                 count += 1;
+            }
+        }
+
+        return eventFound;
+    }
+
+    function getEventById(uint256 _categoryId, uint256 _eventId)
+        public
+        view
+        returns (Event memory)
+    {
+        Category memory categoriesFound = categories[_categoryId];
+        Event memory eventFound;
+        // Iterate through all stored structs
+        for (uint256 i = 0; i < categoriesFound.events.length; i++) {
+            if (categoriesFound.events[i].eventId == _eventId) {
+                eventFound = categoriesFound.events[i];
             }
         }
 
@@ -329,7 +404,11 @@ contract VotingSystem {
         //     require(categories[_categoryId].events[i-0].eventId == _eventId, "noobbbbb");
         // }
 
-        require(candidates[_candidateId].id != 0, "Candidates does not exists");
+        require(
+            isCandidateExistsInEventById(_categoryId, _eventId, _candidateId) ==
+                true,
+            "Candidates does not exists"
+        );
 
         // check if has voted
         for (uint256 i = 1; i <= voteEventCount; i++) {
@@ -443,6 +522,8 @@ contract VotingSystem {
                 winner = candidatesFound[i + 1];
             }
         }
+
+        winner.win = true;
 
         // If the event is not found, return an empty array or handle the situation accordingly
         return winner;

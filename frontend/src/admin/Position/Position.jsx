@@ -181,7 +181,7 @@ function Position() {
     <div className="container mt-5">
       <h2>Event List</h2>
       <Link
-        to="/admin/createCategory"
+        to="/admin/createPosition"
         className="btn btn-success mb-3"
         style={{ marginLeft: "auto" }}
       >
