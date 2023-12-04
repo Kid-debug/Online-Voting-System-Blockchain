@@ -1,75 +1,67 @@
 import React from "react";
 import "../../stylesheets/list.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import votingContract from "../../../../build/contracts/VotingSystem.json";
+import Web3 from "web3";
+import { contractAddress } from "../../config";
 
 function Position() {
-  const data = [
-    {
-      ID: "1",
-      "Position Name": "President",
-      Description:
-        "The President is responsible for leading the SRC, representing student interests, and overseeing SRC activities.",
-      "Maximum Candidates": "5",
-      Action: "Edit",
-    },
-    {
-      ID: "2",
-      "Position Name": "Vice President",
-      Description:
-        "The Vice President supports the President and may assume their duties when necessary.",
-      "Maximum Candidates": "5",
-      Action: "Edit",
-    },
-    {
-      ID: "3",
-      "Position Name": "Secretary",
-      Description:
-        "The Secretary manages SRC records, handles communications, and documents SRC meetings and initiatives.",
-      "Maximum Candidates": "5",
-      Action: "Edit",
-    },
-    {
-      ID: "4",
-      "Position Name": "Treasurer",
-      Description:
-        "The Treasurer oversees SRC finances, manages budgets, and maintains financial reports.",
-      "Maximum Candidates": "5",
-      Action: "Edit",
-    },
-    {
-      ID: "5",
-      "Position Name": "Committee Member",
-      Description:
-        "Committee Members collaborate on SRC projects, initiatives, and committees.",
-      "Maximum Candidates": "10",
-      Action: "Edit",
-    },
-  ];
-
-  const columns = [
-    "ID",
-    "Position Name",
-    "Description",
-    "Maximum Candidates",
-    "Action",
-  ];
-
-  const [expandedCategory, setExpandedCategory] = useState(null);
-
-  const toggleExpand = (categoryID) => {
-    if (expandedCategory === categoryID) {
-      setExpandedCategory(null);
-    } else {
-      setExpandedCategory(categoryID);
-    }
-  };
-
+  const [events, setEvents] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const [sortColumn, setSortColumn] = useState(null);
   const [sortDirection, setSortDirection] = useState(null);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState(null);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const web3 = new Web3(window.ethereum);
+        await window.ethereum.enable();
+        const accounts = await web3.eth.getAccounts();
+
+        const contract = new web3.eth.Contract(
+          votingContract.abi,
+          contractAddress
+        );
+
+        // Call the getAllEvent function in smart contract
+        const eventList = await contract.methods.getAllEvent().call();
+
+        const eventPromises = eventList.map(async (event) => {
+          const categoryName = await contract.methods.getCategoryById(event.categoryId).call();
+          return {
+            eventId: Number(event.eventId),
+            eventName: event.eventName,
+            categoryName: categoryName.categoryName,
+          };
+        });
+
+
+        const formattedEvents = await Promise.all(eventPromises);
+        console.log("Event", formattedEvents);
+        setEvents(formattedEvents);
+      } catch (error) {
+        console.error("Error fetching Event:", error);
+      }
+    };
+
+    fetchCategories();
+  }, []); // The empty dependency array ensures that this effect runs once, similar to componentDidMount
+
+  // Define a mapping between API keys and display names
+  const columnMapping = {
+    eventId: "ID",
+    eventName: "Event Name",
+    categoryName: "Category Name",
+    Action: "Action",
+  };
+
+  // Create an array of display names based on the API keys
+  const columns = ["eventId", "eventName","categoryName", "Action"];
 
   // Function to handle sorting
   const handleSort = (column) => {
@@ -83,9 +75,10 @@ function Position() {
     }
   };
 
+  // search function
   // Helper function to filter the data based on the search term
-  const filterData = (data) => {
-    return data.filter((item) =>
+  const filterData = (events) => {
+    return events.filter((item) =>
       Object.values(item).some((value) =>
         value.toString().toLowerCase().includes(searchTerm.toLowerCase())
       )
@@ -94,23 +87,27 @@ function Position() {
 
   // Sort the filtered data
   const sortedData = sortColumn
-    ? filterData(data).sort((a, b) => {
-        if (sortColumn === "ID") {
+    ? filterData(events).sort((a, b) => {
+        if (sortColumn === "eventId") {
           // Parse the values as numbers for numeric comparison
           const aValue = parseInt(a[sortColumn]);
           const bValue = parseInt(b[sortColumn]);
 
           return sortDirection === "asc" ? aValue - bValue : bValue - aValue;
-        } else {
-          const aValue = a[sortColumn];
-          const bValue = b[sortColumn];
+        } else if (sortColumn !== "Action") {
+          // For non-numeric columns, use localeCompare for string comparison
+          const aValue = a[sortColumn].toString();
+          const bValue = b[sortColumn].toString();
 
           return sortDirection === "asc"
             ? aValue.localeCompare(bValue)
             : bValue.localeCompare(aValue);
+        } else {
+          // For "Action" column, maintain the order
+          return 0;
         }
       })
-    : filterData(data);
+    : filterData(events);
 
   // Get total number of pages
   const totalPages = Math.ceil(sortedData.length / itemsPerPage);
@@ -149,15 +146,46 @@ function Position() {
     setCurrentPage(1); // Reset to the first page when changing items per page
   };
 
+  const handleDeleteCategory = (eventId) => {
+    setCategoryToDelete(eventId);
+    setShowDeleteConfirmation(true);
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteConfirmation(false);
+    setCategoryToDelete(null);
+  };
+
+  const confirmDelete = async () => {
+    setShowDeleteConfirmation(false);
+
+    try {
+      // Handle category deletion from the smart contract if needed
+      console.log(`Deleting category with ID ${categoryToDelete}`);
+
+      // Fetch updated categories after deletion
+      fetchCategories();
+    } catch (error) {
+      console.error("Error deleting category:", error);
+    }
+  };
+
+  const getConfirmationContent = () => {
+    return {
+      title: "Delete Category Confirmation",
+      content: "Are you sure you want to delete this category?",
+    };
+  };
+
   return (
     <div className="container mt-5">
-      <h2>Position List</h2>
+      <h2>Event List</h2>
       <Link
         to="/admin/createPosition"
         className="btn btn-success mb-3"
         style={{ marginLeft: "auto" }}
       >
-        Add New Position
+        Add New Event
       </Link>
       <div className="mt-3"></div>
       <div className="input-group mb-3">
@@ -175,13 +203,11 @@ function Position() {
         />
       </div>
       <table className="data-table">
-        {" "}
-        {/* Added className to table element */}
         <thead>
           <tr>
             {columns.map((column, index) => (
               <th key={index} onClick={() => handleSort(column)}>
-                {column}
+                {columnMapping[column]}
                 {sortColumn === column && (
                   <span>
                     {sortDirection === "asc" ? <>&uarr;</> : <>&darr;</>}
@@ -192,99 +218,120 @@ function Position() {
           </tr>
         </thead>
         <tbody>
-          {currentItems.map((row, rowIndex) => (
-            <tr key={rowIndex}>
-              {columns.map((column, colIndex) => (
-                <td key={colIndex} className="data-cell">
-                  {column === "Description" ? (
-                    <>
-                      {row[column].length > 50 &&
-                      expandedCategory !== row.ID ? (
-                        <>
-                          {`${row[column].substring(0, 50)}... `}
-                          <button
-                            onClick={() => toggleExpand(row.ID)}
-                            className="btn btn-link p-0"
-                          >
-                            Read More
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          {row[column]}
-                          {row[column].length > 50 && (
-                            <button
-                              onClick={() => toggleExpand(row.ID)}
-                              className="btn btn-link p-0"
-                            >
-                              Read Less
-                            </button>
-                          )}
-                        </>
-                      )}
-                    </>
-                  ) : column === "Action" ? (
-                    <>
-                      <Link
-                        to={`/admin/editPosition`}
-                        className="btn btn-primary btn-sm"
-                      >
-                        <i className="fs-4 bi-pencil"></i>
-                      </Link>
-                      <button className="btn btn-danger btn-sm">
-                        <i className="fs-4 bi-trash"></i>
-                      </button>
-                    </>
-                  ) : (
-                    row[column]
-                  )}
-                </td>
-              ))}
+          {currentItems.length === 0 ? (
+            <tr>
+              <td colSpan={columns.length} className="text-center">
+                No matching records found
+              </td>
             </tr>
-          ))}
+          ) : (
+            currentItems.map((row, rowIndex) => (
+              <tr key={rowIndex}>
+                {columns.map((column, colIndex) => (
+                  <td key={colIndex} className="data-cell">
+                    {console.log("check row : ",row.categoryId)}
+                    {column === "Action" ? (
+                      <>
+                        {console.log(row[column])}
+                        <Link
+                          to={`/admin/editCategory/${row.eventId}`}
+                          className="btn btn-primary btn-sm"
+                        >
+                          <i className="fs-4 bi-pencil"></i>
+                        </Link>
+                        <button
+                          onClick={() => handleDeleteCategory(row.eventId)}
+                          className="btn btn-danger btn-sm"
+                        >
+                          <i className="fs-4 bi-trash"></i>
+                        </button>
+                      </>
+                    ) : (
+                      row[column]
+                    )}
+                  </td>
+                ))}
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
-      <div className="pagination-buttons">
-        <button
-          disabled={currentPage === 1}
-          onClick={() => handlePageChange(currentPage - 1)}
-          className="page-button"
-        >
-          &#8249;&#8249;
-        </button>
-        {generatePaginationButtons().map((page) => (
+      {showDeleteConfirmation && (
+        <div className="confirm">
+          <div className="confirm__window">
+            <div className="confirm__titlebar">
+              <span className="confirm__title">
+                {getConfirmationContent().title}
+              </span>
+              <button className="confirm__close" onClick={cancelDelete}>
+                &times;
+              </button>
+            </div>
+            <div className="confirm__content">
+              {getConfirmationContent().content}
+            </div>
+            <div className="confirm__buttons">
+              <button
+                className="confirm__button confirm__button--ok confirm__button--fill"
+                onClick={confirmDelete}
+              >
+                OK
+              </button>
+              <button
+                className="confirm__button confirm__button--cancel"
+                onClick={cancelDelete}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {events.length > 0 && (
+        <div className="pagination-buttons">
           <button
-            key={page}
-            onClick={() => handlePageChange(page)}
-            style={{
-              fontWeight: page === currentPage ? "bold" : "normal",
-            }}
-            className="page-button" // Added className to button element
+            disabled={currentPage === 1}
+            onClick={() => handlePageChange(currentPage - 1)}
+            className="page-button"
           >
-            {page}
+            &#8249;&#8249;
           </button>
-        ))}
-        <button
-          disabled={currentPage === totalPages}
-          onClick={() => handlePageChange(currentPage + 1)}
-          className="page-button" // Added className to button element
-        >
-          &#8250;&#8250;
-        </button>
-        <label>
-          Items per page:
-          <select
-            value={itemsPerPage}
-            onChange={(e) => handleItemsPerPageChange(parseInt(e.target.value))}
-            className="items-per-page-select" // Added className to select element
+          {generatePaginationButtons().map((page) => (
+            <button
+              key={page}
+              onClick={() => handlePageChange(page)}
+              style={{
+                fontWeight: page === currentPage ? "bold" : "normal",
+              }}
+              className="page-button"
+            >
+              {page}
+            </button>
+          ))}
+          <button
+            disabled={currentPage === totalPages}
+            onClick={() => handlePageChange(currentPage + 1)}
+            className="page-button"
           >
-            <option value={5}>5</option>
-            <option value={10}>10</option>
-            <option value={15}>15</option>
-            <option value={20}>20</option>
-          </select>
-        </label>
-      </div>
+            &#8250;&#8250;
+          </button>
+          <label>
+            Items per page:
+            <select
+              value={itemsPerPage}
+              onChange={(e) =>
+                handleItemsPerPageChange(parseInt(e.target.value))
+              }
+              className="items-per-page-select"
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={15}>15</option>
+              <option value={20}>20</option>
+            </select>
+          </label>
+        </div>
+      )}
     </div>
   );
 }

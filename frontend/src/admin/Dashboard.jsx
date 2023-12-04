@@ -3,6 +3,8 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import axios from "axios";
 import useAuth from "../hooks/useAuth";
+import Web3 from 'web3';
+
 function Dashboard() {
   const navigate = useNavigate();
   axios.defaults.withCredentials = true;
@@ -11,6 +13,10 @@ function Dashboard() {
   const [isCandidatesOpen, setIsCandidatesOpen] = useState(false);
   const [isVotersOpen, setIsVotersOpen] = useState(false);
   const [isElectionOpen, setIsElectionOpen] = useState(false);
+
+  const [walletAddress, setWalletAddress] = useState("");
+  const [walletBalance, setWalletBalance] = useState("");
+
 
   const { logout } = useAuth();
 
@@ -51,6 +57,34 @@ function Dashboard() {
   const toggleElection = () => {
     setIsElectionOpen(!isElectionOpen);
   };
+
+  async function requestAccount() {
+    console.log("Requesting account...");
+
+    // Check if Meta Mask Extension exists
+    if (window.ethereum) {
+      console.log("detected");
+
+      try {
+        const accounts = await window.ethereum.request({
+          method: "eth_requestAccounts",
+        });
+      
+        setWalletAddress(accounts[0]);
+      
+        // get balance
+        const web3 = new Web3(window.ethereum);
+        const balance = await web3.eth.getBalance(accounts[0]);
+        const walletBalance = web3.utils.fromWei(balance, "ether");
+        console.log("Balance:", balance);
+        setWalletBalance(walletBalance);
+      } catch (error) {
+        console.error("Error connecting:", error);
+      }
+    } else {
+      alert("Meta Mask not detected");
+    }
+  }
 
   return (
     <div className="container-fluid">
@@ -255,6 +289,15 @@ function Dashboard() {
                     Report Summary
                   </span>
                 </a>
+              </li>
+              <li>
+                <div className="App">
+                  <header className="App-header">
+                    <button onClick={requestAccount}>Request Account</button>
+                    <p>Wallet Address: {walletAddress}</p>
+                    <p>Wallet Balance: {walletBalance}</p>
+                  </header>
+                </div>
               </li>
               <li onClick={handleLogout}>
                 <a href="#" className="nav-link px-0 align-middle text-white">
