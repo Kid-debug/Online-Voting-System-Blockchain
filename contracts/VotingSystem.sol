@@ -19,6 +19,7 @@ contract VotingSystem {
     struct Candidate {
         uint256 id;
         string name;
+        string description;
         uint256 CategoryId;
         uint256 eventId;
         uint256 voteCount;
@@ -145,7 +146,8 @@ contract VotingSystem {
     function addCandidateToEvent(
         uint256 _categoryId,
         uint256 _eventId,
-        string memory _candidateName
+        string memory _candidateName,
+        string memory _description
     ) public {
         require(
             categories[_categoryId].categoryId != 0,
@@ -164,6 +166,7 @@ contract VotingSystem {
             name: _candidateName,
             CategoryId: _categoryId,
             eventId: _eventId,
+            description: _description,
             voteCount: 0
         });
 
