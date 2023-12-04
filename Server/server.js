@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
+const path = require("path");
 const allowedOrigins = ["http://localhost:5173", "http://localhost:3000"];
 
 const corsOptions = {

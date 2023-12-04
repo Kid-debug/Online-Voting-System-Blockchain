@@ -66,16 +66,8 @@ function AddCategory() {
   return (
     <div className="d-flex flex-column align-items-center pt-4">
       <h2>Add Category</h2>
-      {/* {backendErrors.length > 0 && (
-        <div className="alert alert-danger" role="alert">
-          {backendErrors.map((error, index) => (
-            <div key={index}>{error.msg}</div>
-          ))}
-        </div>
-      )} */}
-
-      <form class="row g-3 w-50" onSubmit={handleAddCategory}>
-        <div class="col-12">
+      <form className="row g-3 w-50" onSubmit={handleAddCategory}>
+        <div className="col-12">
           <label htmlFor="inputCategoryName" className="form-label">
             Category Name
           </label>
@@ -88,8 +80,8 @@ function AddCategory() {
             onChange={(e) => setCategoryName(e.target.value)}
           />
         </div>
-        <div class="col-12">
-          <button type="submit" class="btn btn-primary">
+        <div className="col-12">
+          <button type="submit" className="btn btn-primary">
             Create
           </button>
         </div>

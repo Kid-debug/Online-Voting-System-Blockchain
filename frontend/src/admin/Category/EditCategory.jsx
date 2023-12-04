@@ -83,7 +83,7 @@ function EditCategory() {
     <div className="d-flex flex-column align-items-center pt-4">
       <h2>Update Category</h2>
       <form className="row g-3 w-50" onSubmit={handleSubmit}>
-        <div class="col-12">
+        <div className="col-12">
           <label htmlFor="inputCategoryname" className="form-label">
             Category Name
           </label>
@@ -96,8 +96,8 @@ function EditCategory() {
             onChange={(e) => setCategoryName(e.target.value)}
           />
         </div>
-        <div class="col-12">
-          <button type="submit" class="btn btn-primary">
+        <div className="col-12">
+          <button type="submit" className="btn btn-primary">
             Edit
           </button>
         </div>

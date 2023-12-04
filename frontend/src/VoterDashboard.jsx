@@ -5,175 +5,113 @@ import { Link } from "react-router-dom";
 import "./stylesheets/voterhome.css";
 
 function VoterDashboard() {
-  const cardData = [
-    {
-      title: "Chemistry and Biology",
-    },
-    {
-      title: "Computer Science",
-    },
-    {
-      title: "Food Science",
-    },
-    {
-      title: "Sport and Exercise Science",
-    },
-    {
-      title: "Dancing",
-    },
-  ];
+  // State for sorting and filtering
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortDirection, setSortDirection] = useState("asc");
+  const [cardData, setCardData] = useState([
+    { title: "Chemistry and Biology" },
+    { title: "Computer Science" },
+    { title: "Food Science" },
+    { title: "Sport and Exercise Science" },
+    { title: "Dancing" },
+    { title: "Dancing" },
+  ]);
 
-  const inProgressData = [
-    {
-      title: "Badminton Club",
-    },
-    {
-      title: "Basketball Club",
-    },
-    {
-      title: "Chess Club",
-    },
-    {
-      title: "Football Club",
-    },
-    {
-      title: "Kendo Club",
-    },
-  ];
+  // State for pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
 
-  const [currentPage, setCurrentPage] = useState(0);
-  const [inProgressPage, setInProgressPage] = useState(0);
-  const cardsPerPage = 3;
-
-  useEffect(() => {
-    updateSliderButtons();
-  }, [currentPage]);
-
-  useEffect(() => {
-    updateInProgressSliderButtons();
-  }, [inProgressPage]);
-
-  const handlePrevClick = () => {
-    if (currentPage > 0) {
-      setCurrentPage(currentPage - 1);
-    }
+  const handleItemsPerPageChange = (event) => {
+    setItemsPerPage(Number(event.target.value));
+    setCurrentPage(1); // Reset to first page when items per page changes
   };
 
-  const handleNextClick = () => {
-    const maxPage = Math.ceil(cardData.length / cardsPerPage) - 1;
-    if (currentPage < maxPage) {
-      setCurrentPage(currentPage + 1);
-    }
+  // Handle search term change
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
   };
 
-  const handleInProgressPrevClick = () => {
-    if (inProgressPage > 0) {
-      setInProgressPage(inProgressPage - 1);
-    }
+  // Sort by name function
+  const sortByName = () => {
+    setSortDirection((prevSortDirection) =>
+      prevSortDirection === "asc" ? "desc" : "asc"
+    );
+    setCardData((prevCardData) => {
+      const sortedData = [...prevCardData].sort((a, b) =>
+        sortDirection === "asc"
+          ? b.title.localeCompare(a.title)
+          : a.title.localeCompare(b.title)
+      );
+      return sortedData;
+    });
   };
 
-  const handleInProgressNextClick = () => {
-    const maxPage = Math.ceil(inProgressData.length / cardsPerPage) - 1;
-    if (inProgressPage < maxPage) {
-      setInProgressPage(inProgressPage + 1);
-    }
-  };
+  // Get filtered and sorted data
+  const filteredData = cardData.filter((card) =>
+    card.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-  const updateSliderButtons = () => {
-    const prevButton = document.querySelector(".prev-button");
-    const nextButton = document.querySelector(".next-button");
-    const maxPage = Math.ceil(cardData.length / cardsPerPage) - 1;
+  // Pagination logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
 
-    if (prevButton && nextButton) {
-      prevButton.disabled = currentPage === 0;
-      nextButton.disabled = currentPage === maxPage;
-    }
-  };
-
-  const updateInProgressSliderButtons = () => {
-    const prevButton = document.querySelector(".in-progress-prev-button");
-    const nextButton = document.querySelector(".in-progress-next-button");
-    const maxPage = Math.ceil(inProgressData.length / cardsPerPage) - 1;
-
-    if (prevButton && nextButton) {
-      prevButton.disabled = inProgressPage === 0;
-      nextButton.disabled = inProgressPage === maxPage;
-    }
-  };
+  // Change page function
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
     <div>
       <Header />
       <h2 className="mt-4">VOTER PORTAL</h2>
-      {/* <h2 style={{ fontSize: "20px" }}>({email})</h2> */}
-
-      <div className="container bg-primary mt-4 border border-dark-subtle">
-        <div className="heading-container">
-          <h2 className="text-white">Society</h2>
-        </div>
-        <div className="card-slider">
-          <button className="prev-button" onClick={handlePrevClick}>
-            <i className="fas bi-arrow-left"></i> {/* Left arrow icon */}
+      <div className="container">
+        <div id="categorybox" className="mt-4">
+          <input
+            className="search"
+            placeholder="Search"
+            value={searchTerm}
+            onChange={handleSearchChange}
+          />
+          <button className="sort" onClick={sortByName}>
+            Sort by name
           </button>
-          {cardData
-            .slice(currentPage * cardsPerPage, (currentPage + 1) * cardsPerPage)
-            .map((card, index) => (
-              <div className="card" key={index}>
-                <div className="body-container">
-                  <div className="overlay"></div>
-                  <div className="election-info">
-                    <p className="title">{card.title}</p>
-                    <div className="separator"></div>
-                  </div>
-                  <Link
-                    to="/electionList"
-                    className="action text-center text-decoration-none"
-                  >
-                    Proceed To Election
-                  </Link>
-                </div>
-              </div>
+          <label htmlFor="itemsPerPage">Items per page:</label>
+          <select
+            id="itemsPerPage"
+            value={itemsPerPage}
+            onChange={handleItemsPerPageChange}
+          >
+            {[5, 10, 15, 20].map((number) => (
+              <option key={number} value={number}>
+                {number}
+              </option>
             ))}
-          <button className="next-button" onClick={handleNextClick}>
-            <i className="fas bi bi-arrow-right"></i> {/* Right arrow icon */}
-          </button>
-        </div>
-      </div>
-
-      <div className="container bg-success mt-4 border border-dark-subtle mb-5">
-        <div className="heading-container">
-          <h2 className="text-white">Club</h2>
-        </div>
-        <div className="card-slider">
-          <button className="prev-button" onClick={handleInProgressPrevClick}>
-            <i className="fas bi-arrow-left"></i> {/* Left arrow icon */}
-          </button>
-          {inProgressData
-            .slice(
-              inProgressPage * cardsPerPage,
-              (inProgressPage + 1) * cardsPerPage
-            )
-            .map((card, index) => (
-              <div className="card" key={index}>
-                <div className="body-container">
-                  <div className="overlay"></div>
-                  <div className="election-info">
-                    <p className="title">{card.title}</p>
-                    <div className="separator"></div>
-                  </div>
-                  <Link
-                    to="/electionList"
-                    className="action text-center text-decoration-none"
-                  >
-                    Proceed To Election
-                  </Link>
-                </div>
-              </div>
+          </select>
+          <div className="list">
+            {currentItems.map((card, index) => (
+              <Link to="/electionList" key={index} className="project-name">
+                <h3>{card.title}</h3>
+                <i className="fas bi-eye"></i>
+              </Link>
             ))}
-          <button className="next-button" onClick={handleInProgressNextClick}>
-            <i className="fas bi bi-arrow-right"></i> {/* Right arrow icon */}
-          </button>
+          </div>
         </div>
+        <nav>
+          <ul className="pagination">
+            {Array.from(
+              { length: Math.ceil(filteredData.length / itemsPerPage) },
+              (_, index) => (
+                <li
+                  key={index}
+                  className={currentPage === index + 1 ? "active" : ""}
+                >
+                  <a onClick={() => paginate(index + 1)} href="#!">
+                    {index + 1}
+                  </a>
+                </li>
+              )
+            )}
+          </ul>
+        </nav>
       </div>
 
       <div className="container container_instruction mb-4">

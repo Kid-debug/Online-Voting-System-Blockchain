@@ -92,11 +92,14 @@ h2 {
   margin-bottom: 5%;
 }
 
-.btn-block {
-  background-color: #d15b47 !important;
-  border-color: #d15b47 !important;
+.block {
   margin: 0px 10px 0 0 !important;
   padding: 4px 15px 4px 8px !important;
+}
+
+.bi-x-square {
+  position: relative;
+  top: 3px;
 }
 
 .feedback-table thead th {

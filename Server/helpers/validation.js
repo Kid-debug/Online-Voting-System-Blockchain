@@ -1,4 +1,10 @@
 const { check } = require("express-validator");
+// const multer = require("multer");
+// const path = require("path");
+
+// // Set up multer for file uploads
+// const storage = multer.memoryStorage();
+// const upload = multer({ storage: storage }).single("candidate_image");
 
 exports.signUpValidation = [
   // Check if email is not empty and stop validation chain if empty
@@ -185,6 +191,63 @@ exports.categoryValidation = [
     .withMessage(
       "• Category name can only contain alphabetic characters and spaces"
     ),
+];
+
+//add candidate
+exports.candidateValidation = [
+  check("candidate_name")
+    .trim() // Trim leading and trailing whitespace
+    .notEmpty()
+    .withMessage("• Candidate name is required")
+    .isString()
+    .withMessage("• Candidate name must be a string")
+    .isLength({ min: 1, max: 100 })
+    .withMessage("• Candidate name must be between 1 and 100 characters")
+    .matches(/^[A-Za-z\s]+$/)
+    .withMessage(
+      "• Candidate name can only contain alphabetic characters and spaces"
+    ),
+  check("student_id")
+    .trim()
+    .notEmpty()
+    .withMessage("• Student ID of the candidate is required")
+    .isString()
+    .withMessage("• Student ID of the candidate must be a string")
+    .isLength(10)
+    .withMessage("• Student ID of the candidate must be exactly 10 characters")
+    .matches(/^\d{2}[A-Za-z]{3}\d{5}$/)
+    .withMessage("• Student ID must follow the format like 22WMR05500"),
+  // Custom validation for the image field
+  // check("candidate_image").custom((value, { req }) => {
+  //   return new Promise((resolve, reject) => {
+  //     upload(req, req, (err) => {
+  //       if (err) {
+  //         reject("Failed to upload image");
+  //       } else if (
+  //         !req.file ||
+  //         !req.file.buffer ||
+  //         req.file.buffer.length === 0
+  //       ) {
+  //         reject("Image file is required");
+  //       } else {
+  //         resolve();
+  //       }
+  //     });
+  //   });
+  // }),
+  // // Validation for allowed file extensions
+  // check("candidate_image").custom((value, { req }) => {
+  //   const allowedExtensions = [".jpg", ".jpeg", ".png"];
+  //   const ext = path.extname(req.file.originalname).toLowerCase();
+
+  //   if (!allowedExtensions.includes(ext)) {
+  //     throw new Error(
+  //       "Invalid file extension. Allowed extensions are .jpg, .jpeg, and .png"
+  //     );
+  //   }
+
+  //   return true;
+  // }),
 ];
 
 exports.updateFeedbackValidation = [

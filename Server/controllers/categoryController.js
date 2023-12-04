@@ -63,7 +63,7 @@ const getCategoryById = async (req, res) => {
     console.error(err);
     return res
       .status(500)
-      .json({ msg: "Server error while retrieving feedback." });
+      .json({ msg: "Server error while retrieving category." });
   }
 };
 

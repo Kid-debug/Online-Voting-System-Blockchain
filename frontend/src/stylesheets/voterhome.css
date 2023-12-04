@@ -1,216 +1,165 @@
-/* voterdashboard.css */
-
-/* Reset default margin and padding */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-.container {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  box-shadow: rgba(0, 0, 0, 0.19) 0px 10px 20px, rgba(0, 0, 0, 0.23) 0px 6px 6px;
-}
-
-.card-slider {
-  display: flex;
-  overflow-x: hidden;
-  align-items: center;
-  margin-top: 20px;
-  position: relative;
-}
-
-.card {
-  width: 350px !important;
-  height: 160px !important;
-  text-align: center;
-  margin-left: 20px;
-  margin-right: 20px;
-  overflow: hidden;
-  background-color: #fff;
-  box-shadow: 0 0 30px 5px rgba(0, 0, 0, 0.15);
-  cursor: pointer;
-  position: relative;
-  transition: transform 0.3s;
-}
-
-.card:last-child {
-  margin-right: 0;
-}
-
-.card:hover {
-  transform: scale(1.05);
-}
-
-.img-container {
-  position: relative;
-  width: 100%;
-  height: 400px;
-  overflow: hidden;
-}
-
-.img-container img {
+body,
+html {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  font-family: "Open Sans", sans-serif;
 }
 
-.body-container {
-  position: relative;
-}
-
-.overlay {
-  position: absolute;
-  width: 100%;
-  height: 400px;
-  background-color: rgba(24, 83, 122, 0.6);
-  opacity: 0;
-  transition: height linear 0.4s, opacity linear 0.2s;
-}
-
-.card:hover .overlay {
-  opacity: 1;
-  height: 150px;
-}
-
-.election-info {
-  margin-top: 10%;
-  background-color: #fff;
+.container {
+  max-width: 800px;
+  margin: auto;
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  padding: 8px;
+  background: #fff;
 }
 
-.title,
-.price {
-  color: #18537a;
-  font-size: 1.5em;
-  font-weight: bold;
-  letter-spacing: 1px;
-  margin: 12px;
+#categorybox {
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
-.info {
-  letter-spacing: 0.5px;
-  margin-bottom: 6px;
-}
-
-.separator {
-  width: 20%;
-  height: 6px;
-  background-color: #17537a;
-  margin-bottom: 16px;
-}
-
-.additional-info {
-  border-top: 1px solid #bbb;
-  margin-top: 12px;
-  padding: 28px;
-  padding-bottom: 0;
-}
-
-.additional-info .info {
-  font-size: 0.9em;
+.search {
+  width: 100%;
+  border: solid 1px #ccc;
+  border-radius: 5px;
+  padding: 7px 14px;
   margin-bottom: 20px;
-  text-align: center;
+  box-sizing: border-box;
 }
 
-.info i {
-  color: #18537a;
-  font-size: 1.1em;
-  margin-right: 4px;
-}
-
-.info span {
-  color: #18537a;
-  font-weight: bolder;
-}
-
-.action {
-  color: #fff;
-  border: 3px solid #fff;
-  background-color: transparent;
-  position: absolute;
-  top: -100px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60%;
-  outline: none;
-  cursor: pointer;
-  padding: 12px;
-  text-transform: uppercase;
-  font-size: 1.3em;
-  font-weight: bold;
-  letter-spacing: 2px;
-  transition: background-color 0.4s, top 0.4s;
-}
-
-.card:hover .action {
-  top: 25px;
-}
-
-.action:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-}
-
-/* upcoming election prev and next button */
-.prev-button,
-.next-button {
-  background-color: #18537a;
-  color: #fff;
+.sort {
+  width: 20%;
+  padding: 8px 30px;
+  border-radius: 6px;
   border: none;
-  padding: 10px 20px;
-  margin-top: 20px;
-  font-size: 1em;
+  background-color: #28a8e0;
+  color: #fff;
   cursor: pointer;
-  outline: none;
-  transition: background-color 0.3s;
+  align-items: center;
+  text-align: center;
+  display: block;
+  margin: 0 auto;
 }
 
-.prev-button:hover,
-.next-button:hover {
-  background-color: #0c2a45;
+.list {
+  margin-top: 30px !important;
+  width: 100%;
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
 }
 
-/* Arrow icons styling */
-.prev-button i,
-.next-button i {
+.list .project-name:hover {
+  background-color: #d3d3d3;
+}
+
+.list .project-name:hover h3 {
+  color: #1e90ff;
+}
+
+.list .project-name {
+  background-color: #eee;
+  padding: 10px 15px;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  color: blue;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  text-decoration: none;
+}
+
+.list h3 {
   font-size: 1.5em;
-  margin-right: 4px;
+  font-weight: 600;
+  color: #333; /* Dark font color for better readability */
+  margin: 0; /* Remove margin from h3 */
 }
 
-/* in progress election prev and next button*/
+.list-item {
+  background-color: #f7f7f7;
+  padding: 15px 20px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
 
-/* Add media query for screens smaller than 768px */
+.bi-eye {
+  color: black;
+}
+.pagination {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+
+.pagination li {
+  list-style-type: none;
+  margin: 0 5px; /* Add margin to space out the page numbers */
+}
+
+.pagination a {
+  padding: 8px 16px;
+  text-decoration: none; /* Remove underline from links */
+  color: #333; /* Set text color */
+  background-color: #fff; /* Set background color */
+  border: 1px solid #ccc; /* Set border color */
+  border-radius: 4px; /* Optional: add border-radius for rounded corners */
+  cursor: pointer;
+}
+
+.pagination a:hover {
+  background-color: #eee; /* Set hover background color */
+}
+
+.pagination .active a {
+  background-color: #007bff; /* Set active link background color */
+  color: white; /* Set active link text color */
+  border-color: #007bff; /* Set active link border color */
+}
+
+#itemsPerPage {
+  margin-left: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 5px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
 @media (max-width: 768px) {
-  .card {
-    width: calc(100% - 40px); /* Full width with some margin on the sides */
-    margin-right: 0; /* Remove right margin to stack cards vertically */
+  .container {
+    width: 95%;
   }
 
-  /* Adjust spacing between cards */
-  .card-slider {
-    overflow-x: auto; /* Enable horizontal scrolling */
-    justify-content: flex-start;
-    margin-top: 0;
-    scroll-snap-type: x mandatory; /* Enable snap scrolling */
+  .search,
+  .sort {
+    width: auto;
+    margin: 10px 0;
   }
+}
 
-  /* Optional: Center the slider content on smaller screens */
-  .card-slider {
-    align-items: center;
-  }
-
-  /* Style for individual cards */
-  .card {
-    flex: 0 0 auto; /* Allow cards to shrink */
-    scroll-snap-align: start; /* Snap to the start of each card */
-  }
+/* Additional styles for the voting guidelines section */
+#round-corner {
+  background: #1e90ff;
+  border-radius: 25px;
+  color: white;
+  padding: 20px;
+  margin-bottom: 20px;
 }
 
 /* Add this CSS to style the heading-container */

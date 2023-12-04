@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import $ from "jquery";
 import Header from "./container/Header";
 import Footer from "./container/Footer";
 import { Link } from "react-router-dom";
@@ -146,7 +145,7 @@ function UserFeedbackList() {
     Swal({
       title: "Blocked",
       text: "You have been blocked from editing this feedback.",
-      icon: "error",
+      icon: "warning",
       buttons: "OK",
       dangerMode: true,
     });
@@ -191,7 +190,7 @@ function UserFeedbackList() {
             {currentItems.length === 0 ? (
               <tr>
                 <td colSpan={columns.length} className="text-center">
-                  No matching records found
+                    No matching records found
                 </td>
               </tr>
             ) : (
@@ -234,6 +233,18 @@ function UserFeedbackList() {
                             </>
                           )}
                         </>
+                      ) : column === "status" ? (
+                        <span
+                          className={`badge ${
+                            row.status === "Under Review"
+                              ? "badge-primary"
+                              : row.status === "Mark As Reviewed"
+                              ? "badge-danger"
+                              : ""
+                          }`}
+                        >
+                          {row.status}
+                        </span>
                       ) : column === "Action" ? (
                         <div>
                           {row.status === "Under Review" ? (
@@ -246,7 +257,7 @@ function UserFeedbackList() {
                           ) : row.status === "Mark As Reviewed" ? (
                             <button
                               onClick={() => handleBlockClick(row.feedback_id)}
-                              className="btn-block btn btn-danger btn-sm"
+                              className="btn btn-danger btn-sm block"
                             >
                               <i className="fs-4 bi-pencil"></i>
                             </button>
