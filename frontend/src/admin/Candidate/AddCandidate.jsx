@@ -12,6 +12,7 @@ function AddCandidate() {
   const [events, setEvents] = useState([]);
   const [candidateName, setCandidateName] = useState("");
   const [candidateDesc, setCandidateDesc] = useState("");
+  const [candidateStdId, setCandidateStdId] = useState("");
 
   useEffect(() => {
     // Fetch categories when the component mounts
@@ -89,6 +90,11 @@ function AddCandidate() {
     setCandidateDesc(event.target.value);
   };
 
+  // Handle category change events
+  const handleCandidateStdIdChange = (event) => {
+    setCandidateStdId(event.target.value);
+  };
+
   const handleCreateCandidate = async () => {
     try {
       // Ensure that positionName and selectedCategoryId are not empty
@@ -96,8 +102,10 @@ function AddCandidate() {
         !selectedCategoryId ||
         !selectedEventId ||
         !candidateName ||
-        !candidateDesc
+        !candidateDesc||
+        !candidateStdId
       ) {
+        console.error("candidateStdId : ", selectedEventId);
         console.error("all input file must be specified.");
         return;
       }
@@ -118,7 +126,8 @@ function AddCandidate() {
           selectedCategoryId,
           selectedEventId,
           candidateName,
-          candidateDesc
+          candidateDesc,
+          Number(candidateStdId)
         )
         .send({
           from: accounts[0], // Assuming the user's account is the first account
@@ -168,6 +177,9 @@ function AddCandidate() {
             value={selectedEventId}
             onChange={handleEventChanged}
           >
+             <option value="" disabled>
+              Select a event
+            </option>
             {events.map((event) => (
               <option key={Number(event.eventId)} value={Number(event.eventId)}>
                 {event.eventName}
@@ -191,10 +203,24 @@ function AddCandidate() {
 
         <div class="col-12">
           <label htmlFor="inputDescription4" className="form-label">
+            Student ID
+          </label>
+          <input
+            type="number"
+            className="form-control"
+            id="inputDescription4"
+            placeholder="Enter Candidate Description"
+            value={candidateStdId}
+            onChange={handleCandidateStdIdChange}
+          />
+        </div>
+
+        <div class="col-12">
+          <label htmlFor="inputDescription4" className="form-label">
             Description
           </label>
           <input
-            type="email"
+            type="text"
             className="form-control"
             id="inputDescription4"
             placeholder="Enter Candidate Description"
@@ -210,7 +236,11 @@ function AddCandidate() {
           <input type="file" className="form-control" id="inputGroupFile01" />
         </div>
         <div class="col-12">
-        <button type="button" className="btn btn-primary"  onClick={handleCreateCandidate}>
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={handleCreateCandidate}
+          >
             Create
           </button>
         </div>
