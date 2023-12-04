@@ -3,23 +3,49 @@ import Header from "./container/Header";
 import Footer from "./container/Footer";
 import { Link } from "react-router-dom";
 import "./stylesheets/voterhome.css";
+import votingContract from "../../build/contracts/VotingSystem.json";
+import Web3 from "web3";
+import { contractAddress } from "./config";
 
 function VoterDashboard() {
   // State for sorting and filtering
   const [searchTerm, setSearchTerm] = useState("");
   const [sortDirection, setSortDirection] = useState("asc");
-  const [cardData, setCardData] = useState([
-    { title: "Chemistry and Biology" },
-    { title: "Computer Science" },
-    { title: "Food Science" },
-    { title: "Sport and Exercise Science" },
-    { title: "Dancing" },
-    { title: "Dancing" },
-  ]);
+  const [cardData, setCardData] = useState([]);
 
   // State for pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const web3 = new Web3(window.ethereum);
+        await window.ethereum.enable();
+        const accounts = await web3.eth.getAccounts();
+
+        const contract = new web3.eth.Contract(
+          votingContract.abi,
+          contractAddress
+        );
+
+        // Call the getAllCategory function in your smart contract
+        const categoryList = await contract.methods.getAllCategory().call();
+        const formattedCategories = categoryList.map((category) => ({
+          categoryId: Number(category.categoryId),
+          categoryName: category.categoryName,
+        }));
+
+        console.log("category", categoryList);
+        setCardData(formattedCategories);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+
+    fetchCategories();
+  }, []); // The empty dependency array ensures that this effect runs once, similar to componentDidMount
+
 
   const handleItemsPerPageChange = (event) => {
     setItemsPerPage(Number(event.target.value));
@@ -48,7 +74,7 @@ function VoterDashboard() {
 
   // Get filtered and sorted data
   const filteredData = cardData.filter((card) =>
-    card.title.toLowerCase().includes(searchTerm.toLowerCase())
+    card.categoryName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Pagination logic
@@ -88,8 +114,8 @@ function VoterDashboard() {
           </select>
           <div className="list">
             {currentItems.map((card, index) => (
-              <Link to="/electionList" key={index} className="project-name">
-                <h3>{card.title}</h3>
+              <Link to={`/electionList/${Number(card.categoryId, 10)}`} key={card.categoryId} className="project-name">
+                <h3>{card.categoryName}</h3>
                 <i className="fas bi-eye"></i>
               </Link>
             ))}

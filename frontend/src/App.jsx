@@ -99,7 +99,7 @@ function App() {
           >
             <Route path="/voterdashboard" element={<VoterDashboard />} />
             <Route path="/about" element={<About />} />
-            <Route path="/electionList" element={<ElectionList />} />
+            <Route path="/electionList/:categoryId" element={<ElectionList />} />
             <Route path="/electionDetails" element={<ElectionDetails />} />
             <Route path="/voting" element={<Voting />} />
             <Route path="/verification" element={<Verification />} />
