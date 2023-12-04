@@ -207,20 +207,20 @@ contract VotingSystem {
     function getAllCategoryEvent(uint256 _categoryId)
         public
         view
-        returns (string[] memory foundEvent)
+        returns (Event[] memory foundEvent)
     {
         // find the certain category
         Category storage category = categories[_categoryId];
 
         // declare an array variable for storing events
-        string[] memory eventsName = new string[](category.events.length);
+        Event[] memory eventsFound = new Event[](category.events.length);
 
         // get all the event name by searching the event in list
         for (uint256 i = 0; i < category.events.length; i++) {
-            eventsName[i] = category.events[i].eventName;
+            eventsFound[i] = category.events[i];
         }
 
-        return (eventsName);
+        return (eventsFound);
     }
 
     function getAllCategoryEventCandidate(
