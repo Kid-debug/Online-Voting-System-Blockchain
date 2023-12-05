@@ -322,10 +322,10 @@ const login = async (req, res) => {
 
         if (req.body.rememberMe) {
           // Extend session cookie's lifetime for 30 days
-          req.session.cookie.maxAge = 30 * 60 * 60 * 1000;
+          req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
         } else {
-          // If Remember Me isn't checked, set a shorter session duration
-          req.session.cookie.maxAge = 24 * 60 * 1000; // 24 hours
+          // If Remember Me isn't checked, set a shorter session duration (24 hours)
+          req.session.cookie.maxAge = 24 * 60 * 60 * 1000; // 24 hours
         }
 
         const sessionExpiryTime = Date.now() + req.session.cookie.maxAge;
