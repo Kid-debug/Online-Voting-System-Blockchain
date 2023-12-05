@@ -147,77 +147,87 @@ function ElectionList() {
             </tr>
           </thead>
           <tbody>
-            {currentItems.map((election) => (
-              <tr key={election.eventId}>
-                <td>{election.eventId}</td>
-                <td>{election.eventName}</td>
-                <td>{election.categoryName}</td>
-                <td>{election["Start Date"]}</td>
-                <td>{election["End Date"]}</td>
-                <td>{getElectionStatus(election)}</td>
-                <td>
-                  <Link
-                    to={`/voting/${categoryId}/${election.eventId}`}
-                    style={{
-                      border: "none",
-                      padding: "7px 20px",
-                      borderRadius: "20px",
-                      backgroundColor: "black",
-                      color: "#e6e7e8",
-                      textDecoration: "none", // Remove the default underline
-                      display: "inline-block", // Make the link a block element
-                    }}
-                  >
-                    View Details
-                  </Link>
+            {currentItems.length === 0 ? (
+              <tr>
+                <td colSpan={7} className="text-center">
+                  No matching records found
                 </td>
               </tr>
-            ))}
+            ) : (
+              currentItems.map((election) => (
+                <tr key={election.eventId}>
+                  <td>{election.eventId}</td>
+                  <td>{election.eventName}</td>
+                  <td>{election.categoryName}</td>
+                  <td>{election["Start Date"]}</td>
+                  <td>{election["End Date"]}</td>
+                  <td>{getElectionStatus(election)}</td>
+                  <td>
+                    <Link
+                      to={`/voting/${categoryId}/${election.eventId}`}
+                      style={{
+                        border: "none",
+                        padding: "7px 20px",
+                        borderRadius: "20px",
+                        backgroundColor: "black",
+                        color: "#e6e7e8",
+                        textDecoration: "none", // Remove the default underline
+                        display: "inline-block", // Make the link a block element
+                      }}
+                    >
+                      View Details
+                    </Link>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
-        <div className="pagination-buttons">
-          <button
-            disabled={currentPage === 1}
-            onClick={() => handlePageChange(currentPage - 1)}
-            className="page-button"
-          >
-            &#8249;&#8249;
-          </button>
-          {[...Array(totalPages).keys()].map((page) => (
+        {events.length > 0 && (
+          <div className="pagination-buttons">
             <button
-              key={page + 1}
-              onClick={() => handlePageChange(page + 1)}
-              style={{
-                fontWeight: currentPage === page + 1 ? "bold" : "normal",
-              }}
-              className={`page-button`}
+              disabled={currentPage === 1}
+              onClick={() => handlePageChange(currentPage - 1)}
+              className="page-button"
             >
-              {page + 1}
+              &#8249;&#8249;
             </button>
-          ))}
-          <button
-            disabled={currentPage === totalPages}
-            onClick={() => handlePageChange(currentPage + 1)}
-            className="page-button"
-          >
-            &#8250;&#8250;
-          </button>
-          <label>
-            Items per page:
-            <select
-              value={itemsPerPage}
-              onChange={(e) =>
-                handleItemsPerPageChange(parseInt(e.target.value))
-              }
-              className="items-per-page-select"
+            {[...Array(totalPages).keys()].map((page) => (
+              <button
+                key={page + 1}
+                onClick={() => handlePageChange(page + 1)}
+                style={{
+                  fontWeight: currentPage === page + 1 ? "bold" : "normal",
+                }}
+                className={`page-button`}
+              >
+                {page + 1}
+              </button>
+            ))}
+            <button
+              disabled={currentPage === totalPages}
+              onClick={() => handlePageChange(currentPage + 1)}
+              className="page-button"
             >
-              <option value={5}>5</option>
-              <option value={10}>10</option>
-              <option value={15}>15</option>
-              <option value={20}>20</option>
-            </select>
-          </label>
-        </div>
+              &#8250;&#8250;
+            </button>
+            <label>
+              Items per page:
+              <select
+                value={itemsPerPage}
+                onChange={(e) =>
+                  handleItemsPerPageChange(parseInt(e.target.value))
+                }
+                className="items-per-page-select"
+              >
+                <option value={5}>5</option>
+                <option value={10}>10</option>
+                <option value={15}>15</option>
+                <option value={20}>20</option>
+              </select>
+            </label>
+          </div>
+        )}
       </div>
       <Footer />
     </div>
