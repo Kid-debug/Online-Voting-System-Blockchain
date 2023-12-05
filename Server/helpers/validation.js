@@ -183,22 +183,6 @@ exports.feedbackValidation = [
     .isLength({ max: 300 }),
 ];
 
-//add category
-exports.categoryValidation = [
-  check("category_name")
-    .trim() // Trim leading and trailing whitespace
-    .notEmpty()
-    .withMessage("• Category name is required")
-    .isString()
-    .withMessage("• Category name must be a string")
-    .isLength({ min: 1, max: 100 })
-    .withMessage("• Category name must be between 1 and 100 characters")
-    .matches(/^[A-Za-z\s]+$/)
-    .withMessage(
-      "• Category name can only contain alphabetic characters and spaces"
-    ),
-];
-
 exports.updateFeedbackValidation = [
   // Validate the status
   check("status", "• Status is required")

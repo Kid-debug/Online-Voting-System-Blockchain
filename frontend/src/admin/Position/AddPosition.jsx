@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import Web3 from "web3";
 import votingContract from "../../../../build/contracts/VotingSystem.json";
 import { contractAddress } from "../../config";
+import Swal from "sweetalert";
 
 function AddPosition() {
   const [positionName, setPositionName] = useState("");
@@ -70,10 +71,38 @@ function AddPosition() {
           from: accounts[0], // Assuming the user's account is the first account
         });
       // prompt success message
+      Swal({
+        icon: "success",
+        title: "Position Created!",
+        text: "You've successfully added a new position.",
+      });
       // Handle success
       console.log("Transaction successful:", transaction);
     } catch (error) {
-      // prompt error message
+      // Check for specific error messages
+      if (error.message.includes("Category has not exists")) {
+        // Display the exact error message from Solidity
+        Swal({
+          icon: "error",
+          title: "Error creating position!",
+          text: "Category has not exists",
+        });
+      } else if (error.message.includes("Event already exists")) {
+        // Display custom error message for event already exists
+        Swal({
+          icon: "error",
+          title: "Error creating position!",
+          text: "Event already exists",
+        });
+      } else {
+        // For other errors, show the full error message
+        Swal({
+          icon: "error",
+          title: "Error creating position!",
+          text: "An error occurred while creating the position. Please try again.",
+        });
+      }
+
       console.error("Error creating position:", error);
     }
   };

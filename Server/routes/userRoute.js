@@ -8,13 +8,9 @@ const {
   changePasswordValidation,
   feedbackValidation,
   updateFeedbackValidation,
-  categoryValidation,
-  // candidateValidation,
 } = require("../helpers/validation");
 const userController = require("../controllers/userController");
 const feedbackController = require("../controllers/feedbackController");
-const categoryController = require("../controllers/categoryController");
-// const candidateController = require("../controllers/candidateController");
 
 //registration
 router.post("/registerUser", signUpUserValidation, userController.registerUser);
@@ -63,21 +59,5 @@ router.put(
   feedbackController.updateFeedback
 );
 router.delete("/deleteFeedback/:feedbackId", feedbackController.deleteFeedback);
-
-//category
-router.post(
-  "/createCategory",
-  categoryValidation,
-  categoryController.addCategory
-);
-
-router.get("/retrieveCategory", categoryController.retrieveCategory);
-router.get("/retrieveCategory/:categoryId", categoryController.getCategoryById);
-router.put(
-  "/updateCategory/:categoryId",
-  categoryValidation,
-  categoryController.updateCategory
-);
-router.delete("/deleteCategory/:categoryId", categoryController.deleteCategory);
 
 module.exports = router;
