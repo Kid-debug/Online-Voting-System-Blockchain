@@ -9,7 +9,6 @@ require("dotenv").config();
 const JWT_SECRET = process.env.JWT_SECRET;
 const { promisify } = require("util");
 const jwtVerify = promisify(jwt.verify);
-const moment = require("moment-timezone");
 const randomstring = require("randomstring");
 const sendMail = require("../helpers/sendMail.js");
 
