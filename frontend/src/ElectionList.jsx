@@ -11,6 +11,9 @@ import { contractAddress } from "./config";
 
 function ElectionList() {
   const [events, setEvents] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
 
   const { categoryId } = useParams();
   console.log("categoryId : ", categoryId);
@@ -87,12 +90,51 @@ function ElectionList() {
     console.log("Voted for:", election["Election Name"]);
   };
 
+  const filterData = (data) => {
+    const searchTermLower = searchTerm.toLowerCase();
+    return data.filter((event) =>
+      Object.values(event).join(" ").toLowerCase().includes(searchTermLower)
+    );
+  };
+
+  const sortedAndFilteredData = filterData(events); // Add sorting if necessary
+  const totalPages = Math.ceil(sortedAndFilteredData.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = sortedAndFilteredData.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const handleItemsPerPageChange = (value) => {
+    setItemsPerPage(value);
+    setCurrentPage(1);
+  };
+
   return (
     <div>
       <Header />
-      <div className="election-list-title">Election List</div>
-      <div className="header_fixed">
-        <table className="election-table">
+      <div className="election-container">
+        <h2 className="mt-5 mb-4">Election List</h2>
+        <div className="input-group mb-3">
+          <div className="input-group-prepend">
+            <span className="input-group-text">
+              <i className="bi bi-search"></i>
+            </span>
+          </div>
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Search"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        <table className="data-table election-table mt-4">
           <thead>
             <tr>
               <th>Event No.</th>
@@ -105,11 +147,8 @@ function ElectionList() {
             </tr>
           </thead>
           <tbody>
-            {events.map((election, index) => (
-              <tr
-                key={election.eventId}
-                onClick={() => selectElection(election)}
-              >
+            {currentItems.map((election) => (
+              <tr key={election.eventId}>
                 <td>{election.eventId}</td>
                 <td>{election.eventName}</td>
                 <td>{election.categoryName}</td>
@@ -118,9 +157,7 @@ function ElectionList() {
                 <td>{getElectionStatus(election)}</td>
                 <td>
                   <Link
-                    to={`/voting/${Number(categoryId)}/${Number(
-                      election.eventId
-                    )}`}
+                    to={`/voting/${categoryId}/${election.eventId}`}
                     style={{
                       border: "none",
                       padding: "7px 20px",
@@ -138,11 +175,50 @@ function ElectionList() {
             ))}
           </tbody>
         </table>
+        <div className="pagination-buttons">
+          <button
+            disabled={currentPage === 1}
+            onClick={() => handlePageChange(currentPage - 1)}
+            className="page-button"
+          >
+            &#8249;&#8249;
+          </button>
+          {[...Array(totalPages).keys()].map((page) => (
+            <button
+              key={page + 1}
+              onClick={() => handlePageChange(page + 1)}
+              style={{
+                fontWeight: currentPage === page + 1 ? "bold" : "normal",
+              }}
+              className={`page-button`}
+            >
+              {page + 1}
+            </button>
+          ))}
+          <button
+            disabled={currentPage === totalPages}
+            onClick={() => handlePageChange(currentPage + 1)}
+            className="page-button"
+          >
+            &#8250;&#8250;
+          </button>
+          <label>
+            Items per page:
+            <select
+              value={itemsPerPage}
+              onChange={(e) =>
+                handleItemsPerPageChange(parseInt(e.target.value))
+              }
+              className="items-per-page-select"
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={15}>15</option>
+              <option value={20}>20</option>
+            </select>
+          </label>
+        </div>
       </div>
-      <Link
-        to="/electionDetails"
-        className="action text-center text-decoration-none"
-      ></Link>
       <Footer />
     </div>
   );

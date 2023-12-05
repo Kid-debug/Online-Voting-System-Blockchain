@@ -90,6 +90,37 @@ h2 {
   margin-bottom: 5%;
 }
 
+.election-container {
+  max-width: 100%;
+  margin: 0 auto;
+  font-family: Arial, sans-serif;
+  overflow: auto;
+}
+
+.election-table {
+  margin-bottom: 5%;
+}
+
+.election-table thead th {
+  background-color: black !important;
+  color: #e6e7e8 !important;
+}
+
+.election-table tr:nth-child(even) {
+  background-color: #dddddd;
+}
+
+.election-table tr:nth-child(odd) {
+  background-color: #edeef1;
+}
+
+.election-table tr:hover td {
+  color: #44b478;
+  cursor: pointer;
+  background-color: #ffffff;
+}
+
+
 .block {
   margin: 0px 10px 0 0 !important;
   padding: 4px 15px 4px 8px !important;
