@@ -312,32 +312,36 @@ const login = async (req, res) => {
     const user = await User.findOne({ where: { email: req.body.email } });
 
     if (user) {
-      const match = await bcrypt.compare(req.body.password, user.password);
+      if (user.is_verified === 1) {
+        const match = await bcrypt.compare(req.body.password, user.password);
 
-      if (match) {
-        req.session.email = user.email;
-        req.session.role = user.role;
-        req.session.user_id = user.user_id;
-        let path = user.role === "U" ? "voterdashboard" : "admin/home";
+        if (match) {
+          req.session.email = user.email;
+          req.session.role = user.role;
+          req.session.user_id = user.user_id;
+          let path = user.role === "U" ? "voterdashboard" : "admin/home";
 
-        if (req.body.rememberMe) {
-          // Extend session cookie's lifetime for 30 days
-          req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
+          if (req.body.rememberMe) {
+            // Extend session cookie's lifetime for 30 days
+            req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
+          } else {
+            // If Remember Me isn't checked, set a shorter session duration (24 hours)
+            req.session.cookie.maxAge = 24 * 60 * 60 * 1000; // 24 hours
+          }
+
+          const sessionExpiryTime = Date.now() + req.session.cookie.maxAge;
+          return res.status(200).send({
+            path,
+            userRole: req.session.role,
+            email: req.session.email,
+            userId: req.session.user_id,
+            sessionExpiryTime,
+          });
         } else {
-          // If Remember Me isn't checked, set a shorter session duration (24 hours)
-          req.session.cookie.maxAge = 24 * 60 * 60 * 1000; // 24 hours
+          return res.status(401).json({ msg: "Password is incorrect." });
         }
-
-        const sessionExpiryTime = Date.now() + req.session.cookie.maxAge;
-        return res.status(200).send({
-          path,
-          userRole: req.session.role,
-          email: req.session.email,
-          userId: req.session.user_id,
-          sessionExpiryTime,
-        });
       } else {
-        return res.status(401).json({ msg: "Password is incorrect." });
+        return res.status(401).json({ msg: "Please verify your email first." });
       }
     } else {
       return res.status(401).json({ msg: "Email does not exist." });

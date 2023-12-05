@@ -52,7 +52,7 @@ function Login() {
     } catch (error) {
       if (error.response) {
         // If the backend sends an array of errors
-        if (error.response.errors) {
+        if (error.response.data.errors) {
           setBackendErrors(error.response.data.errors);
         } else {
           // If the backend sends a single error message
