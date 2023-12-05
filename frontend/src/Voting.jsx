@@ -183,8 +183,13 @@ function Voting() {
       </div>
 
       {/* Final Submit Button */}
-      <div className="text-center mt-4 mb-3">
-        <button className="vote-submit" onClick={handleSubmit}>
+      <div className="form-actions">
+        <button
+          type="submit"
+          style={{ width: "270px" }}
+          className="vote-submit submit-btn"
+          onClick={handleSubmit}
+        >
           Submit
         </button>
       </div>

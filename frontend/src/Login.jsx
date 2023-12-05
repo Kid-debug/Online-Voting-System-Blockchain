@@ -111,12 +111,7 @@ function Login() {
               {visible ? <EyeOutlined /> : <EyeInvisibleOutlined />}
             </i>
           </div>
-          <div className="float-end mb-2">
-            <a href="/forgotPass" className="text-white text-decoration-none">
-              Forgot Password?
-            </a>
-          </div>
-          <div className="form-check">
+          <div className="form-check mb-3">
             <input
               className="form-check-input"
               type="checkbox"
@@ -139,9 +134,14 @@ function Login() {
           <Link to="/register" className="btn btn-light w-100 mb-2">
             Create User Account
           </Link>
-          <Link to="/adminregister" className="btn btn-secondary w-100 mb-2">
+          <Link to="/adminregister" className="btn btn-secondary w-100">
             Create Admin Account
           </Link>
+          <div className="text-center">
+            <Link to="/forgotPass" className="text-white text-decoration-none">
+              Forgot Password?
+            </Link>
+          </div>
         </form>
       </div>
     </div>
