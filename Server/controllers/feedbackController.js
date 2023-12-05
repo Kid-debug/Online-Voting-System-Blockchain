@@ -13,17 +13,8 @@ const submitFeedback = async (req, res) => {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const token = req.headers.authorization?.split(" ")[1] || req.cookies.jwt;
-
-  if (!token) {
-    return res
-      .status(401)
-      .json({ msg: "No token provided, authorization denied." });
-  }
-
   try {
-    const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
-    const userEmail = decoded.email;
+    const userEmail = req.session.email;
 
     const user = await User.findOne({ where: { email: userEmail } });
     if (user) {
@@ -60,26 +51,13 @@ const submitFeedback = async (req, res) => {
     }
   } catch (error) {
     console.error("Error in submitFeedback:", error);
-    if (error.name === "TokenExpiredError") {
-      return res.status(401).json({ msg: "Token expired." });
-    } else {
-      return res.status(401).json({ msg: "Invalid token." });
-    }
+    return res.status(500).json({ msg: error });
   }
 };
 
 const getFeedbackByUserId = async (req, res) => {
-  const token = req.cookies.jwt;
-
-  if (!token) {
-    return res
-      .status(401)
-      .json({ msg: "No token provided, authorization denied." });
-  }
-
   try {
-    const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
-    const userEmail = decoded.email;
+    const userEmail = req.session.email;
 
     const user = await User.findOne({ where: { email: userEmail } });
     if (user) {
@@ -113,11 +91,7 @@ const getFeedbackByUserId = async (req, res) => {
     }
   } catch (error) {
     console.error("Error in retrieve feedback:", error);
-    if (error.name === "TokenExpiredError") {
-      return res.status(401).json({ msg: "Token expired." });
-    } else {
-      return res.status(401).json({ msg: "Invalid token." });
-    }
+    return res.status(500).json({ msg: error });
   }
 };
 
@@ -127,17 +101,8 @@ const editUserFeedback = async (req, res) => {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const token = req.headers.authorization?.split(" ")[1] || req.cookies.jwt;
-
-  if (!token) {
-    return res
-      .status(401)
-      .json({ msg: "No token provided, authorization denied." });
-  }
-
   try {
-    const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
-    const userEmail = decoded.email;
+    const userEmail = req.session.email;
 
     const user = await User.findOne({ where: { email: userEmail } });
     if (user) {
@@ -175,11 +140,7 @@ const editUserFeedback = async (req, res) => {
     }
   } catch (error) {
     console.error("Error in updateFeedback:", error);
-    if (error.name === "TokenExpiredError") {
-      return res.status(401).json({ msg: "Token expired." });
-    } else {
-      return res.status(401).json({ msg: "Invalid token." });
-    }
+    return res.status(500).json({ msg: error });
   }
 };
 
