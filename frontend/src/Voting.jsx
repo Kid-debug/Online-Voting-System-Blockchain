@@ -93,22 +93,14 @@ function Voting() {
     await window.ethereum.enable();
     const accounts = await web3.eth.getAccounts();
 
-    const contract = new web3.eth.Contract(
-      votingContract.abi,
-      contractAddress
-    );
+    const contract = new web3.eth.Contract(votingContract.abi, contractAddress);
 
     const voterId = 2205619;
-    console.log("selectedCandidateId : ",  Number(selectedCandidateId));
+    console.log("selectedCandidateId : ", Number(selectedCandidateId));
 
     // Perform the necessary action, e.g., sending a transaction
     const transaction = await contract.methods
-      .vote(
-        voterId,
-        Number(selectedCandidateId),
-        categoryId,
-        eventId
-      )
+      .vote(voterId, Number(selectedCandidateId), categoryId, eventId)
       .send({
         from: accounts[0], // Assuming the user's account is the first account
       });
@@ -123,67 +115,70 @@ function Voting() {
     <div>
       <Header />
 
-      <div className="container">
+      <div className="container mt-5 pt-5">
         {/* President */}
         <div className="grey-container">
           <h5></h5>
         </div>
-
         <h4>{instruction}</h4>
         <div className="radio-group row justify-content-between px-3 text-center a mt-4">
-          {candidates.map((candidate, index) => (
-            <label
-              key={index}
-              className={`col-auto mx-3 card-block py-2 text-center radio ${
-                selectedCandidateId === candidate.id ? "selected" : ""
-              }`}
-            >
-              <input
-                type="radio"
-                name="candidatePresident"
-                value={Number(candidate.id)}
-                checked={selectedCandidateId === candidate.id}
-                onChange={() => handleRadioClickPresident(candidate.id)}
-                style={{ display: "none" }}
-              />
-              <div className="flex-row">
-                <div className="col">
-                  <div className="pic p-3 m-3">
-                    <img
-                      className={`irc_mut img-fluid circular-image`}
-                      // src={}
-                      alt={candidate.name}
-                    />
-                  </div>
-                  <p>{candidate.name}</p>
-                  <p>{Number(candidate.studentId)}</p>
-                  <p className="description">
-                    {expandedDescriptionPresident[candidate.name] ||
-                    candidate.description.length <= 30
-                      ? candidate.description
-                      : candidate.description.slice(0, 30) + "..."}
-                    {candidate.description.length > 30 && (
-                      <a
-                        href="#"
-                        onClick={() =>
-                          handleReadMoreClickPresident(candidate.name)
-                        }
-                      >
-                        {expandedDescriptionPresident[candidate.name]
-                          ? " Read Less"
-                          : " Read More"}
-                      </a>
-                    )}
-                  </p>
-                  {selectedCandidateId === candidate.id && (
-                    <div className="radio-button">
-                      <i className="fa fa-check" />
+          {candidates.length === 0 ? (
+            <h4>No matching records found</h4>
+          ) : (
+            candidates.map((candidate, index) => (
+              <label
+                key={index}
+                className={`col-auto mx-3 card-block py-2 text-center radio ${
+                  selectedCandidateId === candidate.id ? "selected" : ""
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="candidatePresident"
+                  value={Number(candidate.id)}
+                  checked={selectedCandidateId === candidate.id}
+                  onChange={() => handleRadioClickPresident(candidate.id)}
+                  style={{ display: "none" }}
+                />
+                <div className="flex-row">
+                  <div className="col">
+                    <div className="pic p-3 m-3">
+                      <img
+                        className={`irc_mut img-fluid circular-image`}
+                        // src={}
+                        alt={candidate.name}
+                      />
                     </div>
-                  )}
+                    <p>{candidate.name}</p>
+                    <p>{Number(candidate.studentId)}</p>
+                    <p className="description">
+                      {expandedDescriptionPresident[candidate.name] ||
+                      candidate.description.length <= 30
+                        ? candidate.description
+                        : candidate.description.slice(0, 30) + "..."}
+                      {candidate.description.length > 30 && (
+                        <a
+                          href="#"
+                          onClick={() =>
+                            handleReadMoreClickPresident(candidate.name)
+                          }
+                        >
+                          {expandedDescriptionPresident[candidate.name]
+                            ? " Read Less"
+                            : " Read More"}
+                        </a>
+                      )}
+                    </p>
+                    {selectedCandidateId === candidate.id && (
+                      <div className="radio-button">
+                        <i className="fa fa-check" />
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </label>
-          ))}
+              </label>
+            ))
+          )}
         </div>
       </div>
 

@@ -14,6 +14,10 @@ function AddCategory() {
 
   const handleAddCategory = async (event) => {
     event.preventDefault(); // Prevent the default form submission
+    if (!categoryName) {
+      Swal("Error!", "Category input fields must be filled in.", "error");
+      return;
+    }
 
     try {
       console.log("Attempting to add category...");
@@ -42,24 +46,16 @@ function AddCategory() {
       });
       console.log("Category added successfully");
     } catch (error) {
-      // Check for specific error messages
-      if (error.message.includes("Category already exists")) {
-        // Display the exact error message from Solidity
-        Swal({
-          icon: "error",
-          title: "Error creating category!",
-          text: "Category already exists",
-        });
+      let errorMessage = "An error occurred while creating the category.";
+      if (error.message.includes("revert")) {
+        const matches = error.message.match(/revert (.+)/);
+        errorMessage = matches && matches[1] ? matches[1] : errorMessage;
       }
-      // For other errors, show the full error message
-      else
-        Swal({
-          icon: "error",
-          title: "Error creating category!",
-          text: "An error occurred while creating the category. Please try again.",
-        });
-
-      console.error("Error adding category:", error);
+      Swal({
+        icon: "error",
+        title: "Error creating category!",
+        text: errorMessage,
+      });
     }
   };
 

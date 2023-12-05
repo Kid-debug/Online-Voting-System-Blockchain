@@ -54,65 +54,6 @@ function ElectionList() {
     fetchCategories();
   }, []); // The empty dependency array ensures that this effect runs once, similar to componentDidMount
 
-  const data = [
-    {
-      ID: "1",
-      "Election Name": "2023 Student Council Election",
-      Category: "Computer Science Society",
-      "Start Date": "2023-09-26",
-      "End Date": "2023-10-03",
-    },
-    {
-      ID: "2",
-      "Election Name": "2023 Programming Club Elections",
-      Category: "Computer Science Society",
-      "Start Date": "2023-10-01",
-      "End Date": "2023-10-08",
-    },
-    {
-      ID: "3",
-      "Election Name": "2023 Robotics Society Election",
-      Category: "Computer Science Society",
-      "Start Date": "2023-07-15",
-      "End Date": "2023-07-22",
-    },
-    {
-      ID: "4",
-      "Election Name": "2023 Data Science Association Elections",
-      Category: "Computer Science Society",
-      "Start Date": "2023-08-05",
-      "End Date": "2023-08-12",
-    },
-    {
-      ID: "5",
-      "Election Name": "2023 AI Research Group Election",
-      Category: "Computer Science Society",
-      "Start Date": "2023-11-01",
-      "End Date": "2023-11-08",
-    },
-    {
-      ID: "6",
-      "Election Name": "2023 Cybersecurity Club Elections",
-      Category: "Computer Science Society",
-      "Start Date": "2023-06-20",
-      "End Date": "2023-06-27",
-    },
-    {
-      ID: "7",
-      "Election Name": "2023 Web Development Society Election",
-      Category: "Computer Science Society",
-      "Start Date": "2023-12-03",
-      "End Date": "2023-12-10",
-    },
-    {
-      ID: "8",
-      "Election Name": "2023 Game Development Association Elections",
-      Category: "Computer Science Society",
-      "Start Date": "2023-09-30",
-      "End Date": "2023-10-07",
-    },
-  ];
-
   const selectElection = (election) => {
     // Logic to select election and determine the next steps
     console.log("Selected Election:", election);
@@ -151,11 +92,11 @@ function ElectionList() {
       <Header />
       <div className="election-list-title">Election List</div>
       <div className="header_fixed">
-        <table className="election-table mb-5">
+        <table className="election-table">
           <thead>
             <tr>
-              <th>Election No.</th>
-              <th>Election Name</th>
+              <th>Event No.</th>
+              <th>Event Name</th>
               <th>Category</th>
               <th>Start Date</th>
               <th>End Date</th>

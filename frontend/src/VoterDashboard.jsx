@@ -46,7 +46,6 @@ function VoterDashboard() {
     fetchCategories();
   }, []); // The empty dependency array ensures that this effect runs once, similar to componentDidMount
 
-
   const handleItemsPerPageChange = (event) => {
     setItemsPerPage(Number(event.target.value));
     setCurrentPage(1); // Reset to first page when items per page changes
@@ -65,8 +64,8 @@ function VoterDashboard() {
     setCardData((prevCardData) => {
       const sortedData = [...prevCardData].sort((a, b) =>
         sortDirection === "asc"
-          ? b.title.localeCompare(a.title)
-          : a.title.localeCompare(b.title)
+          ? b.categoryName.localeCompare(a.categoryName)
+          : a.categoryName.localeCompare(b.categoryName)
       );
       return sortedData;
     });
@@ -98,7 +97,7 @@ function VoterDashboard() {
             onChange={handleSearchChange}
           />
           <button className="sort" onClick={sortByName}>
-            Sort by name
+            Sort by Category Name
           </button>
           <label htmlFor="itemsPerPage">Items per page:</label>
           <select
@@ -114,7 +113,11 @@ function VoterDashboard() {
           </select>
           <div className="list">
             {currentItems.map((card, index) => (
-              <Link to={`/electionList/${Number(card.categoryId, 10)}`} key={card.categoryId} className="project-name">
+              <Link
+                to={`/electionList/${Number(card.categoryId, 10)}`}
+                key={card.categoryId}
+                className="project-name"
+              >
                 <h3>{card.categoryName}</h3>
                 <i className="fas bi-eye"></i>
               </Link>

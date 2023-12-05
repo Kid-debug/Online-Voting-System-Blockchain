@@ -49,7 +49,11 @@ function AddPosition() {
     try {
       // Ensure that positionName and selectedCategoryId are not empty
       if (!positionName || !selectedCategoryId) {
-        console.error("Position name and category must be specified.");
+        Swal(
+          "Error!",
+          "Position name and category must be specified.",
+          "error"
+        );
         return;
       }
 
@@ -79,31 +83,16 @@ function AddPosition() {
       // Handle success
       console.log("Transaction successful:", transaction);
     } catch (error) {
-      // Check for specific error messages
-      if (error.message.includes("Category has not exists")) {
-        // Display the exact error message from Solidity
-        Swal({
-          icon: "error",
-          title: "Error creating position!",
-          text: "Category has not exists",
-        });
-      } else if (error.message.includes("Event already exists")) {
-        // Display custom error message for event already exists
-        Swal({
-          icon: "error",
-          title: "Error creating position!",
-          text: "Event already exists",
-        });
-      } else {
-        // For other errors, show the full error message
-        Swal({
-          icon: "error",
-          title: "Error creating position!",
-          text: "An error occurred while creating the position. Please try again.",
-        });
+      let errorMessage = "An error occurred while creating the position.";
+      if (error.message.includes("revert")) {
+        const matches = error.message.match(/revert (.+)/);
+        errorMessage = matches && matches[1] ? matches[1] : errorMessage;
       }
-
-      console.error("Error creating position:", error);
+      Swal({
+        icon: "error",
+        title: "Error creating position!",
+        text: errorMessage,
+      });
     }
   };
 

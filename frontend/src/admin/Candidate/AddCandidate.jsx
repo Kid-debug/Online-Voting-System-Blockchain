@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import Web3 from "web3";
 import votingContract from "../../../../build/contracts/VotingSystem.json";
 import { contractAddress } from "../../config";
+import Swal from "sweetalert";
 
 function AddCandidate() {
   // Define state for selected category and election
@@ -96,31 +97,25 @@ function AddCandidate() {
   };
 
   const handleCreateCandidate = async () => {
+    if (
+      !selectedCategoryId ||
+      !selectedEventId ||
+      !candidateName ||
+      !candidateDesc ||
+      !candidateStdId
+    ) {
+      Swal("Error!", "All input fields must be specified.", "error");
+      return;
+    }
     try {
-      // Ensure that positionName and selectedCategoryId are not empty
-      if (
-        !selectedCategoryId ||
-        !selectedEventId ||
-        !candidateName ||
-        !candidateDesc ||
-        !candidateStdId
-      ) {
-        console.error("all input file must be specified.");
-        return;
-      }
-      // Connect to the web3 provider (assuming MetaMask is installed)
       const web3 = new Web3(window.ethereum);
       await window.ethereum.enable();
       const accounts = await web3.eth.getAccounts();
-      console.log("contract address", contractAddress);
-
       const contract = new web3.eth.Contract(
         votingContract.abi,
         contractAddress
       );
-
-      // Perform the necessary action, e.g., sending a transaction
-      const transaction = await contract.methods
+      await contract.methods
         .addCandidateToEvent(
           selectedCategoryId,
           selectedEventId,
@@ -128,14 +123,24 @@ function AddCandidate() {
           candidateDesc,
           Number(candidateStdId)
         )
-        .send({
-          from: accounts[0], // Assuming the user's account is the first account
-        });
+        .send({ from: accounts[0] });
 
-      // Handle success
-      console.log("Transaction successful:", transaction);
+      Swal({
+        icon: "success",
+        title: "Candidate Created!",
+        text: "You've successfully added a new candidate.",
+      });
     } catch (error) {
-      console.error("Error creating position:", error);
+      let errorMessage = "An error occurred while creating the candidate.";
+      if (error.message.includes("revert")) {
+        const matches = error.message.match(/revert (.+)/);
+        errorMessage = matches && matches[1] ? matches[1] : errorMessage;
+      }
+      Swal({
+        icon: "error",
+        title: "Error creating candidate!",
+        text: errorMessage,
+      });
     }
   };
 
@@ -208,7 +213,7 @@ function AddCandidate() {
             type="number"
             className="form-control"
             id="inputDescription4"
-            placeholder="Enter Candidate Description"
+            placeholder="Enter Student ID"
             value={candidateStdId}
             onChange={handleCandidateStdIdChange}
           />
