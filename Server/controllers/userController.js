@@ -339,13 +339,13 @@ const login = async (req, res) => {
           const refreshTokenExpiry = req.body.remember ? "30d" : "1d";
           console.log(refreshTokenExpiry);
           const accessToken = jwt.sign(
-            { email: user.email, role: user.role },
+            { user_id: user.user_id, email: user.email, role: user.role },
             process.env.ACCESS_TOKEN_SECRET,
             { expiresIn: accessTokenExpiry }
           );
 
           const refreshToken = jwt.sign(
-            { email: user.email, role: user.role },
+            { user_id: user.user_id, email: user.email, role: user.role },
             process.env.REFRESH_TOKEN_SECRET,
             { expiresIn: refreshTokenExpiry }
           );
@@ -373,10 +373,12 @@ const login = async (req, res) => {
           const expiryDate = new Date(Date.now() + cookieExpiry);
           const klTime = moment(expiryDate).tz("Asia/Kuala_Lumpur").format();
           console.log(`Cookie expires at (Kuala Lumpur time): ${klTime}`);
-
-          return res
-            .status(200)
-            .send({ path, accessToken, userRole: user.role });
+          return res.status(200).send({
+            path,
+            accessToken,
+            userRole: user.role,
+            userId: user.user_id,
+          });
         } else {
           // Increment the login attempts counter in session
           req.session.loginAttempts = (req.session.loginAttempts || 0) + 1;
@@ -429,7 +431,11 @@ const handleRefreshToken = async (req, res) => {
         }
 
         const accessToken = jwt.sign(
-          { email: decoded.email, role: decoded.role },
+          {
+            user_id: decoded.user_id,
+            email: decoded.email,
+            role: decoded.role,
+          },
           process.env.ACCESS_TOKEN_SECRET,
           { expiresIn: "2h" }
         );

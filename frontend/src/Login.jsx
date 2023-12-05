@@ -45,6 +45,7 @@ function Login() {
         // Use setAuthData to update the auth state and persist it
         setAuthData({
           accessToken: response.data.accessToken,
+          userId: response.data.userId,
           userRole: response.data.userRole,
           email: values.email,
         });

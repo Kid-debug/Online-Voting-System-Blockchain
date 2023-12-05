@@ -16,6 +16,7 @@ const verifyJWT = (req, res, next) => {
         return res.status(403).json({ message: "The token is expired" });
       }
       req.user = {
+        user_id: decoded.user_id,
         email: decoded.email,
         role: decoded.role,
       };
