@@ -42,6 +42,7 @@ import Errorpage from "./component/Errorpage";
 import RequireAuth from "./component/RequireAuth";
 import { AuthProvider } from "./context/AuthProvider";
 
+
 const ROLES = {
   User: "U",
   Admin: "A",
@@ -101,7 +102,8 @@ function App() {
             <Route path="/about" element={<About />} />
             <Route path="/electionList/:categoryId" element={<ElectionList />} />
             <Route path="/electionDetails" element={<ElectionDetails />} />
-            <Route path="/voting" element={<Voting />} />
+            <Route path="/voting/:categoryId/:eventId" element={<Voting />} />
+
             <Route path="/verification" element={<Verification />} />
             <Route path="/feedback" element={<Feedback />} />
             <Route path="/userfeedbacklist" element={<UserFeedbackList />} />

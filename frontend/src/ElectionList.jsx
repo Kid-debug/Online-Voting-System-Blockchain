@@ -3,15 +3,14 @@ import Header from "./container/Header";
 import Footer from "./container/Footer";
 import { Link } from "react-router-dom";
 import "./stylesheets/electionlist.css";
-import { useParams} from "react-router-dom";
-import votingContract from "../../build/contracts/VotingSystem.json";
+import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
+import votingContract from "../../build/contracts/VotingSystem.json";
 import Web3 from "web3";
 import { contractAddress } from "./config";
 
 function ElectionList() {
   const [events, setEvents] = useState([]);
-
 
   const { categoryId } = useParams();
   console.log("categoryId : ", categoryId);
@@ -29,7 +28,9 @@ function ElectionList() {
         );
 
         // Call the getAllEvent function in smart contract
-        const eventList = await contract.methods.getAllCategoryEvent(categoryId).call();
+        const eventList = await contract.methods
+          .getAllCategoryEvent(categoryId)
+          .call();
 
         const eventPromises = eventList.map(async (event) => {
           const categoryName = await contract.methods
@@ -164,7 +165,10 @@ function ElectionList() {
           </thead>
           <tbody>
             {events.map((election, index) => (
-              <tr key={election.eventId} onClick={() => selectElection(election)}>
+              <tr
+                key={election.eventId}
+                onClick={() => selectElection(election)}
+              >
                 <td>{election.eventId}</td>
                 <td>{election.eventName}</td>
                 <td>{election.categoryName}</td>
@@ -173,7 +177,9 @@ function ElectionList() {
                 <td>{getElectionStatus(election)}</td>
                 <td>
                   <Link
-                    to="/electionDetails"
+                    to={`/voting/${Number(categoryId)}/${Number(
+                      election.eventId
+                    )}`}
                     style={{
                       border: "none",
                       padding: "7px 20px",

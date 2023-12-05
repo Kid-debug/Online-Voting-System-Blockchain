@@ -105,7 +105,6 @@ function AddCandidate() {
         !candidateDesc ||
         !candidateStdId
       ) {
-        console.error("candidateStdId : ", selectedEventId);
         console.error("all input file must be specified.");
         return;
       }
