@@ -51,26 +51,29 @@ function AddPosition() {
         console.error("Position name and category must be specified.");
         return;
       }
-  
+
       // Connect to the web3 provider (assuming MetaMask is installed)
       const web3 = new Web3(window.ethereum);
       await window.ethereum.enable();
       const accounts = await web3.eth.getAccounts();
-      console.log('contract address', contractAddress);
+      console.log("contract address", contractAddress);
 
-  
-      const contract = new web3.eth.Contract(votingContract.abi, contractAddress);
-  
+      const contract = new web3.eth.Contract(
+        votingContract.abi,
+        contractAddress
+      );
+
       // Perform the necessary action, e.g., sending a transaction
       const transaction = await contract.methods
         .addEvent(selectedCategoryId, positionName)
         .send({
           from: accounts[0], // Assuming the user's account is the first account
         });
-
+      // prompt success message
       // Handle success
       console.log("Transaction successful:", transaction);
     } catch (error) {
+      // prompt error message
       console.error("Error creating position:", error);
     }
   };
@@ -116,7 +119,11 @@ function AddPosition() {
           />
         </div>
         <div className="col-12">
-          <button type="button" className="btn btn-primary"  onClick={handleCreatePosition}>
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={handleCreatePosition}
+          >
             Create
           </button>
         </div>

@@ -41,7 +41,7 @@ import Unauthorized from "./component/Unauthorized";
 import Errorpage from "./component/Errorpage";
 import RequireAuth from "./component/RequireAuth";
 import { AuthProvider } from "./context/AuthProvider";
-
+import SessionHandler from "./component/SessionHandler";
 
 const ROLES = {
   User: "U",
@@ -52,6 +52,7 @@ function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <SessionHandler />
         <Routes>
           {/* Default route goes to Login */}
           <Route path="/" element={<Login />} />
@@ -100,7 +101,10 @@ function App() {
           >
             <Route path="/voterdashboard" element={<VoterDashboard />} />
             <Route path="/about" element={<About />} />
-            <Route path="/electionList/:categoryId" element={<ElectionList />} />
+            <Route
+              path="/electionList/:categoryId"
+              element={<ElectionList />}
+            />
             <Route path="/electionDetails" element={<ElectionDetails />} />
             <Route path="/voting/:categoryId/:eventId" element={<Voting />} />
 

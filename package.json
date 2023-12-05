@@ -24,6 +24,6 @@
     "semantic-ui-react": "^2.1.4",
     "slick-carousel": "^1.8.1",
     "sweetalert": "^2.1.2",
-    "web3": "^4.2.2"
+    "web3": "^4.3.0"
   }
 }

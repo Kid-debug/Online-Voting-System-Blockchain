@@ -4,18 +4,18 @@ export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [auth, setAuth] = useState(() => {
-    const localAuth = localStorage.getItem("auth");
-    return localAuth ? JSON.parse(localAuth) : {};
+    const sessionAuth = sessionStorage.getItem("auth");
+    return sessionAuth ? JSON.parse(sessionAuth) : {};
   });
 
   const setAuthData = (data) => {
     setAuth(data); // Update React state
-    localStorage.setItem("auth", JSON.stringify(data)); // Persist to localStorage
+    sessionStorage.setItem("auth", JSON.stringify(data)); // Persist to sessionStorage
   };
 
   const logout = () => {
     setAuth({}); // Clear React state
-    localStorage.removeItem("auth"); // Clear localStorage
+    sessionStorage.removeItem("auth"); // Clear sessionStorage
   };
 
   return (

@@ -24,10 +24,6 @@ User.init(
       type: DataTypes.STRING(100),
       allowNull: false,
     },
-    wallet_address: {
-      type: DataTypes.STRING(100),
-      allowNull: true, // allow null since it's not a required field
-    },
     role: {
       type: DataTypes.CHAR(1),
       allowNull: false,
@@ -59,10 +55,6 @@ User.init(
       type: DataTypes.DATE,
       allowNull: false,
       defaultValue: DataTypes.NOW, // Sequelize manages created_at & updated_at
-    },
-    refresh_token: {
-      type: DataTypes.TEXT,
-      allowNull: true,
     },
   },
   {

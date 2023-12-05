@@ -313,93 +313,32 @@ const login = async (req, res) => {
     const user = await User.findOne({ where: { email: req.body.email } });
 
     if (user) {
-      if (user.is_verified === 1) {
-        // Check if the account is locked
-        if (req.session.lockoutUntil && req.session.lockoutUntil > Date.now()) {
-          const lockoutRemaining = moment.duration(
-            req.session.lockoutUntil - Date.now()
-          );
+      const match = await bcrypt.compare(req.body.password, user.password);
 
-          // Calculate minutes and seconds
-          const minutesRemaining = lockoutRemaining.minutes();
-          const secondsRemaining = lockoutRemaining.seconds();
+      if (match) {
+        req.session.email = user.email;
+        req.session.role = user.role;
+        req.session.user_id = user.user_id;
+        let path = user.role === "U" ? "voterdashboard" : "admin/home";
 
-          return res.status(401).json({
-            msg: `Account locked. Please try again after ${minutesRemaining} minutes and ${secondsRemaining} seconds.`,
-          });
-        }
-
-        const match = await bcrypt.compare(req.body.password, user.password);
-
-        if (match) {
-          // Reset the login attempts counter upon successful login
-          req.session.loginAttempts = 0;
-
-          const accessTokenExpiry = "2h";
-          const refreshTokenExpiry = req.body.remember ? "30d" : "1d";
-          console.log(refreshTokenExpiry);
-          const accessToken = jwt.sign(
-            { user_id: user.user_id, email: user.email, role: user.role },
-            process.env.ACCESS_TOKEN_SECRET,
-            { expiresIn: accessTokenExpiry }
-          );
-
-          const refreshToken = jwt.sign(
-            { user_id: user.user_id, email: user.email, role: user.role },
-            process.env.REFRESH_TOKEN_SECRET,
-            { expiresIn: refreshTokenExpiry }
-          );
-
-          let path = user.role === "U" ? "voterdashboard" : "admin/home";
-          console.log(refreshToken);
-          await User.update(
-            { refresh_token: refreshToken },
-            { where: { email: user.email } }
-          );
-
-          // Set the cookie expiration to match the refreshToken's expiration
-          const cookieExpiry = req.body.remember
-            ? 30 * 24 * 60 * 60 * 1000
-            : 24 * 60 * 60 * 1000;
-
-          res.cookie("jwt", refreshToken, {
-            httpOnly: true,
-            sameSite: "None",
-            secure: true,
-            maxAge: cookieExpiry,
-          });
-
-          // Log the expiry time in Kuala Lumpur timezone
-          const expiryDate = new Date(Date.now() + cookieExpiry);
-          const klTime = moment(expiryDate).tz("Asia/Kuala_Lumpur").format();
-          console.log(`Cookie expires at (Kuala Lumpur time): ${klTime}`);
-          return res.status(200).send({
-            path,
-            accessToken,
-            userRole: user.role,
-            userId: user.user_id,
-          });
+        if (req.body.rememberMe) {
+          // Extend session cookie's lifetime for 30 days
+          req.session.cookie.maxAge = 30 * 60 * 60 * 1000;
         } else {
-          // Increment the login attempts counter in session
-          req.session.loginAttempts = (req.session.loginAttempts || 0) + 1;
-
-          // Check if the user has exceeded the maximum number of login attempts
-          const maxAttempts = 5;
-
-          if (req.session.loginAttempts >= maxAttempts) {
-            // Lock the account and set a lockout duration in session (5 minutes in milliseconds)
-            const lockoutDuration = 5 * 60 * 1000; // 5 minutes
-            req.session.lockoutUntil = Date.now() + lockoutDuration;
-
-            return res.status(401).json({
-              msg: `Account locked. Exceeded ${maxAttempts} login attempts. Please try again after 5 minutes.`,
-            });
-          } else {
-            return res.status(401).json({ msg: "Password is incorrect." });
-          }
+          // If Remember Me isn't checked, set a shorter session duration
+          req.session.cookie.maxAge = 24 * 60 * 1000; // 24 hours
         }
+
+        const sessionExpiryTime = Date.now() + req.session.cookie.maxAge;
+        return res.status(200).send({
+          path,
+          userRole: req.session.role,
+          email: req.session.email,
+          userId: req.session.user_id,
+          sessionExpiryTime,
+        });
       } else {
-        return res.status(401).json({ msg: "Please verify your email first." });
+        return res.status(401).json({ msg: "Password is incorrect." });
       }
     } else {
       return res.status(401).json({ msg: "Email does not exist." });
@@ -410,85 +349,14 @@ const login = async (req, res) => {
   }
 };
 
-const handleRefreshToken = async (req, res) => {
-  const cookies = req.cookies;
-  if (!cookies?.jwt) return res.sendStatus(401);
-  const refreshToken = cookies.jwt;
-
-  try {
-    const user = await User.findOne({ where: { refresh_token: refreshToken } });
-
-    if (!user) {
-      return res.sendStatus(403); // Forbidden
-    }
-
-    jwt.verify(
-      refreshToken,
-      process.env.REFRESH_TOKEN_SECRET,
-      (err, decoded) => {
-        if (err || user.email !== decoded.email) {
-          return res.sendStatus(403); // Forbidden
-        }
-
-        const accessToken = jwt.sign(
-          {
-            user_id: decoded.user_id,
-            email: decoded.email,
-            role: decoded.role,
-          },
-          process.env.ACCESS_TOKEN_SECRET,
-          { expiresIn: "2h" }
-        );
-
-        res.json({ accessToken });
-      }
-    );
-  } catch (error) {
-    console.error("Error in handleRefreshToken:", error);
-    return res.status(500).send("Internal Server Error");
-  }
-};
-
 const logout = async (req, res) => {
-  const cookies = req.cookies;
-  if (!cookies?.jwt) {
-    return res.sendStatus(204); // No content, no cookie to clear
-  }
-
-  const refreshToken = cookies.jwt;
-
-  try {
-    // Check if a user with the given refresh token exists
-    const user = await User.findOne({ where: { refresh_token: refreshToken } });
-
-    if (!user) {
-      // If there is no user with that refresh token, clear the cookie anyway
-      res.clearCookie("jwt", {
-        httpOnly: true,
-        sameSite: "None",
-        secure: true,
-      });
-      return res.sendStatus(204);
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).send({ msg: "Logout failed", error: err });
     }
-
-    // User with refreshToken exists, delete refreshToken in db
-    await User.update(
-      { refresh_token: null },
-      { where: { refresh_token: refreshToken } }
-    );
-
-    // Clear the refresh token cookie after successful DB update
-    res.clearCookie("jwt", {
-      httpOnly: true,
-      sameSite: "None",
-      secure: true,
-    });
-
-    return res.sendStatus(204); // Send No Content status after logging out
-  } catch (error) {
-    console.error("Logout error:", error);
-    return res.status(500).send("Internal Server Error");
-  }
+    res.clearCookie("userId");
+    return res.status(200).send({ msg: "Logged out" });
+  });
 };
 
 function generateVerificationCode(length) {
@@ -787,7 +655,6 @@ module.exports = {
   verifyMail,
   resendVerificationMail,
   login,
-  handleRefreshToken,
   logout,
   forgetPassword,
   resetPasswordLoad,

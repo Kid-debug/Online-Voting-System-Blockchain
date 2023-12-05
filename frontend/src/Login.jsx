@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState } from "react";
 import { EyeInvisibleOutlined, EyeOutlined } from "@ant-design/icons";
 import "./stylesheets/style.css";
 import axios from "axios";
@@ -16,7 +16,6 @@ function Login() {
   });
   const [visible, setVisible] = useState(false);
   const navigate = useNavigate();
-  // const { updateAuth } = useContext(AuthContext);
   const [backendErrors, setBackendErrors] = useState([]);
   const [remember, setRemember] = useState(false);
 
@@ -27,7 +26,7 @@ function Login() {
     const dataToSend = {
       email: values.email,
       password: values.password,
-      remember: remember,
+      rememberMe: remember,
     };
 
     try {
@@ -35,19 +34,16 @@ function Login() {
         "http://localhost:3000/api/login",
         dataToSend
       );
-
-      // The server is expected to send a path and accessToken on successful login
-      if (response.data.accessToken) {
+      console.log("Login response:", response.data);
+      if (response.data.userId) {
         console.log("Login successful");
-        console.log("Access Token: ", response.data.accessToken);
-        console.log("Role: ", response.data.userRole);
-
+        console.log(response.data.userId);
         // Use setAuthData to update the auth state and persist it
         setAuthData({
-          accessToken: response.data.accessToken,
           userId: response.data.userId,
           userRole: response.data.userRole,
           email: values.email,
+          sessionExpiryTime: response.data.sessionExpiryTime,
         });
         navigate(`/${response.data.path}`);
       } else {
@@ -56,7 +52,7 @@ function Login() {
     } catch (error) {
       if (error.response) {
         // If the backend sends an array of errors
-        if (error.response.data.errors) {
+        if (error.response.errors) {
           setBackendErrors(error.response.data.errors);
         } else {
           // If the backend sends a single error message
