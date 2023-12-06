@@ -44,7 +44,6 @@ import { AuthProvider } from "./context/AuthProvider";
 import SessionHandler from "./component/SessionHandler";
 import MailVerification from "./MailVerification";
 import ResetPassword from "./ResetPassword";
-import LinkExpired from "./component/LinkExpired";
 import ResetExpired from "./component/ResetExpired";
 
 const ROLES = {
