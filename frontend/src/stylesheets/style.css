@@ -169,3 +169,117 @@
   display: block; /* Center the image horizontally */
   margin: 0 auto;
 }
+
+.login-container {
+  width: 375px;
+  margin: 0 auto;
+}
+.space-6 {
+  max-height: 1px;
+  min-height: 1px;
+  overflow: hidden;
+  margin: 12px 0;
+  margin: 6px 0 5px;
+}
+.position-relative,
+.pos-rel {
+  position: relative;
+}
+.forgot-box .toolbar {
+  background: #c16050;
+  border-top: 2px solid #976559;
+  padding: 9px 18px;
+}
+.widget-box.visible {
+  visibility: visible;
+  position: relative;
+  z-index: auto;
+  -moz-transform: scale(1, 1) translate(0);
+  -webkit-transform: scale(1, 1) translate(0);
+  -o-transform: scale(1, 1) translate(0);
+  -ms-transform: scale(1, 1) translate(0);
+  transform: scale(1, 1) translate(0);
+  transition: transform 0.3s ease;
+  -moz-transition: -moz-transform 0.3s ease;
+  -webkit-transition: -webkit-transform 0.3s ease;
+  -o-transition: -o-transform 0.2s ease;
+}
+.widget-box .widget-main {
+  padding: 16px 36px 36px;
+  background: #f7f7f7;
+}
+.widget-box .widget-main form {
+  margin: 0;
+}
+.widget-box .widget-body .toolbar > div > a {
+  font-size: 15px;
+  font-weight: 400;
+  text-shadow: 1px 0px 1px rgba(0, 0, 0, 0.25);
+}
+.widget-body .wysiwyg-editor {
+  border-width: 0;
+}
+.widget-body .md-header {
+  margin-top: -30px;
+  margin-left: 9px;
+}
+.widget-body .md-header .btn {
+  border-color: transparent;
+  background: rgba(255, 255, 255, 0.25) !important;
+  color: #fff !important;
+  text-align: center;
+  min-width: 32px;
+  border-width: 1px !important;
+  border-radius: 4px !important;
+  padding: 2px 4px 4px;
+}
+.widget-body .md-header .btn > .ace-icon {
+  font-size: 14px;
+  width: 25px;
+  max-width: 25px;
+  display: inline-block;
+}
+.widget-body .md-header .btn-inverse {
+  background: rgba(0, 0, 0, 0.25) !important;
+  padding-right: 5px;
+  margin-left: 4px;
+}
+.md-fullscreen-controls {
+  display: none;
+}
+.widget-body .md-preview {
+  padding: 8px;
+  min-height: 200px;
+}
+.widget-body .md-input {
+  border: none !important;
+  box-shadow: none !important;
+  display: block;
+  margin-bottom: 0;
+  background-color: rgba(48, 126, 204, 0.07);
+  padding: 8px;
+  width: 100%;
+}
+.widget-body .md-input:focus {
+  background-color: #fff;
+  box-shadow: none !important;
+}
+.widget-body {
+  background-color: #fff;
+}
+.forgot-box .back-to-login-link {
+  color: #fe9;
+  font-size: 14px;
+  font-weight: bold;
+  text-shadow: 1px 0px 1px rgba(0, 0, 0, 0.25);
+  text-decoration: none;
+  &:hover {
+    color: #3366cc; /* Change the color on hover */
+  }
+}
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}

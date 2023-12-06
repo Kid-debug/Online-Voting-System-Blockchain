@@ -73,20 +73,39 @@ function ResetPassword() {
 
   return (
     <div className="d-flex justify-content-center align-items-center vh-100 loginPage">
-      <div className="p-3 rounded w-50 border loginForm">
-        <h2 className="mt-3 mb-4">Reset Your Password</h2>
+      {errorMessage ? (
+        // Show error message\
 
-        {errorMessage ? (
-          // Show error message
-          <div className="alert alert-danger" role="alert">
-            {errorMessage}
-            <Link to="/" className="btn btn-danger w-50">
-              Go To Login
-            </Link>
+        <div className="login-container">
+          <div className="space-6"></div>
+
+          <div className="position-relative">
+            <div
+              id="forgot-box"
+              className="forgot-box visible widget-box no-border"
+            >
+              <div className="widget-body">
+                <p
+                  style={{ textAlign: "center", padding: "20px", color: "red" }}
+                >
+                  {errorMessage}
+                </p>
+                <div className="toolbar">
+                  <a href="/" className="back-to-login-link">
+                    Back to login
+                    <i className="ace-icon fas bi-arrow-right"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
           </div>
-        ) : (
-          // Show the form
-          <>
+        </div>
+      ) : (
+        // Show the form
+        <>
+          <div className="p-3 rounded w-50 border loginForm">
+            <h2 className="mt-3 mb-4">Reset Your Password</h2>
+
             {successMessage && (
               <div className="alert alert-success" role="alert">
                 {successMessage}
@@ -157,9 +176,9 @@ function ResetPassword() {
                 Submit
               </button>
             </form>
-          </>
-        )}
-      </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
