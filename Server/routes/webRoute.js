@@ -4,7 +4,7 @@ const user_route = express.Router();
 const { resetValidation } = require("../helpers/validation");
 const userController = require("../controllers/userController");
 
-const checkResetToken = require("../middleware/checkResetToken");
+// const checkResetToken = require("../middleware/checkResetToken");
 
 // Define the GET route for mail verification
 user_route.get("/mail-verification", userController.verifyMail);
@@ -15,11 +15,7 @@ user_route.get("/mail-verification", userController.verifyMail);
 //   userController.resendVerificationMail
 // );
 
-user_route.get(
-  "/reset-password",
-  checkResetToken,
-  userController.resetPasswordLoad
-);
+user_route.get("/reset-password", userController.resetPasswordLoad);
 user_route.post(
   "/reset-password",
   resetValidation,

@@ -148,9 +148,7 @@ const verifyMail = async (req, res) => {
     const user = await User.findOne({ where: { token: token } });
 
     if (!user) {
-      return res
-        .status(500)
-        .json({ message: "An error occurred while verifying the email." });
+      return res.status(404).json({ message: "Token not found." });
     }
 
     // const tokenCreatedAt = new Date(user.token_created_at);
@@ -385,10 +383,7 @@ const forgetPassword = async (req, res) => {
         }
       }
 
-      // Generate a token with a 24 hours expiration
-      const token = jwt.sign({ email: email }, JWT_SECRET, {
-        expiresIn: "1d",
-      });
+      const token = randomstring.generate();
 
       const verificationCode = generateVerificationCode(10);
       console.log(verificationCode);
@@ -397,7 +392,7 @@ const forgetPassword = async (req, res) => {
       const content = `
         <p>We heard that you lost your password.</p>\n
         <p>Don't worry. Please click the following link and enter the following code to change your password:</p>\n
-        <p><a href='http://localhost:3000/reset-password?token=${token}'>http://localhost:3000/reset-password?token=${token}</a></p>\n
+        <p><a href='http://localhost:5173/reset-password/${token}'>http://localhost:5173/reset-password/${token}</a></p>\n
         <p>Code:${verificationCode}</p>\n
         <p>Please be reminded that the code is valid for 24 hours</p>\n
         <p>If you did not request for password reset, please ignore this email.</p>\n
@@ -429,29 +424,22 @@ const forgetPassword = async (req, res) => {
     }
   } catch (error) {
     console.error("Error in forgetPassword:", error);
-    return res.status(500).json({ msg: "Internal Server Error" });
+    return res.status(500).json({ msg: "Internal Server Error." });
   }
 };
 
 const resetPasswordLoad = async (req, res) => {
   try {
-    // Set headers to prevent caching of this page
-    res.set("Cache-Control", "no-cache, no-store, must-revalidate");
-    res.set("Pragma", "no-cache");
-    res.set("Expires", "0");
-    var token = req.query.token;
-    if (!token) {
-      return res.render("404");
-    }
+    const token = req.query.token;
 
-    // Verify if the token has expired
-    try {
-      await jwtVerify(token, process.env.JWT_SECRET);
-    } catch (error) {
-      // If there's an error, it could mean the token has expired
-      return res.render("reset-expired", {
-        message: "Your reset link has expired or is invalid.",
-      });
+    const findToken = await ResetPassword.findOne({
+      where: { token: token },
+    });
+
+    if (!findToken) {
+      return res
+        .status(404)
+        .json({ msg: "The link has expired. Please try again." });
     }
 
     const resetPasswordEntry = await ResetPassword.findOne({
@@ -463,115 +451,95 @@ const resetPasswordLoad = async (req, res) => {
       const createdAt = resetPasswordEntry.created_at;
       const expiryDate = new Date(createdAt.getTime() + 24 * 60 * 60 * 1000);
       if (new Date() > expiryDate) {
-        return res.render("reset-expired", {
-          message: "Your reset link has expired.",
-        });
+        return res
+          .status(400)
+          .json({ msg: "The link has expired. Please try again." });
       }
+    }
 
-      const user = await User.findOne({
-        where: { email: resetPasswordEntry.email },
+    const user = await User.findOne({
+      where: { email: resetPasswordEntry.email },
+    });
+    console.log(resetPasswordEntry.email);
+
+    if (user) {
+      return res.status(200).send({
+        userId: user.user_id,
       });
-
-      if (user) {
-        return res.render("reset-password", {
-          user: user,
-          error_messages: [],
-          token: token,
-        });
-      } else {
-        return res.render("404");
-      }
     } else {
-      return res.render("404");
+      return res.status(401).json({ msg: "User not found." });
     }
   } catch (error) {
-    console.log(error.message);
-    return res
-      .status(500)
-      .render("error-page", { message: "An error occurred." });
+    return res.status(500).json({ msg: "Internal Server Error." });
   }
 };
 
 const resetPassword = async (req, res) => {
   const errors = validationResult(req);
 
-  // It's better to use session or cookies to store these if possible
-  const userId = req.body.id || req.query.id;
-  const userEmail = req.body.email || req.query.email;
-  const userToken = req.body.token || req.query.token;
-  const verificationCode = req.body.code || req.query.code;
-
-  // Prepare the context for rendering the page
-  const context = {
-    error_messages: [],
-    user: { user_id: userId, email: userEmail },
-    token: userToken,
-  };
+  const userId = req.body.userId;
+  const userToken = req.body.token;
+  const verificationCode = req.body.verificationCode;
 
   if (!errors.isEmpty()) {
-    context.error_messages = errors.array();
-    return res.render("reset-password", context);
-  } else {
-    try {
-      const resetPasswordEntry = await ResetPassword.findOne({
-        where: { token: userToken },
-      });
+    return res.status(400).json({ errors: errors.array() });
+  }
 
-      if (!resetPasswordEntry) {
-        context.error_messages.push({ msg: "Invalid or expired token." });
-        return res.render("reset-password", context);
-      }
+  try {
+    const resetPasswordEntry = await ResetPassword.findOne({
+      where: { token: userToken },
+    });
 
-      // Check if the verification code is invalid
-      if (resetPasswordEntry.verification_code !== verificationCode) {
-        context.error_messages.push({
-          msg: "Invalid verification code.",
-        });
-        return res.render("reset-password", context);
-      }
-
-      const currentUser = await User.findByPk(userId);
-      if (!currentUser) {
-        context.error_messages.push({ msg: "User not found." });
-        return res.render("reset-password", context);
-      }
-
-      const currentHashedPassword = currentUser.password;
-      const isSamePassword = await bcrypt.compare(
-        req.body.password,
-        currentHashedPassword
-      );
-      if (isSamePassword) {
-        context.error_messages.push({
-          msg: "You are using an old password. Please set a new password!",
-        });
-        return res.render("reset-password", context);
-      }
-
-      // Proceed with resetting the password
-      const newHashedPassword = await bcrypt.hash(req.body.password, 10);
-      const [updatedRows] = await User.update(
-        { password: newHashedPassword },
-        { where: { user_id: userId } }
-      );
-
-      if (updatedRows > 0) {
-        await ResetPassword.destroy({ where: { token: userToken } });
-        context.success = true;
-        return res.render("reset-password", context);
-      } else {
-        context.error_messages.push({
-          msg: "Failed to update password. Please try again.",
-        });
-        return res.render("reset-password", context);
-      }
-    } catch (error) {
-      console.error("Error in resetPassword:", error);
-      context.error_messages.push({
-        msg: "An error occurred while resetting your password.",
-      });
-      return res.render("reset-password", context);
+    if (!resetPasswordEntry) {
+      return res
+        .status(404)
+        .json({ msg: "The link has expired. Please try again." });
     }
+
+    // Check if the verification code is invalid
+    if (resetPasswordEntry.verification_code !== verificationCode) {
+      return res.status(400).json({ msg: "Invalid verification code" });
+    }
+
+    const currentUser = await User.findByPk(userId);
+    if (!currentUser) {
+      return res.status(401).json({ msg: "User does not exist." });
+    }
+
+    const currentHashedPassword = currentUser.password;
+    const isSamePassword = await bcrypt.compare(
+      req.body.password,
+      currentHashedPassword
+    );
+
+    if (isSamePassword) {
+      return res.status(400).json({
+        msg: "You are using an old password. Please set a new password!",
+      });
+    }
+
+    // Proceed with resetting the password
+    const newHashedPassword = await bcrypt.hash(req.body.password, 10);
+    const [updatedRows] = await User.update(
+      { password: newHashedPassword },
+      { where: { user_id: userId } }
+    );
+
+    if (updatedRows > 0) {
+      await ResetPassword.destroy({ where: { token: userToken } });
+      return res
+        .status(200)
+        .send({ msg: "You have successfully reset your password!" });
+    } else {
+      return res
+        .status(500)
+        .send({ msg: "Failed to update password. Please try again." });
+    }
+  } catch (error) {
+    console.error("Error in resetPassword:", error);
+    return res
+      .status(500)
+      .send({ msg: "An error occurred while resetting your password." });
   }
 };
 

@@ -59,12 +59,14 @@ function MailVerification() {
             </div>
             <div className="bottomHalf">
               <p>
-                {successMessage && <p>{successMessage}</p>}
+                {successMessage && (
+                  <p className="text-success">{successMessage}</p>
+                )}
                 {errorMessage && (
-                  <p className="error-message">{errorMessage}</p>
+                  <p className="error-message text-danger">{errorMessage}</p>
                 )}
               </p>
-              <Link to="/" className="btn btn-success w-50 mb-2">
+              <Link to="/" className="btn btn-success w-50">
                 Go To Login
               </Link>
             </div>

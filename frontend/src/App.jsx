@@ -44,7 +44,6 @@ import { AuthProvider } from "./context/AuthProvider";
 import SessionHandler from "./component/SessionHandler";
 import MailVerification from "./MailVerification";
 import ResetPassword from "./ResetPassword";
-import ResetExpired from "./component/ResetExpired";
 
 const ROLES = {
   User: "U",
@@ -69,8 +68,7 @@ function App() {
             path="/mail-verification/:token"
             element={<MailVerification />}
           />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/reset-expired" element={<ResetExpired />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
 
           <Route element={<RequireAuth allowedRoles={[ROLES.Admin]} />}>
             <Route path="/admin" element={<Dashboard />}>
