@@ -10,10 +10,10 @@ const checkResetToken = require("../middleware/checkResetToken");
 user_route.get("/mail-verification", userController.verifyMail);
 
 // Define the POST route for resending verification email
-user_route.post(
-  "/resend-verification-email",
-  userController.resendVerificationMail
-);
+// user_route.post(
+//   "/resend-verification-email",
+//   userController.resendVerificationMail
+// );
 
 user_route.get(
   "/reset-password",

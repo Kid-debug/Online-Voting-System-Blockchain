@@ -51,13 +51,13 @@ const registerUser = async (req, res) => {
       "<p>We've received a verification request for " +
       req.body.email +
       ". Please verify your email below.</p>" +
-      "<p><a href='http://localhost:3000/mail-verification?token=" +
+      "<p><a href='http://localhost:5173/mail-verification/" +
       randomToken +
       "' style='background-color: darkblue; color: white; padding: 10px; text-decoration: none; display: inline-block;'>Verify Email</a></p>" +
       "<p>Can't see the button? Copy and paste this link into your browser:</p>" +
-      "<p><a href='http://localhost:3000/mail-verification?token=" +
+      "<p><a href='http://localhost:5173/mail-verification/" +
       randomToken +
-      "'>http://localhost:3000/mail-verification?token=" +
+      "'>http://localhost:5173/mail-verification/" +
       randomToken +
       "</a></p>" +
       "<p>Please be reminded that the verification token is only valid for 24 hours</p>" +
@@ -114,13 +114,13 @@ const registerAdmin = async (req, res) => {
       "<p>We've received a verification request for " +
       req.body.email +
       ". Please verify your email below.</p>\n" +
-      "<p><a href='http://localhost:3000/mail-verification?token=" +
+      "<p><a href='http://localhost:5173/mail-verification/" +
       randomToken +
       "' style='background-color: darkblue; color: white; padding: 10px; text-decoration: none; display: inline-block;'>Verify Email</a></p>\n" +
       "<p>Can't see the button? Copy and paste this link into your browser:</p>\n" +
-      "<p><a href='http://localhost:3000/mail-verification?token=" +
+      "<p><a href='http://localhost:5173/mail-verification/" +
       randomToken +
-      "'>http://localhost:3000/mail-verification?token=" +
+      "'>http://localhost:5173/mail-verification/" +
       randomToken +
       "</a></p>\n" +
       "<p>Please be reminded that the verification token is only valid for 24 hours</p>\n" +
@@ -143,164 +143,148 @@ const registerAdmin = async (req, res) => {
 
 const verifyMail = async (req, res) => {
   const token = req.query.token;
-
   try {
-    // Update token_updated_at with the current time
-    const updateResult = await User.update(
-      { token_updated_at: sequelize.fn("NOW") },
-      { where: { token: token } }
-    );
-
-    if (updateResult[0] < 1) {
-      // Token not found or already used
-      return res
-        .status(404)
-        .render("404", { message: "Token not found or already used" });
-    }
-
     // Retrieve the user to check the token_created_at
     const user = await User.findOne({ where: { token: token } });
 
     if (!user) {
-      return res.status(500).render("error-page", {
-        message: "An error occurred while verifying the email.",
-      });
+      return res
+        .status(500)
+        .json({ message: "An error occurred while verifying the email." });
     }
 
-    const tokenCreatedAt = new Date(user.token_created_at);
-    const tokenUpdatedAt = new Date(user.token_updated_at);
-    const tokenAgeSeconds = (tokenUpdatedAt - tokenCreatedAt) / 1000;
+    // const tokenCreatedAt = new Date(user.token_created_at);
+    // const tokenUpdatedAt = new Date(user.token_updated_at);
+    // const tokenAgeSeconds = (tokenUpdatedAt - tokenCreatedAt) / 1000;
 
-    const expirationTimeSeconds = 24 * 60 * 60; // 24 hours in seconds
+    // const expirationTimeSeconds = 24 * 60 * 60; // 24 hours in seconds
 
-    // Check if the token is expired
-    if (tokenAgeSeconds > expirationTimeSeconds) {
-      return res.status(400).render("link-expired", {
-        userEmail: user.email,
-        message:
-          "Your verification link has expired. Please request a new one.",
-      });
-    }
+    // // Check if the token is expired
+    // if (tokenAgeSeconds > expirationTimeSeconds) {
+    //   return res.status(400).json({
+    //     userEmail: user.email,
+    //     message:
+    //       "Your verification link has expired. Please request a new one.",
+    //   });
+    // }
 
     // Token is valid, proceed to update the user as verified
     await User.update(
       {
-        token: null,
-        token_created_at: null,
-        token_updated_at: null,
+        token_updated_at: sequelize.fn("NOW"),
         is_verified: 1,
       },
       { where: { user_id: user.user_id } }
     );
 
     // Verification successful
-    return res.status(200).render("mail-verification", {
+    return res.status(200).json({
       message:
-        "Email verification successful. You now can go to the login page to continue login process.",
+        "Email verification successful. You can now go to the login page to continue the login process.",
     });
   } catch (error) {
     console.error(error);
     // Handle errors during the process
-    return res.status(500).render("error-page", {
+    return res.status(500).json({
       message: "An error occurred while updating the user status.",
     });
   }
 };
 
-const resendVerificationMail = async (req, res) => {
-  const { email } = req.body;
+// const resendVerificationMail = async (req, res) => {
+//   const { email } = req.body;
 
-  if (!email) {
-    return res.status(404).render("404", { message: "No email provided" });
-  }
+//   if (!email) {
+//     return res.status(404).render("404", { message: "No email provided" });
+//   }
 
-  try {
-    // Check if the user exists, is not verified, and the cooldown has passed
-    const user = await User.findOne({
-      where: {
-        email: sequelize.where(
-          sequelize.fn("LOWER", sequelize.col("email")),
-          sequelize.fn("LOWER", email)
-        ),
-        is_verified: 0,
-      },
-    });
+//   try {
+//     // Check if the user exists, is not verified, and the cooldown has passed
+//     const user = await User.findOne({
+//       where: {
+//         email: sequelize.where(
+//           sequelize.fn("LOWER", sequelize.col("email")),
+//           sequelize.fn("LOWER", email)
+//         ),
+//         is_verified: 0,
+//       },
+//     });
 
-    if (!user) {
-      return res.status(404).render("404", {
-        message: "User does not exist or is already verified.",
-      });
-    }
+//     if (!user) {
+//       return res
+//         .status(404)
+//         .json({ message: "User does not exist or is already verified." });
+//     }
 
-    const timeElapsed = new Date() - new Date(user.token_created_at);
-    const waitTime = 15 * 60 * 1000; // 15 minutes in milliseconds
+//     const timeElapsed = new Date() - new Date(user.token_created_at);
+//     const waitTime = 15 * 60 * 1000; // 15 minutes in milliseconds
 
-    if (timeElapsed < waitTime) {
-      const timeToWait = waitTime - timeElapsed;
-      const minutesToWait = Math.ceil(timeToWait / 60000); // Convert milliseconds to minutes and round up
-      // Render the page with the message instead of sending JSON
-      return res.render("link-expired", {
-        userEmail: email,
-        message: `Please wait ${minutesToWait} more minute(s) before requesting a new verification email.`,
-      });
-    }
+//     if (timeElapsed < waitTime) {
+//       const timeToWait = waitTime - timeElapsed;
+//       const minutesToWait = Math.ceil(timeToWait / 60000); // Convert milliseconds to minutes and round up
+//       // Render the page with the message instead of sending JSON
+//       return res.status(400).json({
+//         userEmail: email,
+//         message: `Please wait ${minutesToWait} more minute(s) before requesting a new verification email.`,
+//       });
+//     }
 
-    // Generate a new token
-    const newToken = randomstring.generate();
+//     // Generate a new token
+//     const newToken = randomstring.generate();
 
-    // Update the user with the new token and timestamp
-    await User.update(
-      {
-        token: newToken,
-        token_created_at: sequelize.fn("NOW"), // Set the token_created_at to the current time
-        token_updated_at: null, // Set the token_updated_at to null
-      },
-      {
-        where: {
-          email: sequelize.where(
-            sequelize.fn("LOWER", sequelize.col("email")),
-            sequelize.fn("LOWER", email)
-          ),
-        },
-      }
-    );
+//     // Update the user with the new token and timestamp
+//     await User.update(
+//       {
+//         token: newToken,
+//         token_created_at: sequelize.fn("NOW"), // Set the token_created_at to the current time
+//         token_updated_at: null, // Set the token_updated_at to null
+//       },
+//       {
+//         where: {
+//           email: sequelize.where(
+//             sequelize.fn("LOWER", sequelize.col("email")),
+//             sequelize.fn("LOWER", email)
+//           ),
+//         },
+//       }
+//     );
 
-    // Send verification email with the new token
-    let mailSubject = "Resent Mail Verification (Online Voting System)";
-    let content =
-      "<p>Hi there,</p>\n" +
-      "<p>We've received a verification request for " +
-      req.body.email +
-      ". Please verify your email below.</p>\n" +
-      "<p><a href='http://localhost:3000/mail-verification?token=" +
-      newToken +
-      "' style='background-color: darkblue; color: white; padding: 10px; text-decoration: none; display: inline-block;'>Verify Email</a></p>\n" +
-      "<p>Can't see the button? Copy and paste this link into your browser:</p>\n" +
-      "<p><a href='http://localhost:3000/mail-verification?token=" +
-      newToken +
-      "'>http://localhost:3000/mail-verification?token=" +
-      newToken +
-      "</a></p>\n" +
-      "<p>Please be reminded that the verification token is only valid for 24 hours</p>\n" +
-      "<p>If you did not request for register email verification, please ignore this email.</p>\n" +
-      "<p>Thank you.</p>" +
-      "<br><br><br>" +
-      "<p>[This is a computer generated message which requires no signature.]</p><br>" +
-      "<p>*** THIS IS AN AUTO GENERATED EMAIL NOTIFICATION. PLEASE DO NOT REPLY. ***</p>";
+//     // Send verification email with the new token
+//     let mailSubject = "Resent Mail Verification (Online Voting System)";
+//     let content =
+//       "<p>Hi there,</p>\n" +
+//       "<p>We've received a verification request for " +
+//       req.body.email +
+//       ". Please verify your email below.</p>\n" +
+//       "<p><a href='http://localhost:3000/mail-verification?token=" +
+//       newToken +
+//       "' style='background-color: darkblue; color: white; padding: 10px; text-decoration: none; display: inline-block;'>Verify Email</a></p>\n" +
+//       "<p>Can't see the button? Copy and paste this link into your browser:</p>\n" +
+//       "<p><a href='http://localhost:3000/mail-verification?token=" +
+//       newToken +
+//       "'>http://localhost:3000/mail-verification?token=" +
+//       newToken +
+//       "</a></p>\n" +
+//       "<p>Please be reminded that the verification token is only valid for 24 hours</p>\n" +
+//       "<p>If you did not request for register email verification, please ignore this email.</p>\n" +
+//       "<p>Thank you.</p>" +
+//       "<br><br><br>" +
+//       "<p>[This is a computer generated message which requires no signature.]</p><br>" +
+//       "<p>*** THIS IS AN AUTO GENERATED EMAIL NOTIFICATION. PLEASE DO NOT REPLY. ***</p>";
 
-    await sendMail(email, mailSubject, content);
+//     await sendMail(email, mailSubject, content);
 
-    return res.status(200).render("mail-verification", {
-      message:
-        "Verification email resent successfully. Please check your email to verify your account!",
-    });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).render("error-page", {
-      message: "Error updating user with new token",
-    });
-  }
-};
+//     return res.status(200).json({
+//       message:
+//         "Verification email resent successfully. Please check your email to verify your account!",
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     return res.status(500).json({
+//       message: "Error updating user with new token",
+//     });
+//   }
+// };
 
 const login = async (req, res) => {
   const errors = validationResult(req);
@@ -656,7 +640,7 @@ module.exports = {
   registerUser,
   registerAdmin,
   verifyMail,
-  resendVerificationMail,
+  // resendVerificationMail,
   login,
   logout,
   forgetPassword,
