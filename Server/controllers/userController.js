@@ -175,23 +175,6 @@ const verifyMail = async (req, res) => {
       { where: { user_id: user.user_id } }
     );
 
-    // Insert the valid user in to the blockchain
-    const voterId = randomstring.generate();
-    try {
-      const web3 = new Web3(window.ethereum);
-      await window.ethereum.enable();
-      const accounts = await web3.eth.getAccounts();
-      const contract = new web3.eth.Contract(
-        votingContract.abi,
-        contractAddress
-      );
-      await contract.methods
-        .addVoter(voterId, user.email, user.password, user.role)
-        .send({ from: accounts[0] });
-    } catch (error) {
-      console.error("Error Msg : ", error.message);
-    }
-
     // Verification successful
     return res.status(200).json({
       message:
@@ -316,20 +299,20 @@ const login = async (req, res) => {
         const inputPassword = await bcrypt.hash(req.body.password, 10);
         const email = req.body.email;
         try {
-          const web3 = new Web3(window.ethereum);
-          await window.ethereum.enable();
-          const contract = new web3.eth.Contract(
-            votingContract.abi,
-            contractAddress
-          );
-          const voter = await contract.methods
-            .loginVoter(inputPassword, email)
-            .call();
+          // const web3 = new Web3(window.ethereum);
+          // await window.ethereum.enable();
+          // const contract = new web3.eth.Contract(
+          //   votingContract.abi,
+          //   contractAddress
+          // );
+          // const voter = await contract.methods
+          //   .loginVoter(inputPassword, email)
+          //   .call();
 
-          if (voter) {
-            req.session.email = voter.email;
-            req.session.role = voter.role;
-            req.session.user_id = voter.keys;
+          if (user) {
+            req.session.email = user.email;
+            req.session.role = user.role;
+            req.session.user_id = user.user_id;
             let path = user.role === "U" ? "voterdashboard" : "admin/home";
 
             if (req.body.rememberMe) {
