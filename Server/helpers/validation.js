@@ -107,7 +107,7 @@ exports.forgetValidation = [
 
 exports.resetValidation = [
   // Check if verification code is not empty
-  check("code", "• Code is required").not().isEmpty(),
+  check("verificationCode", "• Code is required").not().isEmpty(),
 
   // Check if password is not empty and stop validation chain if empty
   check("password", "• Password is required")

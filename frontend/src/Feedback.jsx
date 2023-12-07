@@ -48,9 +48,6 @@ function Feedback() {
     setShowConfirmation(false);
 
     try {
-      // Replace with actual token from auth context or state management
-      const token = auth?.accessToken;
-
       // Convert selected emotion to numerical value
       const emotionValues = {
         "sad-tear": 1,

@@ -42,6 +42,8 @@ import Errorpage from "./component/Errorpage";
 import RequireAuth from "./component/RequireAuth";
 import { AuthProvider } from "./context/AuthProvider";
 import SessionHandler from "./component/SessionHandler";
+import MailVerification from "./MailVerification";
+import ResetPassword from "./ResetPassword";
 
 const ROLES = {
   User: "U",
@@ -62,6 +64,11 @@ function App() {
           <Route path="/resetPass" element={<PasswordResetConfirmation />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
           <Route path="/error" element={<Errorpage />} />
+          <Route
+            path="/mail-verification/:token"
+            element={<MailVerification />}
+          />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
 
           <Route element={<RequireAuth allowedRoles={[ROLES.Admin]} />}>
             <Route path="/admin" element={<Dashboard />}>
