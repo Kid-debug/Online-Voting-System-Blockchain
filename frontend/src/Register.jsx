@@ -16,10 +16,6 @@ function Register() {
   const [successMessage, setSuccessMessage] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
-  console.log(
-    "sessionStorage.getItem('userId') : ",
-    sessionStorage.getItem("userKey")
-  );
   //removeItem kill session
 
   const handleRegister = async (event) => {
@@ -33,11 +29,6 @@ function Register() {
       setSuccessMessage(""); // Reset success message on new submission
       try {
         const emailLower = email.toLowerCase();
-
-        // if (existingUser) {
-        //   return res.status(409).json({ msg: "This email is already registered." });
-        // }
-
         // Generate a verification token
         const randomToken = cryptoRandomString({ length: 16 });
         // Insert the valid user in to the blockchain
@@ -58,16 +49,16 @@ function Register() {
           setSuccessMessage(
             "Congratulations, you registered with us successfully! Please verify your email to proceed login!"
           );
+          // send verification email
+          await axios.post("http://localhost:3000/api/verifyEmail", {
+            email,
+            randomToken,
+          });
           console.log("Form submitted successfully");
         } catch (error) {
           console.error("Error Msg : ", error.message);
         }
-
-        // send verification email
-        await axios.post("http://localhost:3000/api/verifyEmail", {
-          email,
-          randomToken,
-        });
+      
       } catch (err) {
         console.error(err);
       }
@@ -84,9 +75,7 @@ function Register() {
     // Check if email is not empty
     if (!email.trim()) {
       errors.email = "•Email is required";
-    } else if (!email.endsWith("@student.tarc.edu.my")) {
-      errors.email = "•Email must be a @student.tarc.edu.my";
-    }
+    } 
 
     // Check if password is not empty and meets requirements
     if (!password.trim()) {
@@ -109,7 +98,6 @@ function Register() {
 
     return errors;
   };
-
 
   return (
     <div className="loginPage">

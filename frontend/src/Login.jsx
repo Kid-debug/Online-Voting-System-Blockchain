@@ -63,8 +63,12 @@ function Login() {
             });
             
             // navigate to home
-            navigate(`/voterdashboard`);
-
+            if(user.role === "U"){
+              navigate(`/voterdashboard`);
+            }else{
+              navigate(`/admin/home`);
+            }
+            
           } else if (userStatus == 0) {
             errors.wrongPassord = "• Account haven't verify.";
           } else {

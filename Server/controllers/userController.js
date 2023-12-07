@@ -11,9 +11,6 @@ const { promisify } = require("util");
 const jwtVerify = promisify(jwt.verify);
 const randomstring = require("randomstring");
 const sendMail = require("../helpers/sendMail.js");
-const Web3 = require("web3");
-const votingContract = require("../../build/contracts/VotingSystem.json");
-const { contractAddress } = require("../../config-sever.js");
 
 const registerUser = async (req, res) => {
   const errors = validationResult(req);

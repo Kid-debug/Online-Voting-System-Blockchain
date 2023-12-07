@@ -3,6 +3,10 @@ import "./stylesheets/style.css";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { EyeInvisibleOutlined, EyeOutlined } from "@ant-design/icons";
+import Web3 from "web3";
+import votingContract from "../../build/contracts/VotingSystem.json";
+import { contractAddress } from "../../config";
+import cryptoRandomString from "crypto-random-string";
 
 function AdminRegister() {
   const [email, setEmail] = useState("");
@@ -12,42 +16,89 @@ function AdminRegister() {
   const [successMessage, setSuccessMessage] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
+  //removeItem kill session
 
   const handleRegister = async (event) => {
     event.preventDefault();
-    setBackendErrors([]);
-    setSuccessMessage(""); // Reset success message on new submission
 
-    try {
-      const response = await axios.post(
-        "http://localhost:3000/api/registerAdmin",
-        {
-          email,
-          password,
-          confirmPassword,
+    const errors = validateSignUp();
+
+    // If there are no errors, proceed with form submission
+    if (Object.keys(errors).length === 0) {
+      setBackendErrors([]);
+      setSuccessMessage(""); // Reset success message on new submission
+      try {
+        const emailLower = email.toLowerCase();
+        // Generate a verification token
+        const randomToken = cryptoRandomString({ length: 16 });
+        // Insert the valid user in to the blockchain
+        const voterId = cryptoRandomString({ length: 16 });
+
+        try {
+          const web3 = new Web3(window.ethereum);
+          await window.ethereum.enable();
+          const accounts = await web3.eth.getAccounts();
+          const contract = new web3.eth.Contract(
+            votingContract.abi,
+            contractAddress
+          );
+          await contract.methods
+            .addVoter(voterId, emailLower, password, "A", randomToken)
+            .send({ from: accounts[0] });
+
+          setSuccessMessage(
+            "Congratulations, you registered with us successfully! Please verify your email to proceed login!"
+          );
+          // send verification email
+          await axios.post("http://localhost:3000/api/verifyEmail", {
+            email,
+            randomToken,
+          });
+          console.log("Form submitted successfully");
+        } catch (error) {
+          console.error("Error Msg : ", error.message);
         }
-      );
-      // Handle successful registration here.
-      setSuccessMessage(response.data.msg); // Set the success message to state
-      // Optionally, redirect user or handle the success case further...
-    } catch (error) {
-      if (error.response) {
-        // If the backend sends an array of errors
-        if (error.response.data.errors) {
-          setBackendErrors(error.response.data.errors);
-        } else {
-          // If the backend sends a single error message
-          setBackendErrors([{ msg: error.response.data.msg }]);
-        }
-      } else {
-        // Handle other errors here
-        console.error("Registration error:", error);
-        setBackendErrors([
-          { msg: "Network error occurred. Please refresh your page!" },
-        ]);
+      
+      } catch (err) {
+        console.error(err);
       }
+    } else {
+      // Handle errors (e.g., display error messages)
+      console.log("Form contains errors:", errors);
+      setBackendErrors(Object.values(errors));
     }
   };
+
+  const validateSignUp = () => {
+    const errors = {};
+
+    // Check if email is not empty
+    if (!email.trim()) {
+      errors.email = "•Email is required";
+    } 
+
+    // Check if password is not empty and meets requirements
+    if (!password.trim()) {
+      errors.password = "•Password is required";
+    } else if (password.length < 8) {
+      errors.password = "•Password must be at least 8 characters long";
+    } else if (
+      !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/.test(password)
+    ) {
+      errors.password =
+        "•Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character";
+    }
+
+    // Check if confirm password matches password
+    if (!confirmPassword.trim()) {
+      errors.confirmPassword = "•Confirm Password is required";
+    } else if (confirmPassword !== password) {
+      errors.confirmPassword = "•Confirm Password must match the password";
+    }
+
+    return errors;
+  };
+
 
   return (
     <div className="loginPage">
@@ -62,7 +113,7 @@ function AdminRegister() {
         {backendErrors.length > 0 && (
           <div className="alert alert-danger" role="alert">
             {backendErrors.map((error, index) => (
-              <div key={index}>{error.msg}</div>
+              <div key={index}>{error}</div>
             ))}
           </div>
         )}
