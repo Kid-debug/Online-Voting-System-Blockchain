@@ -13,7 +13,7 @@ function Candidate() {
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const [sortColumn, setSortColumn] = useState(null);
   const [sortDirection, setSortDirection] = useState(null);
-
+  const IMAGE_BASE_URL = "http://localhost:3000/uploads/";
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -43,6 +43,7 @@ function Candidate() {
             candidateVoteCount: Number(candidate.voteCount),
             categoryName: category.categoryName,
             eventName: event.eventName,
+            imageFileName: candidate.imageFileName,
           };
         });
 
@@ -65,6 +66,7 @@ function Candidate() {
     candidateName: "Candidate Name",
     candidateDesc: "Description",
     candidateVoteCount: "Vote Count",
+    imageFileName: "Image",
     Action: "Action",
   };
 
@@ -75,6 +77,7 @@ function Candidate() {
     "candidateName",
     "candidateDesc",
     "candidateVoteCount",
+    "imageFileName",
     "Action",
   ];
 
@@ -198,7 +201,7 @@ function Candidate() {
           <tr>
             {columns.map((column, index) => (
               <th key={index} onClick={() => handleSort(column)}>
-                {column}
+                {columnMapping[column]}
                 {sortColumn === column && (
                   <span>
                     {sortDirection === "asc" ? <>&uarr;</> : <>&darr;</>}
@@ -213,8 +216,12 @@ function Candidate() {
             <tr key={rowIndex}>
               {columns.map((column, colIndex) => (
                 <td key={colIndex} className="data-cell">
-                  {column === "Image" ? (
-                    <img src={row[column]} alt="Image" className="image" />
+                  {column === "imageFileName" && row.imageFileName ? (
+                    <img
+                      src={`${IMAGE_BASE_URL}${row.imageFileName}`}
+                      alt={row.imageFileName}
+                      className="image"
+                    />
                   ) : column === "Description" ? (
                     <>
                       {row[column].length > 50 &&

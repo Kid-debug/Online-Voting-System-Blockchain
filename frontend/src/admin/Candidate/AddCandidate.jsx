@@ -4,6 +4,7 @@ import Web3 from "web3";
 import votingContract from "../../../../build/contracts/VotingSystem.json";
 import { contractAddress } from "../../../../config";
 import Swal from "sweetalert";
+import axios from "../../api/axios";
 
 function AddCandidate() {
   // Define state for selected category and election
@@ -14,6 +15,7 @@ function AddCandidate() {
   const [candidateName, setCandidateName] = useState("");
   const [candidateDesc, setCandidateDesc] = useState("");
   const [candidateStdId, setCandidateStdId] = useState("");
+  const [file, setFile] = useState(null);
 
   useEffect(() => {
     // Fetch categories when the component mounts
@@ -37,6 +39,10 @@ function AddCandidate() {
     };
     fetchCategories();
   }, []);
+
+  const handleFileChange = (event) => {
+    setFile(event.target.files[0]);
+  };
 
   // Handle category change events
   const handleCategoryChange = (event) => {
@@ -108,6 +114,12 @@ function AddCandidate() {
       return;
     }
     try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await axios.post("/upload", formData);
+      const { imageFileName } = response.data;
+
       const web3 = new Web3(window.ethereum);
       await window.ethereum.enable();
       const accounts = await web3.eth.getAccounts();
@@ -115,13 +127,15 @@ function AddCandidate() {
         votingContract.abi,
         contractAddress
       );
+
       await contract.methods
         .addCandidateToEvent(
           selectedCategoryId,
           selectedEventId,
           candidateName,
           candidateDesc,
-          Number(candidateStdId)
+          Number(candidateStdId),
+          imageFileName
         )
         .send({ from: accounts[0] });
 
@@ -132,9 +146,21 @@ function AddCandidate() {
       });
     } catch (error) {
       let errorMessage = "An error occurred while creating the candidate.";
-      if (error.message.includes("revert")) {
-        const matches = error.message.match(/revert (.+)/);
-        errorMessage = matches && matches[1] ? matches[1] : errorMessage;
+      // Check if the error message includes a revert
+      if (error.response && error.response.data) {
+        // Extracting and displaying the specific message from the Node.js server
+        errorMessage = error.response.data.message || error.response.data;
+      } else if (error.message) {
+        if (error.message.includes("revert")) {
+          // Handling smart contract revert message
+          const matches = error.message.match(/revert (.+)/);
+          errorMessage =
+            matches && matches[1]
+              ? matches[1]
+              : "Transaction reverted without a reason.";
+        } else {
+          errorMessage = error.message;
+        }
       }
       Swal({
         icon: "error",
@@ -147,7 +173,7 @@ function AddCandidate() {
   return (
     <div className="d-flex flex-column align-items-center pt-4">
       <h2>Add Candidate</h2>
-      <form class="row g-3 w-50">
+      <form className="row g-3 w-50">
         <div className="col-12">
           <label htmlFor="electionSelect" className="form-label">
             Category
@@ -191,7 +217,7 @@ function AddCandidate() {
             ))}
           </select>
         </div>
-        <div class="col-12">
+        <div className="col-12">
           <label htmlFor="inputname4" className="form-label">
             First Name
           </label>
@@ -205,7 +231,7 @@ function AddCandidate() {
           />
         </div>
 
-        <div class="col-12">
+        <div className="col-12">
           <label htmlFor="inputDescription4" className="form-label">
             Student ID
           </label>
@@ -219,7 +245,7 @@ function AddCandidate() {
           />
         </div>
 
-        <div class="col-12">
+        <div className="col-12">
           <label htmlFor="inputDescription4" className="form-label">
             Description
           </label>
@@ -233,13 +259,19 @@ function AddCandidate() {
           />
         </div>
 
-        <div class="col-12 mb-3">
+        <div className="col-12 mb-3">
+          {/* Display the image if the URL is set */}
           <label htmlFor="inputGroupFile01" className="form-label">
             Select Image
           </label>
-          <input type="file" className="form-control" id="inputGroupFile01" />
+          <input
+            type="file"
+            className="form-control"
+            id="inputGroupFile01"
+            onChange={handleFileChange}
+          />
         </div>
-        <div class="col-12">
+        <div className="col-12">
           <button
             type="button"
             className="btn btn-primary"

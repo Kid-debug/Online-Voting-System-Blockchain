@@ -38,6 +38,7 @@ contract VotingSystem {
         uint256 eventId;
         uint256 voteCount;
         bool win;
+        string imageFileName;
     }
 
     struct voteEventStruct {
@@ -66,6 +67,7 @@ contract VotingSystem {
     mapping(uint256 => Candidate) candidates;
     mapping(uint256 => voteEventStruct) public voteEvents;
     mapping(uint256 => Voter) public voters;
+    mapping(string => bool) private usedImageFileNames;
 
     uint256 categoryCount;
     uint256 candidateCount;
@@ -321,7 +323,8 @@ contract VotingSystem {
         uint256 _eventId,
         string memory _candidateName,
         string memory _description,
-        uint256 _studentId
+        uint256 _studentId,
+        string memory _imageFileName
     ) public {
         require(
             categories[_categoryId].categoryId != 0,
@@ -350,7 +353,8 @@ contract VotingSystem {
             eventId: _eventId,
             description: _description,
             win: false,
-            voteCount: 0
+            voteCount: 0,
+            imageFileName: _imageFileName
         });
 
         // find the certain category
