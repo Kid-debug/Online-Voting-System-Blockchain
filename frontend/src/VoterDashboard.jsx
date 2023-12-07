@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import "./stylesheets/voterhome.css";
 import votingContract from "../../build/contracts/VotingSystem.json";
 import Web3 from "web3";
-import { contractAddress } from "./config";
+import { contractAddress } from "../../config";
 
 function VoterDashboard() {
   // State for sorting and filtering

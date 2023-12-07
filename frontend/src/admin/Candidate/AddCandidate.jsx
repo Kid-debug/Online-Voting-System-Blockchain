@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Web3 from "web3";
 import votingContract from "../../../../build/contracts/VotingSystem.json";
-import { contractAddress } from "../../config";
+import { contractAddress } from "../../../../config";
 import Swal from "sweetalert";
 
 function AddCandidate() {

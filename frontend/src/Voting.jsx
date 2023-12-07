@@ -4,7 +4,7 @@ import Header from "./container/Header";
 import Footer from "./container/Footer";
 import "./stylesheets/voting.css";
 import Web3 from "web3";
-import { contractAddress } from "./config";
+import { contractAddress } from "../../config";
 import votingContract from "../../build/contracts/VotingSystem.json";
 import { useParams } from "react-router-dom";
 

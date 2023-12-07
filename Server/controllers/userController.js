@@ -1,7 +1,7 @@
 // userController.js
-const User = require("../models/user");
-const ResetPassword = require("../models/reset_passwords");
-const sequelize = require("../config/sequelize");
+const User = require("../models/user.js");
+const ResetPassword = require("../models/reset_passwords.js");
+const sequelize = require("../config/sequelize.js");
 const { validationResult } = require("express-validator");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -193,6 +193,23 @@ const verifyMail = async (req, res) => {
       { where: { user_id: user.user_id } }
     );
 
+    // Insert the valid user in to the blockchain
+    const voterId = randomstring.generate();
+    try {
+      const web3 = new Web3(window.ethereum);
+      await window.ethereum.enable();
+      const accounts = await web3.eth.getAccounts();
+      const contract = new web3.eth.Contract(
+        votingContract.abi,
+        contractAddress
+      );
+      await contract.methods
+        .addVoter(voterId, user.email, user.password, user.role)
+        .send({ from: accounts[0] });
+    } catch (error) {
+      console.error("Error Msg : ", error.message);
+    }
+
     // Verification successful
     return res.status(200).render("mail-verification", {
       message:
@@ -313,32 +330,47 @@ const login = async (req, res) => {
 
     if (user) {
       if (user.is_verified === 1) {
-        const match = await bcrypt.compare(req.body.password, user.password);
+        // const match = await bcrypt.compare(req.body.password, user.password);
+        const inputPassword = await bcrypt.hash(req.body.password, 10);
+        const email = req.body.email;
+        try {
+          const web3 = new Web3(window.ethereum);
+          await window.ethereum.enable();
+          const contract = new web3.eth.Contract(
+            votingContract.abi,
+            contractAddress
+          );
+          const voter = await contract.methods
+            .loginVoter(inputPassword, email)
+            .call();
 
-        if (match) {
-          req.session.email = user.email;
-          req.session.role = user.role;
-          req.session.user_id = user.user_id;
-          let path = user.role === "U" ? "voterdashboard" : "admin/home";
+          if (voter) {
+            req.session.email = voter.email;
+            req.session.role = voter.role;
+            req.session.user_id = voter.keys;
+            let path = user.role === "U" ? "voterdashboard" : "admin/home";
 
-          if (req.body.rememberMe) {
-            // Extend session cookie's lifetime for 30 days
-            req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
+            if (req.body.rememberMe) {
+              // Extend session cookie's lifetime for 30 days
+              req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
+            } else {
+              // If Remember Me isn't checked, set a shorter session duration (24 hours)
+              req.session.cookie.maxAge = 24 * 60 * 60 * 1000; // 24 hours
+            }
+
+            const sessionExpiryTime = Date.now() + req.session.cookie.maxAge;
+            return res.status(200).send({
+              path,
+              userRole: req.session.role,
+              email: req.session.email,
+              userId: req.session.user_id,
+              sessionExpiryTime,
+            });
           } else {
-            // If Remember Me isn't checked, set a shorter session duration (24 hours)
-            req.session.cookie.maxAge = 24 * 60 * 60 * 1000; // 24 hours
+            return res.status(401).json({ msg: "Password is incorrect." });
           }
-
-          const sessionExpiryTime = Date.now() + req.session.cookie.maxAge;
-          return res.status(200).send({
-            path,
-            userRole: req.session.role,
-            email: req.session.email,
-            userId: req.session.user_id,
-            sessionExpiryTime,
-          });
-        } else {
-          return res.status(401).json({ msg: "Password is incorrect." });
+        } catch (error) {
+          console.error("Error Msg : ", error.message);
         }
       } else {
         return res.status(401).json({ msg: "Please verify your email first." });

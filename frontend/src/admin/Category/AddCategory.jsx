@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import votingContract from "../../../../build/contracts/VotingSystem.json";
 import Web3 from "web3";
-import { contractAddress } from "../../config";
+import { contractAddress } from "../../../../config";
 import Swal from "sweetalert";
 
 function AddCategory() {

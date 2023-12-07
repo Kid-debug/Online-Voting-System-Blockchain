@@ -3,6 +3,7 @@ import "./stylesheets/style.css";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { EyeInvisibleOutlined, EyeOutlined } from "@ant-design/icons";
+import { contractAddress } from "../../config";
 
 function Register() {
   const [email, setEmail] = useState("");

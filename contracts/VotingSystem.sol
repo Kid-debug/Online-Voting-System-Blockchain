@@ -2,12 +2,22 @@
 pragma solidity >=0.4.22 <0.9.0;
 
 contract VotingSystem {
+    address public owner;
+    struct Voter {
+        uint256 id;
+        string key;
+        string email;
+        string password;
+        string role;
+    }
+
     struct Event {
         uint256 eventId;
         string eventName;
         uint256 categoryId;
         Candidate[] candidates;
         uint256 candidateCount;
+        uint256 status; // 1: Upcoming, 2: In Progress, 3: Completed, 4： Cancel
     }
 
     struct Category {
@@ -36,24 +46,88 @@ contract VotingSystem {
     }
 
     event CategoryAdded(uint256 indexed categoryId, string categoryName);
+    event VoterAdded(uint256 indexed voterId, string voter_key);
     event EventAdded(uint256 indexed eventId, string eventName);
     event CandidateAdded(uint256 indexed eventId, string eventName);
-
-    mapping(uint256 => Category) categories;
-    mapping(uint256 => Event) events;
-    mapping(uint256 => Candidate) candidates;
-    mapping(uint256 => voteEventStruct) public voteEvents;
-
-    uint256 categoryCount;
-    uint256 candidateCount;
-    uint256 eventCount;
-    uint256 voteEventCount;
-
     event VoteEvent(
         uint256 indexed voterId,
         string indexed categoryEvent,
         uint256 indexed candidate
     );
+
+    mapping(uint256 => Category) categories;
+    mapping(uint256 => Event) events;
+    mapping(uint256 => Candidate) candidates;
+    mapping(uint256 => voteEventStruct) public voteEvents;
+    mapping(uint256 => Voter) public voters;
+
+    uint256 categoryCount;
+    uint256 candidateCount;
+    uint256 eventCount;
+    uint256 voteEventCount;
+    uint256 voterCount;
+
+    constructor() {
+        owner = msg.sender;
+    }
+
+    function addVoter(
+        string memory _key,
+        string memory _email,
+        string memory _password,
+        string memory _role
+    ) public {
+        for (uint256 i = 1; i <= voterCount; i++) {
+            require(
+                keccak256(bytes(_key)) != keccak256(bytes(voters[i].key)),
+                "Voter already exists"
+            );
+        }
+
+        // total category plus 1, use it as the category's id
+        voterCount += 1;
+
+        // add the category details in the category list
+        Voter storage voter = voters[voterCount];
+        voter.id = voterCount;
+        voter.key = _key;
+        voter.email = _email;
+        voter.password = _password;
+        voter.role = _role;
+
+        // emit the category added event
+        emit VoterAdded(voterCount, _key);
+    }
+
+    function loginVoter(string memory _email, string memory _password)
+        public
+        view
+        returns (Voter memory)
+    {
+        Voter memory voterFound = getVoter(_email,_password);
+        require(voterFound.id !=0, "Your email or password is incorrect!");
+
+       return voterFound;
+    }
+
+    function getVoter(string memory _email, string memory _password)
+        public
+        view
+        returns (Voter memory)
+    {
+        for (uint256 i = 1; i <= voterCount; i++) {
+           if((keccak256(bytes(_email)) ==
+                    keccak256(bytes(voters[i].email)) &&
+                    keccak256(bytes(_password)) ==
+                    keccak256(bytes(voters[i].password)))
+            ){
+                return voters[i];
+            }
+        }
+
+        // Event not found in the specified category
+        return Voter(0, "", "","","");
+    }
 
     function addCategory(string memory _categoryName) public {
         // check if the category is exist
@@ -99,6 +173,7 @@ contract VotingSystem {
         newEvent.eventId = eventId;
         newEvent.eventName = _eventName;
         newEvent.categoryId = _categoryId;
+        newEvent.status = 1;
 
         // // Add candidates to the event
         // for (uint256 i = 0; i < _candidateNames.length; i++) {
@@ -221,7 +296,7 @@ contract VotingSystem {
         return false;
     }
 
-     function isCandidateExistsInEventById(
+    function isCandidateExistsInEventById(
         uint256 _categoryId,
         uint256 _eventId,
         uint256 _candidateId
