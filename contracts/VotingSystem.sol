@@ -151,6 +151,30 @@ contract VotingSystem {
         emit CategoryAdded(categoryCount, _categoryName);
     }
 
+    function updateCategory(uint256 _categoryId, string memory _newCategoryName) public {
+        // Check if the category exists
+        require(categories[_categoryId].categoryId != 0, "Category does not exist");
+
+        // Check if the new category name is different from the existing name in the list
+        // and not the same as the current category name being updated
+        for (uint256 i = 1; i <= categoryCount; i++) {
+            if (i != _categoryId) {
+                require(
+                    keccak256(bytes(_newCategoryName)) !=
+                    keccak256(bytes(categories[i].categoryName)),
+                    "Category name already exists"
+                );
+            }
+        }
+
+        // Update the category name
+        categories[_categoryId].categoryName = _newCategoryName;
+
+        // Emit the CategoryAdded event for both adding and updating
+        emit CategoryAdded(_categoryId, _newCategoryName);
+    }
+
+
     function addEvent(uint256 _categoryId, string memory _eventName) public {
         // check if the category has exists
         require(

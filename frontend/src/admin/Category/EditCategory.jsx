@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "../../api/axios";
+import votingContract from "../../../../build/contracts/VotingSystem.json";
+import Web3 from "web3";
+import { contractAddress } from "../../../../config";
 import Swal from "sweetalert";
 
 function EditCategory() {
@@ -10,72 +12,73 @@ function EditCategory() {
   const { categoryId } = useParams();
 
   useEffect(() => {
-    const fetchCategory = async () => {
+    const fetchCategoryDetails = async () => {
       try {
-        const response = await axios.get(`/api/retrieveCategory/${categoryId}`);
-        const category = response.data;
-        setCategoryName(category.category_name);
+        const web3 = new Web3(window.ethereum);
+        await window.ethereum.enable();
+        const accounts = await web3.eth.getAccounts();
+
+        const contract = new web3.eth.Contract(
+          votingContract.abi,
+          contractAddress
+        );
+
+        const category = await contract.methods
+          .getCategoryById(categoryId)
+          .call();
+
+        // Update the state with the fetched category name
+        setCategoryName(category.categoryName);
       } catch (error) {
-        console.error("Error fetching category:", error);
-        navigate("/admin/category", { replace: true });
+        console.error("Error fetching categories:", error);
       }
     };
 
-    if (categoryId) {
-      fetchCategory();
-    }
+    fetchCategoryDetails();
   }, [categoryId]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    if (!categoryName) {
+      Swal("Error!", "Category input fields must be filled in.", "error");
+      return;
+    }
+
     try {
-      const response = await axios.put(`/api/updateCategory/${categoryId}`, {
-        category_name: categoryName,
-      });
+      const web3 = new Web3(window.ethereum);
+      await window.ethereum.enable();
+      const accounts = await web3.eth.getAccounts();
+      const contract = new web3.eth.Contract(
+        votingContract.abi,
+        contractAddress
+      );
+
+      await contract.methods
+        .updateCategory(categoryId, categoryName)
+        .send({ from: accounts[0] });
+
+      Swal("Success!", "Category updated successfully.", "success");
+    } catch (error) {
+      console.error("Updating Category error:", error);
+
+      let errorMessage = "An error occurred while updating the category.";
+      // Check if the error message includes a revert
+      if (error.message && error.message.includes("revert")) {
+        const matches = error.message.match(/revert (.+)/);
+        errorMessage =
+          matches && matches[1]
+            ? matches[1]
+            : "Transaction reverted without a reason.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
 
       Swal({
-        title: "Update Category Successfully!",
-        text: response.data.msg,
-        icon: "success",
-        button: {
-          text: "OK",
-        },
+        icon: "error",
+        title: "Error updating category!",
+        text: errorMessage,
       });
-    } catch (error) {
-      if (error.response) {
-        // If the backend sends an array of errors
-        if (error.response.data.errors) {
-          Swal({
-            icon: "error",
-            title: "Failed to Update Category!",
-            text: error.response.data.errors.map((e) => e.msg).join("\n"),
-            button: {
-              text: "OK",
-            },
-          });
-        } else {
-          // If the backend sends a single error message
-          Swal({
-            icon: "error",
-            title: "Failed to Update Category!",
-            text: error.response.data.msg,
-            button: {
-              text: "OK",
-            },
-          });
-        }
-      } else {
-        // Handle other errors here
-        console.error("Updating Category error:", error);
-        Swal({
-          icon: "error",
-          title: "Internal Server Error",
-          text: "Network error occurred.",
-          button: {
-            text: "OK",
-          },
-        });
-      }
     }
   };
 

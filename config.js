@@ -1,3 +1,2 @@
 // config.js
-export const contractAddress = "0x9eab265D2d65f110CF805089bD350c449863eaC3";
-
+export const contractAddress = "0x7FEe88d69aC3a47f0bB6bda22D10aD91b3925EaA";
