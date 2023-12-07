@@ -55,6 +55,9 @@ function Register() {
             .addVoter(voterId, emailLower, password, "U", randomToken)
             .send({ from: accounts[0] });
 
+          setSuccessMessage(
+            "Congratulations, you registered with us successfully! Please verify your email to proceed login!"
+          );
           console.log("Form submitted successfully");
         } catch (error) {
           console.error("Error Msg : ", error.message);
@@ -65,9 +68,6 @@ function Register() {
           email,
           randomToken,
         });
-        setSuccessMessage(
-          "Congratulations, you registered with us successfully! Please verify your email to proceed login!"
-        );
       } catch (err) {
         console.error(err);
       }
@@ -110,26 +110,6 @@ function Register() {
     return errors;
   };
 
-  const sendMail = async (email, mailSubject, content) => {
-    try {
-      const templateParams = {
-        to_email: email,
-        subject: mailSubject,
-        html_content: content,
-      };
-
-      await emailjs.send(
-        "service_name", // replace with your service ID
-        "template_name", // replace with your template ID
-        templateParams,
-        "user_id" // replace with your user ID
-      );
-
-      console.log("Mail sent successfully");
-    } catch (error) {
-      console.error("Error sending mail:", error);
-    }
-  };
 
   return (
     <div className="loginPage">

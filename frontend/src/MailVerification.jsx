@@ -87,7 +87,7 @@ function MailVerification() {
                   <p className="error-message text-danger">{errorMessage}</p>
                 )}
               </p>
-              <Link to="/" className="btn btn-success w-50">
+              <Link to="/" className="btn btn-success w-50" hidden={!isVerify}>
                 Go To Login
               </Link>
 

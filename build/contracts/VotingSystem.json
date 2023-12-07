@@ -50112,12 +50112,12 @@
     "5777": {
       "events": {},
       "links": {},
-      "address": "0xB300e9d75bC26eB248533B0e11119CE052e7bF92",
-      "transactionHash": "0xe0be31e174f80815c76932848ac5cb0b140c2397403cd28aa090a4e42f71e39e"
+      "address": "0x7531a71034CEd62db45469d9609c09572a9c22C3",
+      "transactionHash": "0x0343b716fd6b37a04cbd4080e29c39c34c29009bc4bef43929303f6492f3a99a"
     }
   },
   "schemaVersion": "3.4.16",
-  "updatedAt": "2023-12-07T08:53:45.475Z",
+  "updatedAt": "2023-12-07T08:58:12.452Z",
   "networkType": "ethereum",
   "devdoc": {
     "kind": "dev",
