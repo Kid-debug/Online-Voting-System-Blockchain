@@ -57,7 +57,7 @@ function Login() {
             console.log("user : ", user);
 
             setAuthData({
-              userId: user.id,
+              userKey: user.key,
               userRole: user.role,
               email: user.email,
             });
