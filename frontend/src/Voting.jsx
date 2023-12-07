@@ -14,6 +14,7 @@ function Voting() {
   const [event, setEvent] = useState(null);
   const [category, setCategory] = useState(null);
   const [selectedCandidateId, setSelectedCandidateId] = useState("");
+  const IMAGE_BASE_URL = "http://localhost:3000/uploads/";
 
   // State for President candidates
   const [expandedDescriptionPresident, setExpandedDescriptionPresident] =
@@ -145,7 +146,7 @@ function Voting() {
                     <div className="pic p-3 m-3">
                       <img
                         className={`irc_mut img-fluid circular-image`}
-                        // src={}
+                        src={`${IMAGE_BASE_URL}${candidate.imageFileName}`}
                         alt={candidate.name}
                       />
                     </div>

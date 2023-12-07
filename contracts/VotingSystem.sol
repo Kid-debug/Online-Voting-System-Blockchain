@@ -318,7 +318,7 @@ contract VotingSystem {
         eventToUpdate.status = _event.status;
     }
 
-    function addCandidateToEvent(
+        function addCandidateToEvent(
         uint256 _categoryId,
         uint256 _eventId,
         string memory _candidateName,
@@ -328,18 +328,20 @@ contract VotingSystem {
     ) public {
         require(
             categories[_categoryId].categoryId != 0,
-            "Category has not exists"
+            "Category does not exist"
         );
-
         require(
-            isEventExists(_categoryId, _eventId) == true,
-            "Event has not exists"
+            isEventExists(_categoryId, _eventId),
+            "Event does not exist"
         );
-
         require(
-            isCandidateExistsInEvent(_categoryId, _eventId, _studentId) ==
-                false,
-            "Candidate existed"
+            !isCandidateExistsInEvent(_categoryId, _eventId, _studentId),
+            "Candidate already exists"
+        );
+        // Check if the image file name is already used
+        require(
+            !usedImageFileNames[_imageFileName],
+            "Image file name already in use"
         );
 
         candidateCount += 1;
@@ -366,6 +368,9 @@ contract VotingSystem {
                 category.events[i].candidateCount += 1;
             }
         }
+
+        // Mark the image file name as used
+        usedImageFileNames[_imageFileName] = true;
     }
 
     function updateCandidate(Candidate memory _candidate) public {
