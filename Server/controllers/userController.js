@@ -11,6 +11,9 @@ const { promisify } = require("util");
 const jwtVerify = promisify(jwt.verify);
 const randomstring = require("randomstring");
 const sendMail = require("../helpers/sendMail.js");
+const Web3 = require("web3");
+const votingContract = require("../../build/contracts/VotingSystem.json");
+const { contractAddress } = require("../../config-sever.js");
 
 const registerUser = async (req, res) => {
   const errors = validationResult(req);
@@ -73,6 +76,28 @@ const registerUser = async (req, res) => {
     // If hashing fails or any other error occurs
     return res.status(400).json({ msg: err });
   }
+};
+
+const sendEmail = async (req, res) => {
+  const mailSubject = "Mail Verification";
+  const content =
+    "<p>Hi there,</p>" +
+    "<p>We've received a verification request for " +
+    req.body.email +
+    ". Please verify your email below.</p>" +
+    "<p><a href='http://localhost:5173/mail-verification/" +
+    req.body.randomToken +
+    "' style='background-color: darkblue; color: white; padding: 10px; text-decoration: none; display: inline-block;'>Verify Email</a></p>" +
+    "<p>Can't see the button? Copy and paste this link into your browser:</p>" +
+    "<p><a href='http://localhost:5173/mail-verification/" +
+    req.body.randomToken +
+    "'>http://localhost:5173/mail-verification/" +
+    req.body.randomToken +
+    "</a></p>" +
+    "<p>Please be reminded that the verification token is only valid for 24 hours</p>" +
+    "<p>If you did not request for register email verification, please ignore this email.</p>" +
+    "<p>Thank you.</p>";
+  await sendMail(req.body.email, mailSubject, content);
 };
 
 const registerAdmin = async (req, res) => {
@@ -166,14 +191,31 @@ const verifyMail = async (req, res) => {
     //   });
     // }
 
-    // Token is valid, proceed to update the user as verified
-    await User.update(
-      {
-        token_updated_at: sequelize.fn("NOW"),
-        is_verified: 1,
-      },
-      { where: { user_id: user.user_id } }
-    );
+    // Insert the valid user in to the blockchain
+    const voterId = randomstring.generate();
+    try {
+      const web3 = new Web3(window.ethereum);
+      await window.ethereum.enable();
+      const accounts = await web3.eth.getAccounts();
+      const contract = new web3.eth.Contract(
+        votingContract.abi,
+        contractAddress
+      );
+      await contract.methods
+        .addVoter(voterId, user.email, user.password, user.role)
+        .send({ from: accounts[0] });
+
+      // Token is valid, proceed to update the user as verified
+      await User.update(
+        {
+          token_updated_at: sequelize.fn("NOW"),
+          is_verified: 1,
+        },
+        { where: { user_id: user.user_id } }
+      );
+    } catch (error) {
+      console.error("Error Msg : ", error.message);
+    }
 
     // Verification successful
     return res.status(200).json({
@@ -630,4 +672,5 @@ module.exports = {
   resetPasswordLoad,
   resetPassword,
   changePassword,
+  sendEmail,
 };

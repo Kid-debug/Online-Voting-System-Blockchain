@@ -1,9 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { EyeInvisibleOutlined, EyeOutlined } from "@ant-design/icons";
 import "./stylesheets/style.css";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import useAuth from "./hooks/useAuth";
+import Web3 from "web3";
+import votingContract from "../../build/contracts/VotingSystem.json";
+import { contractAddress } from "../../config";
 
 // Set axios defaults just once, not in a function
 axios.defaults.withCredentials = true;
@@ -22,48 +25,88 @@ function Login() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setBackendErrors([]); // Reset backend errors on new submission
+    const errors = validateLogin();
 
-    const dataToSend = {
-      email: values.email,
-      password: values.password,
-      rememberMe: remember,
-    };
+    // If there are no errors, proceed with form submission
+    if (Object.keys(errors).length === 0) {
+      setBackendErrors([]);
+      try {
+        const web3 = new Web3(window.ethereum);
+        await window.ethereum.enable();
 
-    try {
-      const response = await axios.post(
-        "http://localhost:3000/api/login",
-        dataToSend
-      );
-      console.log("Login response:", response.data);
-      if (response.data.userId) {
-        console.log("Login successful");
-        console.log(response.data.userId);
-        // Use setAuthData to update the auth state and persist it
-        setAuthData({
-          userId: response.data.userId,
-          userRole: response.data.userRole,
-          email: values.email,
-          sessionExpiryTime: response.data.sessionExpiryTime,
-        });
-        navigate(`/${response.data.path}`);
-      } else {
-        setBackendErrors([{ msg: "Unexpected response from the server." }]);
-      }
-    } catch (error) {
-      if (error.response) {
-        // If the backend sends an array of errors
-        if (error.response.data.errors) {
-          setBackendErrors(error.response.data.errors);
+        const contract = new web3.eth.Contract(
+          votingContract.abi,
+          contractAddress
+        );
+
+        const accountFound = await contract.methods
+          .checkVoterEmailPassword(values.email, values.password)
+          .call();
+
+        if (accountFound) {
+          const userStatus = await contract.methods
+          .getVoterStatus(values.email, values.password)
+          .call();
+          // user status; 0: no verify, 1: verified, 2:banned
+          if (userStatus == 1) {
+            // Login 
+            const user = await contract.methods
+              .loginVoter(values.email, values.password)
+              .call();
+            sessionStorage.setItem("userKey", user.key);
+            console.log("user : ", user);
+
+            setAuthData({
+              userId: user.id,
+              userRole: user.role,
+              email: user.email,
+            });
+            
+            // navigate to home
+            navigate(`/voterdashboard`);
+
+          } else if (userStatus == 0) {
+            errors.wrongPassord = "• Account haven't verify.";
+          } else {
+            errors.wrongPassord = "• Account has been banned.";
+          }
         } else {
-          // If the backend sends a single error message
-          setBackendErrors([{ msg: error.response.data.msg }]);
+          errors.wrongPassord = "• Email or password is incorrect.";
         }
-      } else {
-        // Handle errors not related to the backend response (network errors, etc.)
-        console.error("Login error:", error);
-        setBackendErrors([{ msg: "Network error or server not responding." }]);
+        if (Object.keys(errors).length != 0) {
+          setBackendErrors(Object.values(errors));
+        }
+      } catch (error) {
+        setBackendErrors(Object.values(errors));
       }
+    } else {
+      setBackendErrors(Object.values(errors));
     }
+  };
+
+  const validateLogin = () => {
+    const errors = {};
+
+    // Check if email is not empty
+    if (!values.email.trim()) {
+      errors.email = "•Email is required";
+    }
+
+    // Check if password is not empty and meets requirements
+    if (!values.password.trim()) {
+      errors.password = "•Password is required";
+    } else if (values.password.length < 8) {
+      errors.password = "•Password must be at least 8 characters long";
+    } else if (
+      !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/.test(
+        values.password
+      )
+    ) {
+      errors.password =
+        "•Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character";
+    }
+
+    return errors;
   };
 
   return (
@@ -72,7 +115,7 @@ function Login() {
         {backendErrors.length > 0 && (
           <div className="alert alert-danger" role="alert">
             {backendErrors.map((error, index) => (
-              <div key={index}>{error.msg}</div>
+              <div key={index}>{error}</div>
             ))}
           </div>
         )}

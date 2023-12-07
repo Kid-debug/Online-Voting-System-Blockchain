@@ -14,6 +14,7 @@ const feedbackController = require("../controllers/feedbackController");
 
 //registration
 router.post("/registerUser", signUpUserValidation, userController.registerUser);
+router.post("/verifyEmail", userController.sendEmail);
 router.post(
   "/registerAdmin",
   signUpAdminValidation,

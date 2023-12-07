@@ -19,6 +19,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "ejs": "^3.1.9",
+    "ether": "^0.0.9",
     "express": "^4.18.2",
     "express-mysql-session": "^3.0.0",
     "express-session": "^1.17.3",
@@ -31,7 +32,8 @@
     "nodemon": "^3.0.2",
     "path": "^0.12.7",
     "sequelize": "^6.35.1",
-    "tzdata": "^1.0.38"
+    "tzdata": "^1.0.38",
+    "web3": "^4.3.0"
   },
   "devDependencies": {
     "sequelize-cli": "^6.6.2"

@@ -2,10 +2,12 @@
   "dependencies": {
     "@canvasjs/react-charts": "^1.0.0",
     "apexcharts": "^3.42.0",
+    "bcrypt": "^5.1.1",
     "bootstrap": "^5.3.1",
     "canvasjs": "^1.8.3",
     "chart.js": "^4.4.0",
     "chartjs-plugin-annotation": "^3.0.1",
+    "crypto-random-string": "^5.0.0",
     "dotenv": "^16.3.1",
     "ether": "^0.0.9",
     "font-awesome": "^4.7.0",
