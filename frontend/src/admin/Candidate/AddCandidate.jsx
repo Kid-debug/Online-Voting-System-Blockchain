@@ -132,15 +132,9 @@ function AddCandidate() {
       });
     } catch (error) {
       let errorMessage = "An error occurred while creating the candidate.";
-      // Check if the error message includes a revert
-      if (error.message && error.message.includes("revert")) {
+      if (error.message.includes("revert")) {
         const matches = error.message.match(/revert (.+)/);
-        errorMessage =
-          matches && matches[1]
-            ? matches[1]
-            : "Transaction reverted without a reason.";
-      } else if (error.message) {
-        errorMessage = error.message;
+        errorMessage = matches && matches[1] ? matches[1] : errorMessage;
       }
       Swal({
         icon: "error",
