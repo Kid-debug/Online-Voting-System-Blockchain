@@ -93,15 +93,16 @@ function Voting() {
     const web3 = new Web3(window.ethereum);
     await window.ethereum.enable();
     const accounts = await web3.eth.getAccounts();
-
     const contract = new web3.eth.Contract(votingContract.abi, contractAddress);
+    
+    const authData = JSON.parse(sessionStorage.getItem("auth"));
+    const userKey = authData ? authData.userKey : null;
 
-    const voterId = 2205619;
     console.log("selectedCandidateId : ", Number(selectedCandidateId));
 
     // Perform the necessary action, e.g., sending a transaction
     const transaction = await contract.methods
-      .vote(voterId, Number(selectedCandidateId), categoryId, eventId)
+      .vote(userKey, Number(selectedCandidateId), categoryId, eventId)
       .send({
         from: accounts[0], // Assuming the user's account is the first account
       });

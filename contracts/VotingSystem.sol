@@ -29,7 +29,7 @@ contract VotingSystem {
         uint256 status;
     }
 
-    struct Candidate {
+struct Candidate {
         uint256 id;
         string name;
         string description;
@@ -43,7 +43,7 @@ contract VotingSystem {
 
     struct voteEventStruct {
         uint256 id;
-        uint256 voterId;
+        string voterKey;
         uint256 categoryId;
         uint256 eventId;
         bool voted;
@@ -57,7 +57,7 @@ contract VotingSystem {
     event CandidateAdded(uint256 indexed eventId, string eventName);
 
     event VoteEvent(
-        uint256 indexed voterId,
+        string indexed _voterKey,
         string indexed categoryEvent,
         uint256 indexed candidate
     );
@@ -318,7 +318,7 @@ contract VotingSystem {
         eventToUpdate.status = _event.status;
     }
 
-        function addCandidateToEvent(
+     function addCandidateToEvent(
         uint256 _categoryId,
         uint256 _eventId,
         string memory _candidateName,
@@ -597,7 +597,7 @@ contract VotingSystem {
     }
 
     function vote(
-        uint256 _voterId,
+        string memory _voterKey,
         uint256 _candidateId,
         uint256 _categoryId,
         uint256 _eventId
@@ -622,7 +622,7 @@ contract VotingSystem {
         // check if has voted
         for (uint256 i = 1; i <= voteEventCount; i++) {
             if (
-                _voterId == voteEvents[i].voterId &&
+                 keccak256(bytes(_voterKey)) ==  keccak256(bytes(voteEvents[i].voterKey)) &&
                 _categoryId == voteEvents[i].categoryId &&
                 _eventId == voteEvents[i].eventId
             ) {
@@ -637,7 +637,7 @@ contract VotingSystem {
         // Create a new voteEventStruct
         voteEventStruct memory newVoteEvent = voteEventStruct({
             id: voteEventCount,
-            voterId: _voterId,
+            voterKey: _voterKey,
             categoryId: _categoryId,
             eventId: _eventId,
             voted: true
@@ -653,7 +653,7 @@ contract VotingSystem {
             abi.encodePacked(_categoryId, _eventId)
         );
 
-        emit VoteEvent(_voterId, concatenatedValues, _candidateId);
+        emit VoteEvent(_voterKey, concatenatedValues, _candidateId);
     }
 
     function addVoteCount(uint256 _candidateId) internal {
