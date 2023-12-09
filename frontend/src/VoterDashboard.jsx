@@ -31,10 +31,12 @@ function VoterDashboard() {
 
         // Call the getAllCategory function in your smart contract
         const categoryList = await contract.methods.getAllCategory().call();
-        const formattedCategories = categoryList.map((category) => ({
-          categoryId: Number(category.categoryId),
-          categoryName: category.categoryName,
-        }));
+        const formattedCategories = categoryList
+          .filter((category) => Number(category.categoryId) !== 0)
+          .map((category) => ({
+            categoryId: Number(category.categoryId),
+            categoryName: category.categoryName,
+          }));
 
         console.log("category", categoryList);
         setCardData(formattedCategories);
