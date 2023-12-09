@@ -8,16 +8,18 @@ import Swal from "sweetalert";
 function AddPosition() {
   const [positionName, setPositionName] = useState("");
   const [selectedCategoryId, setSelectedCategoryId] = useState("");
-  const [time, setTime] = useState(""); // Set initial time state to current time
+  const [startDateAndTime, setStartDateAndTime] = useState("");
+  const [endDateAndTime, setEndDateAndTime] = useState("");
   const [categories, setCategories] = useState([]);
 
-  function getCurrentTimeInMalaysia() {
-    // Get the current time in UTC
+  function getCurrentDateTimeInMalaysia() {
+    // Get the current date and time in UTC
     const now = new Date();
     // Convert it to Malaysia time (UTC+8)
     const malaysiaTime = new Date(now.getTime() + 8 * 60 * 60 * 1000);
-    // Format the time to be suitable for the time input (HH:MM)
-    return malaysiaTime.toISOString().slice(11, 16);
+    // Format the date and time to be suitable for the datetime-local input
+    const formattedDateTime = malaysiaTime.toISOString().slice(0, 16);
+    return formattedDateTime;
   }
 
   useEffect(() => {
@@ -42,19 +44,24 @@ function AddPosition() {
     };
 
     fetchCategories();
-    setTime(getCurrentTimeInMalaysia());
+    setStartDateAndTime(getCurrentDateTimeInMalaysia());
+    setEndDateAndTime(getCurrentDateTimeInMalaysia());
   }, []); // The empty dependency array ensures that this effect runs once, similar to componentDidMount
 
   const handlePositionChange = (event) => {
     setPositionName(event.target.value);
   };
 
-  const handleTimeChange = (event) => {
-    setTime(event.target.value);
-  };
-
   const handleCategoryChange = (event) => {
     setSelectedCategoryId(event.target.value);
+  };
+
+  const handleStartDateAndTimeChange = (event) => {
+    setStartDateAndTime(event.target.value);
+  };
+
+  const handleEndDateAndTimeChange = (event) => {
+    setEndDateAndTime(event.target.value);
   };
 
   const handleCreatePosition = async () => {
@@ -158,15 +165,27 @@ function AddPosition() {
           />
         </div>
         <div className="col-12">
-          <label htmlFor="inputTime" className="form-label">
-            Select Time
+          <label htmlFor="inputStartDateAndTime" className="form-label">
+            Start Date and Time
           </label>
           <input
-            type="time"
+            type="datetime-local"
             className="form-control"
-            id="inputTime"
-            value={time}
-            onChange={handleTimeChange}
+            id="inputStartDateAndTime"
+            value={startDateAndTime}
+            onChange={handleStartDateAndTimeChange}
+          />
+        </div>
+        <div className="col-12">
+          <label htmlFor="inputEndDateAndTime" className="form-label">
+            End Date and Time
+          </label>
+          <input
+            type="datetime-local"
+            className="form-control"
+            id="inputEndDateAndTime"
+            value={endDateAndTime}
+            onChange={handleEndDateAndTimeChange}
           />
         </div>
         <div className="col-12">
