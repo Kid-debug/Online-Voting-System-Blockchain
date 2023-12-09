@@ -16,12 +16,6 @@ Feedback.init(
     user_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: {
-        model: "users", // This should be the model name, which is typically the singular form of the table name.
-        key: "user_id",
-      },
-      onUpdate: "CASCADE",
-      onDelete: "CASCADE",
     },
     rating: {
       type: DataTypes.INTEGER,
@@ -61,7 +55,7 @@ Feedback.init(
 );
 
 // Define the associations directly after the model definitions
-User.hasMany(Feedback, { foreignKey: "user_id" });
-Feedback.belongsTo(User, { foreignKey: "user_id" });
+// User.hasMany(Feedback, { foreignKey: "user_id" });
+// Feedback.belongsTo(User, { foreignKey: "user_id" });
 
 module.exports = Feedback;

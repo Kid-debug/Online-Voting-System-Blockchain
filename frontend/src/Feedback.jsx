@@ -15,7 +15,7 @@ function Feedback() {
 
   // Retrieve the auth context
   const { auth } = useAuth();
-
+  const userId = auth.userId;
   const handleEmotionSelect = (emotion) => {
     setSelectedEmotion(emotion);
   };
@@ -68,9 +68,7 @@ function Feedback() {
         "http://localhost:3000/api/submitFeedback",
         {
           ...dataToSend,
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          userId,
         }
       );
 

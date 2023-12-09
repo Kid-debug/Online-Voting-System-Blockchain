@@ -10,12 +10,7 @@ module.exports = {
         content VARCHAR(300) NOT NULL,
         status VARCHAR(100) DEFAULT 'Under Review',
         created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        CONSTRAINT fk_user
-          FOREIGN KEY (user_id)
-          REFERENCES users(user_id)
-          ON DELETE CASCADE
-          ON UPDATE CASCADE
+        updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
       )
     `);
   },

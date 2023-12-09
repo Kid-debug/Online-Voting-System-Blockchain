@@ -45,11 +45,11 @@ function Login() {
 
         if (accountFound) {
           const userStatus = await contract.methods
-          .getVoterStatus(values.email, values.password)
-          .call();
+            .getVoterStatus(values.email, values.password)
+            .call();
           // user status; 0: no verify, 1: verified, 2:banned
           if (userStatus == 1) {
-            // Login 
+            // Login
             const user = await contract.methods
               .loginVoter(values.email, values.password)
               .call();
@@ -58,17 +58,17 @@ function Login() {
 
             setAuthData({
               userKey: user.key,
+              userId: Number(user.id),
               userRole: user.role,
               email: user.email,
             });
-            
+
             // navigate to home
-            if(user.role === "U"){
+            if (user.role === "U") {
               navigate(`/voterdashboard`);
-            }else{
+            } else {
               navigate(`/admin/home`);
             }
-            
           } else if (userStatus == 0) {
             errors.wrongPassord = "• Account haven't verify.";
           } else {

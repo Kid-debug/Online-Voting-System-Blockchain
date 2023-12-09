@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "../../api/axios";
 import Swal from "sweetalert";
+import votingContract from "../../../../build/contracts/VotingSystem.json";
+import Web3 from "web3";
+import { contractAddress } from "../../../../config";
 
 function EditFeedback() {
   const [userEmail, setUserEmail] = useState("");
@@ -22,24 +25,40 @@ function EditFeedback() {
   };
 
   useEffect(() => {
-    const fetchFeedback = async () => {
+    const fetchFeedbackAndEmail = async () => {
       try {
+        // Fetch feedback details from your API
         const response = await axios.get(`/api/retrieveFeedback/${feedbackId}`);
         const feedback = response.data;
-        setUserEmail(feedback.User.email);
+
+        // Initialize web3 and the contract to fetch the email
+        const web3 = new Web3(window.ethereum);
+        await window.ethereum.enable();
+        const contract = new web3.eth.Contract(
+          votingContract.abi,
+          contractAddress
+        );
+
+        // Assuming that feedback object includes a user_id property
+        const userEmail = await contract.methods
+          .getVoterEmailById(feedback.user_id)
+          .call();
+
+        // Set the state with the fetched data
+        setUserEmail(userEmail);
         setContent(feedback.content);
         setRating(feedback.rating);
         const formattedDate = formatDate(feedback.created_at);
         setCreatedDate(formattedDate);
         setStatus(feedback.status);
       } catch (error) {
-        console.error("Error fetching feedback:", error);
+        console.error("Error fetching feedback and email:", error);
         navigate("/admin/adminfeedback", { replace: true });
       }
     };
 
     if (feedbackId) {
-      fetchFeedback();
+      fetchFeedbackAndEmail();
     }
   }, [feedbackId, navigate]);
 

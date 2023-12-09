@@ -5,6 +5,10 @@ import { Link } from "react-router-dom";
 import axios from "./api/axios";
 import "./stylesheets/electionlist.css";
 import Swal from "sweetalert";
+import useAuth from "./hooks/useAuth";
+import Web3 from "web3";
+import votingContract from "../../build/contracts/VotingSystem.json";
+import { contractAddress } from "../../config";
 
 function UserFeedbackList() {
   const [feedbacks, setFeedbacks] = useState([]);
@@ -14,18 +18,39 @@ function UserFeedbackList() {
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const [sortColumn, setSortColumn] = useState(null);
   const [sortDirection, setSortDirection] = useState(null);
-
-  const fetchFeedbacks = async () => {
-    try {
-      const response = await axios.get("api/getUserFeedback");
-      setFeedbacks(response.data);
-    } catch (error) {
-      console.error("Error fetching feedbacks:", error);
-    }
-  };
+  const { auth } = useAuth();
+  const userId = auth.userId;
 
   useEffect(() => {
-    fetchFeedbacks();
+    const fetchEmailAndFeedbacks = async () => {
+      try {
+        const web3 = new Web3(window.ethereum);
+        await window.ethereum.enable();
+        const accounts = await web3.eth.getAccounts();
+        const contract = new web3.eth.Contract(
+          votingContract.abi,
+          contractAddress
+        );
+
+        const userEmail = await contract.methods
+          .getVoterEmailById(userId)
+          .call();
+
+        // Now that you have the email, you can fetch the user's feedback
+        const response = await axios.get("/api/getUserFeedback", {
+          params: { userId: userId },
+        });
+        const feedbacksWithEmail = response.data.map((feedback) => ({
+          ...feedback,
+          email: userEmail,
+        }));
+        setFeedbacks(feedbacksWithEmail);
+      } catch (error) {
+        console.error("Error fetching email and feedbacks:", error);
+      }
+    };
+
+    fetchEmailAndFeedbacks();
   }, []);
 
   const columnMapping = {
@@ -62,7 +87,7 @@ function UserFeedbackList() {
 
     return feedbacks.filter((item) => {
       // Convert all fields to string and lower case for comparison
-      const emailString = item.User.email ? item.User.email.toLowerCase() : "";
+      const emailString = item.email ? item.email.toLowerCase() : "";
       const contentString = item.content.toLowerCase();
       const statusString = item.status.toLowerCase();
       const createdDateString = formatDate(item.created_at).toLowerCase();
@@ -80,8 +105,8 @@ function UserFeedbackList() {
   const sortedData = sortColumn
     ? filterData(feedbacks).sort((a, b) => {
         if (sortColumn === "email") {
-          const aValue = a.User && a.User.email ? a.User.email : "";
-          const bValue = b.User && b.User.email ? b.User.email : "";
+          const aValue = a.email && a.email ? a.email : "";
+          const bValue = b.email && b.email ? b.email : "";
           return sortDirection === "asc"
             ? aValue.localeCompare(bValue)
             : bValue.localeCompare(aValue);
@@ -190,7 +215,7 @@ function UserFeedbackList() {
             {currentItems.length === 0 ? (
               <tr>
                 <td colSpan={columns.length} className="text-center">
-                    No matching records found
+                  No matching records found
                 </td>
               </tr>
             ) : (
@@ -201,8 +226,8 @@ function UserFeedbackList() {
                       {column === "created_at" || column === "updated_at" ? (
                         formatDate(row[column])
                       ) : column === "email" ? (
-                        row.User ? (
-                          row.User.email
+                        row.email ? (
+                          row.email
                         ) : (
                           "N/A"
                         )

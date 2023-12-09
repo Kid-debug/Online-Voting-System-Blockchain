@@ -92,6 +92,7 @@ function MailVerification() {
               </Link>
 
               <button
+                id="mailButton"
                 className={`btn ${
                   isVerify ? "btn-primary" : "btn-success"
                 } w-50`}

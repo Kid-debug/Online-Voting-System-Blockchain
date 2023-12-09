@@ -4,6 +4,9 @@ import { Link } from "react-router-dom";
 import axios from "../../api/axios";
 import "../../stylesheets/list.css";
 import Swal from "sweetalert";
+import votingContract from "../../../../build/contracts/VotingSystem.json";
+import Web3 from "web3";
+import { contractAddress } from "../../../../config";
 
 function AdminFeedback() {
   const [feedbacks, setFeedbacks] = useState([]);
@@ -18,8 +21,30 @@ function AdminFeedback() {
 
   const fetchFeedbacks = async () => {
     try {
-      const response = await axios.get("api/retrieveFeedback");
-      setFeedbacks(response.data);
+      // Fetch all feedbacks from the backend
+      const response = await axios.get("/api/retrieveFeedback");
+      const feedbacks = response.data;
+
+      // Initialize web3 with MetaMask's provider
+      const web3 = new Web3(window.ethereum);
+      await window.ethereum.enable();
+      const accounts = await web3.eth.getAccounts();
+      const contract = new web3.eth.Contract(
+        votingContract.abi,
+        contractAddress
+      );
+
+      // Fetch emails for each feedback and add them to the feedback object
+      const feedbacksWithEmails = await Promise.all(
+        feedbacks.map(async (feedback) => {
+          const email = await contract.methods
+            .getVoterEmailById(feedback.user_id)
+            .call();
+          return { ...feedback, email };
+        })
+      );
+
+      setFeedbacks(feedbacksWithEmails);
     } catch (error) {
       console.error("Error fetching feedbacks:", error);
     }
@@ -76,7 +101,7 @@ function AdminFeedback() {
     return feedbacks.filter((item) => {
       // Convert all fields to string and lower case for comparison
       const idString = item.feedback_id.toString().toLowerCase();
-      const emailString = item.User.email ? item.User.email.toLowerCase() : "";
+      const emailString = item.email ? item.email.toLowerCase() : "";
       const ratingString = item.rating.toString().toLowerCase();
       const contentString = item.content.toLowerCase();
       const statusString = item.status.toLowerCase();
@@ -103,8 +128,8 @@ function AdminFeedback() {
             ? a[sortColumn] - b[sortColumn]
             : b[sortColumn] - a[sortColumn];
         } else if (sortColumn === "email") {
-          const aValue = a.User && a.User.email ? a.User.email : "";
-          const bValue = b.User && b.User.email ? b.User.email : "";
+          const aValue = a.email && a.email ? a.email : "";
+          const bValue = b.email && b.email ? b.email : "";
           return sortDirection === "asc"
             ? aValue.localeCompare(bValue)
             : bValue.localeCompare(aValue);
@@ -271,8 +296,8 @@ function AdminFeedback() {
                     {column === "created_at" || column === "updated_at" ? (
                       formatDate(row[column])
                     ) : column === "email" ? (
-                      row.User ? (
-                        row.User.email
+                      row.email ? (
+                        row.email
                       ) : (
                         "N/A"
                       )

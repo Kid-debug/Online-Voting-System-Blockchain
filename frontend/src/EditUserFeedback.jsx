@@ -75,9 +75,6 @@ function EditUserFeedback() {
     setShowConfirmation(false);
 
     try {
-      // Replace with actual token from auth context or state management
-      const token = auth?.accessToken;
-
       // Convert selected emotion to numerical value
       const emotionValues = {
         "sad-tear": 1,
@@ -96,9 +93,6 @@ function EditUserFeedback() {
 
       const response = await axios.put(`/api/editUserFeedback/${feedbackId}`, {
         ...dataToSend,
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
       });
 
       Swal({

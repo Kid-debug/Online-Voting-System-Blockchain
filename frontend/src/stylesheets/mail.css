@@ -48,7 +48,7 @@
   margin-bottom: 20px;
 }
 
-button {
+#mailButton {
   border: none;
   color: white;
   cursor: pointer;
@@ -59,7 +59,7 @@ button {
   z-index: 3;
 }
 
-button:hover {
+#mailButton:hover {
   background-color: #85ddbf;
 }
 

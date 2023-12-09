@@ -157,6 +157,12 @@ struct Candidate {
         return Voter(0, "", "", "", "", 0, "");
     }
 
+    function getVoterEmailById(uint256 _voterId) public view returns (string memory) {
+    require(_voterId > 0 && _voterId <= voterCount, "Invalid voter ID");
+    return voters[_voterId].email;
+    }
+
+
     function updateVoterPassword(string memory _key, string memory _password)
         public
     {
