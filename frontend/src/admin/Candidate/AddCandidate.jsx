@@ -150,6 +150,28 @@ function AddCandidate() {
         text: "You've successfully added a new candidate.",
       });
     } catch (error) {
+      // Check if the image file name is used by any candidate
+      const web3 = new Web3(window.ethereum);
+      await window.ethereum.enable();
+      const accounts = await web3.eth.getAccounts();
+      const contract = new web3.eth.Contract(
+        votingContract.abi,
+        contractAddress
+      );
+      const imageInUse = await contract.methods
+        .isImageFileNameUsed(imageFileName)
+        .call();
+
+      // If the image file name is not in use, delete the file
+      if (!imageInUse && error.message) {
+        try {
+          await axios.delete("/deleteFile", {
+            data: { filename: imageFileName },
+          });
+        } catch (deleteError) {
+          console.error("Error deleting the file:", deleteError);
+        }
+      }
       let errorMessage = "An error occurred while creating the candidate.";
       // Check if the error message includes a revert
       if (error.response && error.response.data) {
@@ -165,28 +187,6 @@ function AddCandidate() {
               : "Transaction reverted without a reason.";
         } else {
           errorMessage = error.message;
-          // Check if the image file name is used by any candidate
-          const web3 = new Web3(window.ethereum);
-          await window.ethereum.enable();
-          const accounts = await web3.eth.getAccounts();
-          const contract = new web3.eth.Contract(
-            votingContract.abi,
-            contractAddress
-          );
-          const imageInUse = await contract.methods
-            .isImageFileNameUsed(imageFileName)
-            .call();
-
-          // If the image file name is not in use, delete the file
-          if (!imageInUse && error.message) {
-            try {
-              await axios.delete("/deleteFile", {
-                data: { filename: imageFileName },
-              });
-            } catch (deleteError) {
-              console.error("Error deleting the file:", deleteError);
-            }
-          }
         }
       }
       Swal({
