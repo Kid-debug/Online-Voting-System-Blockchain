@@ -408,6 +408,10 @@ struct Candidate {
         candidateToUpdate.description = _candidate.description;
     }
 
+    function isImageFileNameUsed(string memory _imageFileName) public view returns (bool) {
+        return usedImageFileNames[_imageFileName];
+    }
+
     function isCandidateExistsInEvent(
         uint256 _categoryId,
         uint256 _eventId,

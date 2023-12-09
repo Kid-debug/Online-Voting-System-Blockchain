@@ -105,6 +105,24 @@ app.post("/upload", upload.single("file"), async (req, res) => {
   }
 });
 
+app.delete("/deleteFile", async (req, res) => {
+  const { filename } = req.body;
+  console.log("Attempting to delete file:", filename);
+  try {
+    const filePath = path.join("uploads", filename);
+    fs.unlink(filePath, (err) => {
+      if (err) {
+        console.error("Error deleting file: ", err);
+        return res.status(500).send("Internal Server Error");
+      }
+      res.status(200).send("File deleted successfully.");
+    });
+  } catch (error) {
+    console.error("Error Msg : ", error.message);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
 sequelize
   .authenticate()
   .then(() => {

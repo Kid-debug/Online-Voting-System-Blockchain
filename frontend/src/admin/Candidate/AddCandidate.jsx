@@ -103,6 +103,8 @@ function AddCandidate() {
   };
 
   const handleCreateCandidate = async () => {
+    let imageFileName;
+
     if (
       !selectedCategoryId ||
       !selectedEventId ||
@@ -118,7 +120,7 @@ function AddCandidate() {
       formData.append("file", file);
 
       const response = await axios.post("/upload", formData);
-      const { imageFileName } = response.data;
+      imageFileName = response.data.imageFileName;
 
       const web3 = new Web3(window.ethereum);
       await window.ethereum.enable();
@@ -160,6 +162,28 @@ function AddCandidate() {
               : "Transaction reverted without a reason.";
         } else {
           errorMessage = error.message;
+          // Check if the image file name is used by any candidate
+          const web3 = new Web3(window.ethereum);
+          await window.ethereum.enable();
+          const accounts = await web3.eth.getAccounts();
+          const contract = new web3.eth.Contract(
+            votingContract.abi,
+            contractAddress
+          );
+          const imageInUse = await contract.methods
+            .isImageFileNameUsed(imageFileName)
+            .call();
+
+          // If the image file name is not in use, delete the file
+          if (!imageInUse && error.message) {
+            try {
+              await axios.delete("/deleteFile", {
+                data: { filename: imageFileName },
+              });
+            } catch (deleteError) {
+              console.error("Error deleting the file:", deleteError);
+            }
+          }
         }
       }
       Swal({
