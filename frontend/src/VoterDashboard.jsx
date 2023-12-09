@@ -114,16 +114,20 @@ function VoterDashboard() {
             ))}
           </select>
           <div className="list">
-            {currentItems.map((card, index) => (
-              <Link
-                to={`/electionList/${Number(card.categoryId, 10)}`}
-                key={card.categoryId}
-                className="project-name"
-              >
-                <h3>{card.categoryName}</h3>
-                <i className="fas bi-eye"></i>
-              </Link>
-            ))}
+            {currentItems.length === 0 ? (
+              <h4 className="text-center">No matching records found</h4>
+            ) : (
+              currentItems.map((card, index) => (
+                <Link
+                  to={`/electionList/${Number(card.categoryId, 10)}`}
+                  key={card.categoryId}
+                  className="project-name"
+                >
+                  <h3>{card.categoryName}</h3>
+                  <i className="fas bi-eye"></i>
+                </Link>
+              ))
+            )}
           </div>
         </div>
         <nav>
