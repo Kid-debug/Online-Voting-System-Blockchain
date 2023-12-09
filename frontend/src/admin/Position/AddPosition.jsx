@@ -8,7 +8,17 @@ import Swal from "sweetalert";
 function AddPosition() {
   const [positionName, setPositionName] = useState("");
   const [selectedCategoryId, setSelectedCategoryId] = useState("");
+  const [time, setTime] = useState(""); // Set initial time state to current time
   const [categories, setCategories] = useState([]);
+
+  function getCurrentTimeInMalaysia() {
+    // Get the current time in UTC
+    const now = new Date();
+    // Convert it to Malaysia time (UTC+8)
+    const malaysiaTime = new Date(now.getTime() + 8 * 60 * 60 * 1000);
+    // Format the time to be suitable for the time input (HH:MM)
+    return malaysiaTime.toISOString().slice(11, 16);
+  }
 
   useEffect(() => {
     // Fetch categories when the component mounts
@@ -32,10 +42,15 @@ function AddPosition() {
     };
 
     fetchCategories();
+    setTime(getCurrentTimeInMalaysia());
   }, []); // The empty dependency array ensures that this effect runs once, similar to componentDidMount
 
   const handlePositionChange = (event) => {
     setPositionName(event.target.value);
+  };
+
+  const handleTimeChange = (event) => {
+    setTime(event.target.value);
   };
 
   const handleCategoryChange = (event) => {
@@ -140,6 +155,18 @@ function AddPosition() {
             placeholder="Enter your position name (e.g., President)"
             value={positionName}
             onChange={handlePositionChange}
+          />
+        </div>
+        <div className="col-12">
+          <label htmlFor="inputTime" className="form-label">
+            Select Time
+          </label>
+          <input
+            type="time"
+            className="form-control"
+            id="inputTime"
+            value={time}
+            onChange={handleTimeChange}
           />
         </div>
         <div className="col-12">
