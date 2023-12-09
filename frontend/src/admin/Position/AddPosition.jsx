@@ -11,7 +11,8 @@ function AddPosition() {
   const [startDateAndTime, setStartDateAndTime] = useState("");
   const [endDateAndTime, setEndDateAndTime] = useState("");
   const [categories, setCategories] = useState([]);
-
+  
+  useEffect(() => {
   function getCurrentDateTimeInMalaysia() {
     // Get the current date and time in UTC
     const now = new Date();
@@ -21,8 +22,20 @@ function AddPosition() {
     const formattedDateTime = malaysiaTime.toISOString().slice(0, 16);
     return formattedDateTime;
   }
+   // Set the initial state when the component mounts
+   setStartDateAndTime(getCurrentDateTimeInMalaysia());
+  }, []);
+
 
   useEffect(() => {
+    console.log("startDateAndTime :", startDateAndTime);
+    console.log("endDateAndTime : ", endDateAndTime);
+    const startDateTime = new Date(startDateAndTime).getTime() / 1000;
+    const endDateTime = new Date(endDateAndTime).getTime() / 1000;
+
+    console.log("startUnix :", startDateTime);
+    console.log("endUnix : ", endDateTime);
+
     // Fetch categories when the component mounts
     const fetchCategories = async () => {
       try {
@@ -44,8 +57,6 @@ function AddPosition() {
     };
 
     fetchCategories();
-    setStartDateAndTime(getCurrentDateTimeInMalaysia());
-    setEndDateAndTime(getCurrentDateTimeInMalaysia());
   }, []); // The empty dependency array ensures that this effect runs once, similar to componentDidMount
 
   const handlePositionChange = (event) => {
@@ -90,9 +101,15 @@ function AddPosition() {
         contractAddress
       );
 
+      const startDateTime = new Date(startDateAndTime).getTime() / 1000;
+      const endDateTime = new Date(endDateAndTime).getTime() / 1000;
+
+      console.log("startUnix :", startDateTime);
+      console.log("endUnix : ", endDateTime);
+
       // Perform the necessary action, e.g., sending a transaction
       const transaction = await contract.methods
-        .addEvent(selectedCategoryId, positionName)
+        .addEvent(selectedCategoryId, positionName, startDateTime, endDateTime)
         .send({
           from: accounts[0], // Assuming the user's account is the first account
         });

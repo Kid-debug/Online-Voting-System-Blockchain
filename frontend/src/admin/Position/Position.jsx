@@ -15,13 +15,45 @@ function Position() {
   const [sortDirection, setSortDirection] = useState(null);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState(null);
+  const [currentDateTime, setCurrentDatetTime] = useState();
+
+
+  useEffect(() => {
+    const web3 = new Web3(window.ethereum);
+    const accounts = web3.eth.getAccounts();
+    window.ethereum.enable();
+
+    const contract = new web3.eth.Contract(votingContract.abi, contractAddress);
+
+    function getCurrentDateTimeInMalaysia() {
+      // Get the current date and time in UTC
+      const now = new Date();
+      // Convert it to Malaysia time (UTC+8)
+      const malaysiaTime = new Date(now.getTime() + 8 * 60 * 60 * 1000);
+      // Format the date and time to be suitable for the datetime-local input
+      const formattedDateTime = malaysiaTime.toISOString().slice(0, 16);
+      return formattedDateTime;
+    }
+    // Function to run every second
+    const everySecondFunction = async () => {
+     const currentTime =  getCurrentDateTimeInMalaysia();
+      const unixCurrentTime = new Date(currentTime).getTime() / 1000;
+      setCurrentDatetTime(unixCurrentTime);
+    };
+
+    // Set up an interval to run every second
+    const intervalId = setInterval(everySecondFunction, 1000);
+
+    // Clean up the interval on component unmount
+    return () => clearInterval(intervalId);
+  }, []); // Empty dependency array to ensure it runs only once when the component mounts
 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         const web3 = new Web3(window.ethereum);
-        await window.ethereum.enable();
         const accounts = await web3.eth.getAccounts();
+        await window.ethereum.enable();
 
         const contract = new web3.eth.Contract(
           votingContract.abi,
@@ -32,17 +64,21 @@ function Position() {
         const eventList = await contract.methods.getAllEvent().call();
 
         const eventPromises = eventList.map(async (event) => {
-          const categoryName = await contract.methods.getCategoryById(event.categoryId).call();
+          const categoryName = await contract.methods
+            .getCategoryById(event.categoryId)
+            .call();
           return {
             eventId: Number(event.eventId),
             eventName: event.eventName,
+            categoryId: event.categoryId,
             categoryName: categoryName.categoryName,
+            eventStatus: event.status,
+            eventStartDate: Number(event.startDateTime),
+            eventEndDate: Number(event.endDateTime),
           };
         });
 
-
         const formattedEvents = await Promise.all(eventPromises);
-        console.log("Event", formattedEvents);
         setEvents(formattedEvents);
       } catch (error) {
         console.error("Error fetching Event:", error);
@@ -57,11 +93,22 @@ function Position() {
     eventId: "ID",
     eventName: "Event Name",
     categoryName: "Category Name",
+    eventStatus: "Status",
+    eventStartDate: "Start Date",
+    eventEndDate: "End Date",
     Action: "Action",
   };
 
   // Create an array of display names based on the API keys
-  const columns = ["eventId", "eventName","categoryName", "Action"];
+  const columns = [
+    "eventId",
+    "eventName",
+    "categoryName",
+    "eventStatus",
+    "eventStartDate",
+    "eventEndDate",
+    "Action",
+  ];
 
   // Function to handle sorting
   const handleSort = (column) => {
@@ -229,10 +276,8 @@ function Position() {
               <tr key={rowIndex}>
                 {columns.map((column, colIndex) => (
                   <td key={colIndex} className="data-cell">
-                    {console.log("check row : ",row.categoryId)}
                     {column === "Action" ? (
                       <>
-                        {console.log(row[column])}
                         <Link
                           to={`/admin/editCategory/${row.eventId}`}
                           className="btn btn-primary btn-sm"
@@ -246,6 +291,9 @@ function Position() {
                           <i className="fs-4 bi-trash"></i>
                         </button>
                       </>
+                    ) : column === "eventStatus" ? (
+                     currentDateTime >= row.eventStartDate? "Processing" :"Comming Soon"
+                      
                     ) : (
                       row[column]
                     )}

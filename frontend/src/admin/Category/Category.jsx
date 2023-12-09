@@ -26,7 +26,7 @@ function Category() {
           votingContract.abi,
           contractAddress
         );
-
+        
         // Call the getAllCategory function in your smart contract
         const categoryList = await contract.methods.getAllCategory().call();
         const formattedCategories = categoryList.map((category) => ({

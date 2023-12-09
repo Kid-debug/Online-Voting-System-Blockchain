@@ -19,6 +19,8 @@ contract VotingSystem {
         uint256 categoryId;
         Candidate[] candidates;
         uint256 candidateCount;
+        uint256 startDateTime;
+        uint256 endDateTime;
         uint256 status; // 1: Upcoming, 2: In Progress, 3: Completed, 4： Cancel
     }
 
@@ -29,7 +31,7 @@ contract VotingSystem {
         uint256 status;
     }
 
-struct Candidate {
+    struct Candidate {
         uint256 id;
         string name;
         string description;
@@ -157,11 +159,14 @@ struct Candidate {
         return Voter(0, "", "", "", "", 0, "");
     }
 
-    function getVoterEmailById(uint256 _voterId) public view returns (string memory) {
-    require(_voterId > 0 && _voterId <= voterCount, "Invalid voter ID");
-    return voters[_voterId].email;
+    function getVoterEmailById(uint256 _voterId)
+        public
+        view
+        returns (string memory)
+    {
+        require(_voterId > 0 && _voterId <= voterCount, "Invalid voter ID");
+        return voters[_voterId].email;
     }
-
 
     function updateVoterPassword(string memory _key, string memory _password)
         public
@@ -254,7 +259,12 @@ struct Candidate {
         category.status = _category.status;
     }
 
-    function addEvent(uint256 _categoryId, string memory _eventName) public {
+    function addEvent(
+        uint256 _categoryId,
+        string memory _eventName,
+        uint256 _startDateTime,
+        uint256 _endDateTime
+    ) public {
         // check if the category has exists
         require(
             categories[_categoryId].categoryId != 0,
@@ -277,6 +287,8 @@ struct Candidate {
         newEvent.eventName = _eventName;
         newEvent.categoryId = _categoryId;
         newEvent.status = 1;
+        newEvent.startDateTime = _startDateTime;
+        newEvent.endDateTime = _endDateTime;
     }
 
     function isEventExists(uint256 _categoryId, string memory _eventName)
@@ -305,6 +317,41 @@ struct Candidate {
         return false;
     }
 
+    function isEventStart(
+        uint256 _categoryId,
+        string memory _eventName,
+        uint256 _startDateTime
+    ) public view returns (bool) {
+        // Check if the category exists
+        require(
+            categories[_categoryId].categoryId != 0,
+            "Category does not exist"
+        );
+
+        require(
+            isEventExists(_categoryId, _eventName) == true,
+            "Event does not exist"
+        );
+
+        // Loop through the events in the specified category
+        for (uint256 i = 0; i < categories[_categoryId].events.length; i++) {
+            if (
+                (keccak256(
+                    bytes(categories[_categoryId].events[i].eventName)
+                ) ==
+                    keccak256(bytes(_eventName)) &&
+                    (_startDateTime >=
+                        categories[_categoryId].events[i].startDateTime))
+            ) {
+                
+                return true;
+            }
+        }
+
+        // Event not found in the specified category
+        return false;
+    }
+
     function updateEvent(Event memory _event) public {
         // check if the category is exist
         require(
@@ -324,7 +371,7 @@ struct Candidate {
         eventToUpdate.status = _event.status;
     }
 
-     function addCandidateToEvent(
+    function addCandidateToEvent(
         uint256 _categoryId,
         uint256 _eventId,
         string memory _candidateName,
@@ -336,10 +383,7 @@ struct Candidate {
             categories[_categoryId].categoryId != 0,
             "Category does not exist"
         );
-        require(
-            isEventExists(_categoryId, _eventId),
-            "Event does not exist"
-        );
+        require(isEventExists(_categoryId, _eventId), "Event does not exist");
         require(
             !isCandidateExistsInEvent(_categoryId, _eventId, _studentId),
             "Candidate already exists"
@@ -408,7 +452,11 @@ struct Candidate {
         candidateToUpdate.description = _candidate.description;
     }
 
-    function isImageFileNameUsed(string memory _imageFileName) public view returns (bool) {
+    function isImageFileNameUsed(string memory _imageFileName)
+        public
+        view
+        returns (bool)
+    {
         return usedImageFileNames[_imageFileName];
     }
 
@@ -632,7 +680,8 @@ struct Candidate {
         // check if has voted
         for (uint256 i = 1; i <= voteEventCount; i++) {
             if (
-                 keccak256(bytes(_voterKey)) ==  keccak256(bytes(voteEvents[i].voterKey)) &&
+                keccak256(bytes(_voterKey)) ==
+                keccak256(bytes(voteEvents[i].voterKey)) &&
                 _categoryId == voteEvents[i].categoryId &&
                 _eventId == voteEvents[i].eventId
             ) {
