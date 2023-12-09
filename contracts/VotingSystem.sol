@@ -277,7 +277,25 @@ contract VotingSystem {
     function deleteCategory(uint256 _categoryId) public {
         require(categories[_categoryId].categoryId != 0, "Category does not exist");
 
-        // Delete the category and reset the storage
+        // Check if there are any events associated with the category
+        require(categories[_categoryId].events.length == 0, "Cannot delete category with events");
+
+        // Check if there are any candidates associated with the category
+        for (uint256 i = 1; i <= eventCount; i++) {
+            Event storage currentEvent = events[i];
+            if (currentEvent.categoryId == _categoryId && currentEvent.candidates.length > 0) {
+                revert("Cannot delete category with candidates");
+            }
+        }
+
+        // Check if there are any vote events associated with the category
+        for (uint256 i = 1; i <= voteEventCount; i++) {
+            if (voteEvents[i].categoryId == _categoryId) {
+                revert("Cannot delete category with vote events");
+            }
+        }
+
+        // If no associated events, candidates, or vote events, delete the category
         delete categories[_categoryId];
     }
 
