@@ -49,8 +49,11 @@ function AddPosition() {
 
         // Call the getAllCategory function in your smart contract
         const categoryList = await contract.methods.getAllCategory().call();
+        const formattedCategories = categoryList.filter(
+          (category) => Number(category.categoryId) !== 0
+        );
 
-        setCategories(categoryList);
+        setCategories(formattedCategories);
       } catch (error) {
         console.error("Error fetching categories:", error);
       }

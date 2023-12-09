@@ -259,6 +259,51 @@ contract VotingSystem {
         category.status = _category.status;
     }
 
+    function updateCategoryName(uint256 _categoryId, string memory _newCategoryName) public {
+        // Check if the category exists
+        require(categories[_categoryId].categoryId != 0, "Category does not exist");
+
+        // Check if the new category name is different from the existing name in the list
+        // and not the same as the current category name being updated
+        for (uint256 i = 1; i <= categoryCount; i++) {
+            if (i != _categoryId) {
+                require(
+                    keccak256(bytes(_newCategoryName)) !=
+                    keccak256(bytes(categories[i].categoryName)),
+                    "Category name already exists"
+                );
+            }
+        }
+
+        // Update the category name
+        categories[_categoryId].categoryName = _newCategoryName;
+    }
+
+    function deleteCategory(uint256 _categoryId) public {
+        require(categories[_categoryId].categoryId != 0, "Category does not exist");
+
+        // Check if there are any events associated with the category
+        require(categories[_categoryId].events.length == 0, "Cannot delete category with events");
+
+        // Check if there are any candidates associated with the category
+        for (uint256 i = 1; i <= eventCount; i++) {
+            Event storage currentEvent = events[i];
+            if (currentEvent.categoryId == _categoryId && currentEvent.candidates.length > 0) {
+                revert("Cannot delete category with candidates");
+            }
+        }
+
+        // Check if there are any vote events associated with the category
+        for (uint256 i = 1; i <= voteEventCount; i++) {
+            if (voteEvents[i].categoryId == _categoryId) {
+                revert("Cannot delete category with vote events");
+            }
+        }
+
+        // If no associated events, candidates, or vote events, delete the category
+        delete categories[_categoryId];
+    }
+
     function addEvent(
         uint256 _categoryId,
         string memory _eventName,

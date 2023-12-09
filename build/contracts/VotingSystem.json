@@ -641,6 +641,37 @@
         },
         {
           "internalType": "string",
+          "name": "_newCategoryName",
+          "type": "string"
+        }
+      ],
+      "name": "updateCategoryName",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_categoryId",
+          "type": "uint256"
+        }
+      ],
+      "name": "deleteCategory",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_categoryId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
           "name": "_eventName",
           "type": "string"
         },
@@ -25475,7 +25506,7 @@
                         "nodeType": "YulLiteral",
                         "src": "31777:2:3",
                         "type": "",
-                        "value": "20"
+                        "value": "28"
                       }
                     ],
                     "functionName": {
@@ -27653,7 +27684,7 @@
                     "id": 197,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1366:7:2",
+                    "src": "1370:7:2",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -27681,7 +27712,7 @@
                     "id": 199,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1391:6:2",
+                    "src": "1395:6:2",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage_ptr",
                       "typeString": "string"
@@ -27690,9 +27721,9 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1365:43:2"
+              "src": "1369:43:2"
             },
-            "src": "1349:60:2"
+            "src": "1353:60:2"
           },
           {
             "anonymous": false,
@@ -53025,7 +53056,7 @@
                       "scope": 2280,
                       "src": "24040:26:2",
                       "stateVariable": false,
-                      "storageLocation": "memory",
+                      "storageLocation": "storage",
                       "typeDescriptions": {
                         "typeIdentifier": "t_array$_t_struct$_Event_$149_memory_ptr_$dyn_memory_ptr",
                         "typeString": "struct VotingSystem.Event[]"
@@ -53213,7 +53244,56 @@
                           "src": "24216:67:2",
                           "statements": [
                             {
-                              "expression": {
+                              "assignments": [
+                                2221
+                              ],
+                              "declarations": [
+                                {
+                                  "constant": false,
+                                  "id": 2221,
+                                  "mutability": "mutable",
+                                  "name": "candidatesFound",
+                                  "nameLocation": "23811:15:2",
+                                  "nodeType": "VariableDeclaration",
+                                  "scope": 2256,
+                                  "src": "23791:35:2",
+                                  "stateVariable": false,
+                                  "storageLocation": "storage",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_array$_t_struct$_Candidate_$175_storage_$dyn_storage_ptr",
+                                    "typeString": "struct VotingSystem.Candidate[]"
+                                  },
+                                  "typeName": {
+                                    "baseType": {
+                                      "id": 2219,
+                                      "nodeType": "UserDefinedTypeName",
+                                      "pathNode": {
+                                        "id": 2218,
+                                        "name": "Candidate",
+                                        "nodeType": "IdentifierPath",
+                                        "referencedDeclaration": 175,
+                                        "src": "23791:9:2"
+                                      },
+                                      "referencedDeclaration": 175,
+                                      "src": "23791:9:2",
+                                      "typeDescriptions": {
+                                        "typeIdentifier": "t_struct$_Candidate_$175_storage_ptr",
+                                        "typeString": "struct VotingSystem.Candidate"
+                                      }
+                                    },
+                                    "id": 2220,
+                                    "nodeType": "ArrayTypeName",
+                                    "src": "23791:11:2",
+                                    "typeDescriptions": {
+                                      "typeIdentifier": "t_array$_t_struct$_Candidate_$175_storage_$dyn_storage_ptr",
+                                      "typeString": "struct VotingSystem.Candidate[]"
+                                    }
+                                  },
+                                  "visibility": "internal"
+                                }
+                              ],
+                              "id": 2226,
+                              "initialValue": {
                                 "expression": {
                                   "baseExpression": {
                                     "id": 2264,

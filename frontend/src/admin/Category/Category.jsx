@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import votingContract from "../../../../build/contracts/VotingSystem.json";
 import Web3 from "web3";
 import { contractAddress } from "../../../../config";
+import Swal from "sweetalert";
 
 function Category() {
   const [categories, setCategories] = useState([]);
@@ -15,32 +16,34 @@ function Category() {
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState(null);
 
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const web3 = new Web3(window.ethereum);
-        await window.ethereum.enable();
-        const accounts = await web3.eth.getAccounts();
+  const fetchCategories = async () => {
+    try {
+      const web3 = new Web3(window.ethereum);
+      await window.ethereum.enable();
+      const accounts = await web3.eth.getAccounts();
 
-        const contract = new web3.eth.Contract(
-          votingContract.abi,
-          contractAddress
-        );
-        
-        // Call the getAllCategory function in your smart contract
-        const categoryList = await contract.methods.getAllCategory().call();
-        const formattedCategories = categoryList.map((category) => ({
+      const contract = new web3.eth.Contract(
+        votingContract.abi,
+        contractAddress
+      );
+
+      // Call the getAllCategory function in your smart contract
+      const categoryList = await contract.methods.getAllCategory().call();
+      const formattedCategories = categoryList
+        .filter((category) => Number(category.categoryId) !== 0)
+        .map((category) => ({
           categoryId: Number(category.categoryId),
           categoryName: category.categoryName,
         }));
 
-        console.log("category", categoryList);
-        setCategories(formattedCategories);
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-      }
-    };
+      console.log("category", categoryList);
+      setCategories(formattedCategories);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
 
+  useEffect(() => {
     fetchCategories();
   }, []); // The empty dependency array ensures that this effect runs once, similar to componentDidMount
 
@@ -149,15 +152,52 @@ function Category() {
 
   const confirmDelete = async () => {
     setShowDeleteConfirmation(false);
-
     try {
-      // Handle category deletion from the smart contract if needed
-      console.log(`Deleting category with ID ${categoryToDelete}`);
+      console.log(`Attempting to delete category with ID ${categoryToDelete}`);
+      const web3 = new Web3(window.ethereum);
+      await window.ethereum.enable();
+      const accounts = await web3.eth.getAccounts();
+
+      const contract = new web3.eth.Contract(
+        votingContract.abi,
+        contractAddress
+      );
+
+      // Call the deleteCategory function in your smart contract
+      await contract.methods.deleteCategory(categoryToDelete).send({
+        from: accounts[0],
+      });
+
+      console.log(`Category with ID ${categoryToDelete} deleted successfully`);
 
       // Fetch updated categories after deletion
       fetchCategories();
+
+      // Prompt success message
+      Swal({
+        icon: "success",
+        title: "Category Deleted!",
+        text: "You've successfully deleted the category.",
+      });
     } catch (error) {
-      console.error("Error deleting category:", error);
+      let errorMessage = "An error occurred while deleting the category.";
+      // Check if the error message includes a revert
+      if (error.message && error.message.includes("revert")) {
+        const matches = error.message.match(/revert (.+)/);
+        errorMessage =
+          matches && matches[1]
+            ? matches[1]
+            : "Transaction reverted without a reason.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      // Show an alert with the error message
+      Swal({
+        icon: "error",
+        title: "Error Deleting Category!",
+        text: errorMessage,
+      });
     }
   };
 
