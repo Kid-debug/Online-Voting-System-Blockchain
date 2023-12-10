@@ -78,7 +78,7 @@ function ElectionList() {
         const eventList = await contract.methods
           .getAllCategoryEvent(categoryId)
           .call();
-
+        
         const eventPromises = eventList.map(async (event) => {
           const categoryName = await contract.methods
             .getCategoryById(event.categoryId)

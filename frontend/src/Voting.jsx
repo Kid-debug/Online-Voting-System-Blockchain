@@ -11,27 +11,69 @@ import { useParams } from "react-router-dom";
 function Voting() {
   const [candidates, setCandidates] = useState([]);
   const { categoryId, eventId } = useParams();
-  const [eventName, setEvent] = useState(null);
-  const [categoryName, setCategory] = useState(null);
+  const [eventName, setEventName] = useState(null);
+  const [categoryName, setCategoryName] = useState(null);
   const [selectedCandidateId, setSelectedCandidateId] = useState("");
   const [isVoted, setIsVoted] = useState();
+  const [isClose, setIsClose] = useState(true);
   const IMAGE_BASE_URL = "http://localhost:3000/uploads/";
   const authData = JSON.parse(sessionStorage.getItem("auth"));
   const userKey = authData ? authData.userKey : null;
+  const [currentDateTime, setCurrentDatetTime] = useState();
 
   // State for President candidates
   const [expandedDescriptionPresident, setExpandedDescriptionPresident] =
     useState({});
 
-  console.log("categoryId : ", categoryId);
-  console.log("eventId : ", eventId);
 
   useEffect(() => {
+    function getCurrentDateTimeInMalaysia() {
+      // Get the current date and time in UTC
+      const now = new Date();
+      // Convert it to Malaysia time (UTC+8)
+      const malaysiaTime = new Date(now.getTime() + 8 * 60 * 60 * 1000);
+      // Format the date and time to be suitable for the datetime-local input
+      const formattedDateTime = malaysiaTime.toISOString().slice(0, 16);
+      return formattedDateTime;
+    }
+    // Function to run every second
+    const everySecondFunction = async () => {
+      const currentTime = getCurrentDateTimeInMalaysia();
+      const unixCurrentTime = new Date(currentTime).getTime() / 1000;
+      setCurrentDatetTime(unixCurrentTime);
+
+      const web3 = new Web3(window.ethereum);
+      await window.ethereum.enable();
+
+      const contract = new web3.eth.Contract(
+        votingContract.abi,
+        contractAddress
+      );
+
+      const event = await contract.methods
+      .getEventById(categoryId, eventId)
+      .call();
+      
+      const eventStartTime = Number(event.startDateTime);
+      const eventEndDate = Number(event.endDateTime);
+      // check if the current date and the start data and end date
+      if (
+        unixCurrentTime >= eventStartTime &&
+        unixCurrentTime <= eventEndDate
+      ) {
+        setIsClose(false);
+      } else {
+        setIsClose(true);
+      }
+    };
+
+    // Set up an interval to run every second
+    setInterval(everySecondFunction, 1000);
+
     const fetchCategories = async () => {
       try {
         const web3 = new Web3(window.ethereum);
         await window.ethereum.enable();
-        const accounts = await web3.eth.getAccounts();
 
         const contract = new web3.eth.Contract(
           votingContract.abi,
@@ -56,11 +98,10 @@ function Voting() {
           .getEventById(categoryId, eventId)
           .call();
 
-        setCategory(category.categoryName);
-        setEvent(event.eventName);
-        console.log("event : ", event);
         console.log("category : ", category);
-        console.log("Candidates : ", candidatesList);
+        setCategoryName(category.categoryName);
+        setEventName(event.eventName);
+
         setCandidates(candidatesList);
       } catch (error) {
         console.error("Error fetching Event:", error);
@@ -73,7 +114,6 @@ function Voting() {
   // instruction
   const instruction = "You are only allowed to choose 1 candidate";
   const noticeVoted = "You has been voted the candiates!";
-
 
   const candidatesPerPage = 5;
 
@@ -128,9 +168,11 @@ function Voting() {
       <div className="container mt-5 pt-5">
         {/* President */}
         <div className="grey-container">
-          <h5>{categoryName} - {eventName}</h5>
+          <h5>
+            {categoryName} - {eventName}
+          </h5>
         </div>
-        <h4>{isVoted?noticeVoted:instruction}</h4>
+        <h4>{isVoted ? noticeVoted : instruction}</h4>
         <div className="radio-group row justify-content-between px-3 text-center a mt-4">
           {candidates.length === 0 ? (
             <h4>No matching records found</h4>
@@ -194,13 +236,12 @@ function Voting() {
 
       {/* Final Submit Button */}
       <div className="form-actions">
-
         <button
           type="submit"
           style={{ width: "270px" }}
           className="vote-submit submit-btn"
           onClick={handleSubmit}
-          hidden={isVoted}
+          hidden={isVoted || isClose}
         >
           Submit
         </button>
