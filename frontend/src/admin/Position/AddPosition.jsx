@@ -11,31 +11,36 @@ function AddPosition() {
   const [startDateAndTime, setStartDateAndTime] = useState("");
   const [endDateAndTime, setEndDateAndTime] = useState("");
   const [categories, setCategories] = useState([]);
-  
+  const [currentDateTime, setCurrentDatetTime] = useState();
+
   useEffect(() => {
-  function getCurrentDateTimeInMalaysia() {
-    // Get the current date and time in UTC
-    const now = new Date();
-    // Convert it to Malaysia time (UTC+8)
-    const malaysiaTime = new Date(now.getTime() + 8 * 60 * 60 * 1000);
-    // Format the date and time to be suitable for the datetime-local input
-    const formattedDateTime = malaysiaTime.toISOString().slice(0, 16);
-    return formattedDateTime;
-  }
-   // Set the initial state when the component mounts
-   setStartDateAndTime(getCurrentDateTimeInMalaysia());
+    function getCurrentDateTimeInMalaysia() {
+      // Get the current date and time in UTC
+      const now = new Date();
+      // Convert it to Malaysia time (UTC+8)
+      const malaysiaTime = new Date(now.getTime() + 8 * 60 * 60 * 1000);
+      // Format the date and time to be suitable for the datetime-local input
+      const formattedDateTime = malaysiaTime.toISOString().slice(0, 16);
+      return formattedDateTime;
+    }
+    // Set the initial state when the component mounts
+    setStartDateAndTime(getCurrentDateTimeInMalaysia());
+
+    // Function to run every second
+    const everySecondFunction = async () => {
+      const currentTime = getCurrentDateTimeInMalaysia();
+      const unixCurrentTime = new Date(currentTime).getTime() / 1000;
+      setCurrentDatetTime(unixCurrentTime);
+    };
+
+    // Set up an interval to run every second
+    const intervalId = setInterval(everySecondFunction, 1000);
+
+    // Clean up the interval on component unmount
+    return () => clearInterval(intervalId);
   }, []);
 
-
   useEffect(() => {
-    console.log("startDateAndTime :", startDateAndTime);
-    console.log("endDateAndTime : ", endDateAndTime);
-    const startDateTime = new Date(startDateAndTime).getTime() / 1000;
-    const endDateTime = new Date(endDateAndTime).getTime() / 1000;
-
-    console.log("startUnix :", startDateTime);
-    console.log("endUnix : ", endDateTime);
-
     // Fetch categories when the component mounts
     const fetchCategories = async () => {
       try {
@@ -93,6 +98,8 @@ function AddPosition() {
         return;
       }
 
+      validationOnDateTime();
+
       // Connect to the web3 provider (assuming MetaMask is installed)
       const web3 = new Web3(window.ethereum);
       await window.ethereum.enable();
@@ -106,9 +113,6 @@ function AddPosition() {
 
       const startDateTime = new Date(startDateAndTime).getTime() / 1000;
       const endDateTime = new Date(endDateAndTime).getTime() / 1000;
-
-      console.log("startUnix :", startDateTime);
-      console.log("endUnix : ", endDateTime);
 
       // Perform the necessary action, e.g., sending a transaction
       const transaction = await contract.methods
@@ -141,6 +145,37 @@ function AddPosition() {
         title: "Error creating position!",
         text: errorMessage,
       });
+    }
+  };
+
+  const validationOnDateTime = () => {
+    const startDateTime = new Date(startDateAndTime).getTime() / 1000;
+    const endDateTime = new Date(endDateAndTime).getTime() / 1000;
+    if (currentDateTime > startDateTime) {
+      Swal(
+        "Error!",
+        "Start Date Time cannot set before current date time",
+        "error"
+      );
+      return;
+    }
+
+    if (currentDateTime >= endDateTime) {
+      Swal(
+        "Error!",
+        "End Date Time cannot set before or same as current date time",
+        "error"
+      );
+      return;
+    }
+
+    if (startDateTime >= endDateTime) {
+      Swal(
+        "Error!",
+        "End Date Time cannot set before or same as start date time!",
+        "error"
+      );
+      return;
     }
   };
 
