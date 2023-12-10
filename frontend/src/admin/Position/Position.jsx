@@ -19,12 +19,6 @@ function Position() {
 
 
   useEffect(() => {
-    const web3 = new Web3(window.ethereum);
-    const accounts = web3.eth.getAccounts();
-    window.ethereum.enable();
-
-    const contract = new web3.eth.Contract(votingContract.abi, contractAddress);
-
     function getCurrentDateTimeInMalaysia() {
       // Get the current date and time in UTC
       const now = new Date();
@@ -72,6 +66,7 @@ function Position() {
             eventName: event.eventName,
             categoryId: event.categoryId,
             categoryName: categoryName.categoryName,
+            candidatesCount : Number(event.candidateCount),
             eventStatus: event.status,
             eventStartDate: Number(event.startDateTime),
             eventEndDate: Number(event.endDateTime),
@@ -93,6 +88,7 @@ function Position() {
     eventId: "ID",
     eventName: "Event Name",
     categoryName: "Category Name",
+    candidatesCount : "Candidates",
     eventStatus: "Status",
     eventStartDate: "Start Date",
     eventEndDate: "End Date",
@@ -104,6 +100,7 @@ function Position() {
     "eventId",
     "eventName",
     "categoryName",
+    "candidatesCount",
     "eventStatus",
     "eventStartDate",
     "eventEndDate",
@@ -119,6 +116,20 @@ function Position() {
     } else {
       setSortColumn(column);
       setSortDirection("asc");
+    }
+  };
+
+  const getElectionStatus = (election) => {
+    const currentDate = currentDateTime;
+    const startDate = election.eventStartDate;
+    const endDate = election.eventEndDate;
+
+    if (currentDate >= startDate && currentDate <= endDate) {
+      return "In Progess";
+    } else if (currentDate < startDate) {
+      return "Upcoming";
+    } else {
+      return "Completed";
     }
   };
 
@@ -224,6 +235,20 @@ function Position() {
     };
   };
 
+  const formatUnixTimestamp = (timestamp) => {
+    const formattedDate = new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      second: 'numeric',
+      timeZone: 'Asia/Kuala_Lumpur', // Set the desired time zone
+    }).format(timestamp * 1000); // Convert timestamp to milliseconds
+
+    return formattedDate;
+  };
+
   return (
     <div className="container mt-5">
       <h2>Event List</h2>
@@ -292,9 +317,12 @@ function Position() {
                         </button>
                       </>
                     ) : column === "eventStatus" ? (
-                     currentDateTime >= row.eventStartDate? "Processing" :"Comming Soon"
-                      
-                    ) : (
+                      getElectionStatus(row)
+                    ) : column === "eventStartDate"?(
+                      formatUnixTimestamp(row.eventStartDate)
+                    ): column === "eventEndDate"?(
+                      formatUnixTimestamp(row.eventEndDate)
+                    ): (
                       row[column]
                     )}
                   </td>

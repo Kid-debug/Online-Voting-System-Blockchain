@@ -14,9 +14,47 @@ function ElectionList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
-
+  const [currentDateTime, setCurrentDatetTime] = useState();
+  const [categoryName, setCategoryName] = useState("");
   const { categoryId } = useParams();
-  console.log("categoryId : ", categoryId);
+
+  useEffect(() => {
+    function getCurrentDateTimeInMalaysia() {
+      // Get the current date and time in UTC
+      const now = new Date();
+      // Convert it to Malaysia time (UTC+8)
+      const malaysiaTime = new Date(now.getTime() + 8 * 60 * 60 * 1000);
+      // Format the date and time to be suitable for the datetime-local input
+      const formattedDateTime = malaysiaTime.toISOString().slice(0, 16);
+      return formattedDateTime;
+    }
+    // Function to run every second
+    const everySecondFunction = async () => {
+      const currentTime = getCurrentDateTimeInMalaysia();
+      const unixCurrentTime = new Date(currentTime).getTime() / 1000;
+      setCurrentDatetTime(unixCurrentTime);
+    };
+
+    // Set up an interval to run every second
+    const intervalId = setInterval(everySecondFunction, 1000);
+
+    // Clean up the interval on component unmount
+    return () => clearInterval(intervalId);
+  }, []); // Empty dependency array to ensure it runs only once when the component mounts
+
+  const formatUnixTimestamp = (timestamp) => {
+    const formattedDate = new Intl.DateTimeFormat("en-US", {
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+      timeZone: "Asia/Kuala_Lumpur", // Set the desired time zone
+    }).format(timestamp * 1000); // Convert timestamp to milliseconds
+
+    return formattedDate;
+  };
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -29,6 +67,12 @@ function ElectionList() {
           votingContract.abi,
           contractAddress
         );
+
+        const category = await contract.methods
+          .getCategoryById(categoryId)
+          .call();
+
+        setCategoryName(category.categoryName);
 
         // Call the getAllEvent function in smart contract
         const eventList = await contract.methods
@@ -43,6 +87,10 @@ function ElectionList() {
             eventId: Number(event.eventId),
             eventName: event.eventName,
             categoryName: categoryName.categoryName,
+            candidatesCount: Number(event.candidateCount),
+            eventStatus: event.status,
+            eventStartDate: Number(event.startDateTime),
+            eventEndDate: Number(event.endDateTime),
           };
         });
 
@@ -63,9 +111,9 @@ function ElectionList() {
   };
 
   const getElectionStatus = (election) => {
-    const currentDate = new Date();
-    const startDate = new Date(election["Start Date"]);
-    const endDate = new Date(election["End Date"]);
+    const currentDate = currentDateTime;
+    const startDate = election.eventStartDate;
+    const endDate = election.eventEndDate;
 
     if (currentDate >= startDate && currentDate <= endDate) {
       return "In Progess";
@@ -119,7 +167,7 @@ function ElectionList() {
     <div>
       <Header />
       <div className="election-container">
-        <h2 className="mt-5 mb-4">Election List</h2>
+        <h2 className="mt-5 mb-4">Election List : {categoryName}</h2>
         <div className="input-group mb-3">
           <div className="input-group-prepend">
             <span className="input-group-text">
@@ -139,7 +187,6 @@ function ElectionList() {
             <tr>
               <th>Event No.</th>
               <th>Event Name</th>
-              <th>Category</th>
               <th>Start Date</th>
               <th>End Date</th>
               <th>Status</th>
@@ -158,9 +205,8 @@ function ElectionList() {
                 <tr key={election.eventId}>
                   <td>{election.eventId}</td>
                   <td>{election.eventName}</td>
-                  <td>{election.categoryName}</td>
-                  <td>{election["Start Date"]}</td>
-                  <td>{election["End Date"]}</td>
+                  <td>{formatUnixTimestamp(election.eventStartDate)}</td>
+                  <td>{formatUnixTimestamp(election.eventEndDate)}</td>
                   <td>{getElectionStatus(election)}</td>
                   <td>
                     <Link

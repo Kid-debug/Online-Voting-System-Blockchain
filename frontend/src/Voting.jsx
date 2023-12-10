@@ -11,10 +11,13 @@ import { useParams } from "react-router-dom";
 function Voting() {
   const [candidates, setCandidates] = useState([]);
   const { categoryId, eventId } = useParams();
-  const [event, setEvent] = useState(null);
-  const [category, setCategory] = useState(null);
+  const [eventName, setEvent] = useState(null);
+  const [categoryName, setCategory] = useState(null);
   const [selectedCandidateId, setSelectedCandidateId] = useState("");
+  const [isVoted, setIsVoted] = useState();
   const IMAGE_BASE_URL = "http://localhost:3000/uploads/";
+  const authData = JSON.parse(sessionStorage.getItem("auth"));
+  const userKey = authData ? authData.userKey : null;
 
   // State for President candidates
   const [expandedDescriptionPresident, setExpandedDescriptionPresident] =
@@ -35,6 +38,12 @@ function Voting() {
           contractAddress
         );
 
+        const isVoted = await contract.methods
+          .isVoted(categoryId, eventId, userKey)
+          .call();
+
+        setIsVoted(isVoted);
+
         // Call the getAllEvent function in smart contract
         const candidatesList = await contract.methods
           .getVoteEventCandidate(categoryId, eventId)
@@ -47,8 +56,8 @@ function Voting() {
           .getEventById(categoryId, eventId)
           .call();
 
-        setCategory(category);
-        setEvent(event);
+        setCategory(category.categoryName);
+        setEvent(event.eventName);
         console.log("event : ", event);
         console.log("category : ", category);
         console.log("Candidates : ", candidatesList);
@@ -63,6 +72,8 @@ function Voting() {
 
   // instruction
   const instruction = "You are only allowed to choose 1 candidate";
+  const noticeVoted = "You has been voted the candiates!";
+
 
   const candidatesPerPage = 5;
 
@@ -94,9 +105,6 @@ function Voting() {
     await window.ethereum.enable();
     const accounts = await web3.eth.getAccounts();
     const contract = new web3.eth.Contract(votingContract.abi, contractAddress);
-    
-    const authData = JSON.parse(sessionStorage.getItem("auth"));
-    const userKey = authData ? authData.userKey : null;
 
     console.log("selectedCandidateId : ", Number(selectedCandidateId));
 
@@ -120,9 +128,9 @@ function Voting() {
       <div className="container mt-5 pt-5">
         {/* President */}
         <div className="grey-container">
-          <h5></h5>
+          <h5>{categoryName} - {eventName}</h5>
         </div>
-        <h4>{instruction}</h4>
+        <h4>{isVoted?noticeVoted:instruction}</h4>
         <div className="radio-group row justify-content-between px-3 text-center a mt-4">
           {candidates.length === 0 ? (
             <h4>No matching records found</h4>
@@ -186,11 +194,13 @@ function Voting() {
 
       {/* Final Submit Button */}
       <div className="form-actions">
+
         <button
           type="submit"
           style={{ width: "270px" }}
           className="vote-submit submit-btn"
           onClick={handleSubmit}
+          hidden={isVoted}
         >
           Submit
         </button>

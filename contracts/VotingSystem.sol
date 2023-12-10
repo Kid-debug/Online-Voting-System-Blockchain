@@ -789,6 +789,31 @@ contract VotingSystem {
         }
     }
 
+     function isVoted(
+        uint256 _categoryId,
+        uint256 _eventId,
+        string memory _voterKey
+    ) public view returns (bool) {
+        // Check if the category exists
+        require(
+            categories[_categoryId].categoryId != 0,
+            "Category does not exist"
+        );
+
+        for (uint256 i = 1; i <= voteEventCount; i++) {
+            if (
+                voteEvents[i].categoryId == _categoryId &&
+                voteEvents[i].eventId == _eventId &&
+                keccak256(bytes(voteEvents[i].voterKey)) ==
+                keccak256(bytes(_voterKey))
+            ) {
+                return voteEvents[i].voted;
+            }
+        }
+
+        return false;
+    }
+
     function getCandidateVoteCount(uint256 _candidateId)
         public
         view
