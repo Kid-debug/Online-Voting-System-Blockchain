@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "./container/Header";
 import Footer from "./container/Footer";
 import "./stylesheets/profile.css";
@@ -26,6 +26,7 @@ function Profile() {
     useState(false);
   const [walletAddress, setWalletAddress] = useState("");
   const [walletBalance, setWalletBalance] = useState("");
+  const shouldDisplayButtons = activeTab === TAB_CHANGE_PASSWORD;
 
   // Retrieve the auth context
   const { auth } = useAuth();
@@ -57,12 +58,89 @@ function Profile() {
   };
 
   // Reset the form fields to initial state
-  const handleReset = () => {
+  const handleResetPassword = async () => {
+    validatePassword();
+    try {
+      const web3 = new Web3(window.ethereum);
+      await window.ethereum.enable();
+      const accounts = await web3.eth.getAccounts();
+      const contract = new web3.eth.Contract(
+        votingContract.abi,
+        contractAddress
+      );
+
+      const user = await contract.methods
+        .getVoterByEmailPassword(auth.email, values.currentPassword)
+        .call();
+      if (user.id == 0) {
+        Swal("Error!", "Current Password is wrong!", "error");
+        return;
+      }
+
+     
+
+      console.log("user  : ", user);
+      console.log("email  : ", auth.email);
+      console.log("currentPassword  : ", values.currentPassword);
+
+      await contract.methods
+        .updateVoterPassword(
+          auth.userKey,
+          values.newPassword
+        )
+        .send({ from: accounts[0] });
+
+      Swal({
+        icon: "success",
+        title: "Candidate Created!",
+        text: "You've successfully added a new candidate.",
+      });
+    } catch (error) {
+      // Check if the image file name is used by any candidate
+      console.error("Error change password : ", error.message);
+    }
+    handleResetInput();
+  };
+
+  const handleResetInput = () =>{
     setValues({
       currentPassword: "",
       newPassword: "",
       repeatNewPassword: "",
     });
+  };
+
+  const validatePassword = () => {
+    const errors = {};
+    if (
+      !values.currentPassword ||
+      !values.newPassword ||
+      !values.repeatNewPassword
+    ) {
+      Swal("Error!", "All input fields must be specified.", "error");
+      return false;
+    }
+
+    // Check if password is not empty and meets requirements
+     if (values.newPassword.length < 8) {
+      Swal("Error!", "Password must be at least 8 characters long!", "error");
+    } else if (
+      !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/.test(
+        values.newPassword
+      )
+    ) {
+        Swal("Error!", "Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character!", "error");
+        return false
+    }
+
+    if (values.newPassword != values.repeatNewPassword) {
+      Swal("Error!", "Repeat new Password is not same with the new password!", "error");
+      return false;
+    }
+
+ 
+
+    return true;
   };
 
   return (
@@ -126,7 +204,10 @@ function Profile() {
                             />
                           </div>
                           <div className="col-md-12 mb-3 mt-3">
-                            <label htmlFor="walletAddress" className="form-label">
+                            <label
+                              htmlFor="walletAddress"
+                              className="form-label"
+                            >
                               MetaMask Account
                             </label>
                             <input
@@ -139,7 +220,10 @@ function Profile() {
                             />
                           </div>
                           <div className="col-md-12 mb-3 mt-3">
-                            <label htmlFor="walletBalance" className="form-label">
+                            <label
+                              htmlFor="walletBalance"
+                              className="form-label"
+                            >
                               Wallet Balance
                             </label>
                             <input
@@ -278,19 +362,27 @@ function Profile() {
               </div>
             </div>
             <div className="text-right mt-3">
-              <button type="submit" className="btn btn-primary rounded-0">
-                <i className="bi bi-check"></i>
-                Save
-              </button>
-              &nbsp;
-              <button
-                type="button"
-                className="btn btn-default rounded-0"
-                onClick={handleReset}
-              >
-                <i className="bi bi-arrow-counterclockwise"></i>
-                Reset
-              </button>
+            {shouldDisplayButtons && (
+                <>
+                  <button
+                    type="button"
+                    className="btn btn-primary rounded-0"
+                    onClick={handleResetPassword}
+                  >
+                    <i className="bi bi-check"></i>
+                    Save
+                  </button>
+                  &nbsp;
+                  <button
+                    type="button"
+                    className="btn btn-default rounded-0"
+                    onClick={handleResetInput}
+                  >
+                    <i className="bi bi-arrow-counterclockwise"></i>
+                    Reset
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </form>
