@@ -83,6 +83,25 @@ function AddPosition() {
     setEndDateAndTime(event.target.value);
   };
 
+  const validationOnDateTime = () => {
+    const startDateTime = new Date(startDateAndTime).getTime() / 1000;
+    const endDateTime = new Date(endDateAndTime).getTime() / 1000;
+
+    if (currentDateTime > startDateTime) {
+      return "Start Date Time cannot be set before the current date time.";
+    }
+
+    if (currentDateTime >= endDateTime) {
+      return "End Date Time cannot be set before or the same as the current date time.";
+    }
+
+    if (startDateTime >= endDateTime) {
+      return "End Date Time cannot be set before or the same as the start date time.";
+    }
+
+    return ""; // Return an empty string if there are no validation errors
+  };
+
   const handleCreatePosition = async () => {
     // Your logic to create a position goes here
     console.log("Position created:", positionName);
@@ -98,7 +117,13 @@ function AddPosition() {
         return;
       }
 
-      validationOnDateTime();
+      // Check validation first
+      const validationMessage = validationOnDateTime();
+      if (validationMessage) {
+        // If there is a validation message, show it and return early
+        Swal("Error!", validationMessage, "error");
+        return;
+      }
 
       // Connect to the web3 provider (assuming MetaMask is installed)
       const web3 = new Web3(window.ethereum);
@@ -145,37 +170,6 @@ function AddPosition() {
         title: "Error creating position!",
         text: errorMessage,
       });
-    }
-  };
-
-  const validationOnDateTime = () => {
-    const startDateTime = new Date(startDateAndTime).getTime() / 1000;
-    const endDateTime = new Date(endDateAndTime).getTime() / 1000;
-    if (currentDateTime > startDateTime) {
-      Swal(
-        "Error!",
-        "Start Date Time cannot set before current date time",
-        "error"
-      );
-      return;
-    }
-
-    if (currentDateTime >= endDateTime) {
-      Swal(
-        "Error!",
-        "End Date Time cannot set before or same as current date time",
-        "error"
-      );
-      return;
-    }
-
-    if (startDateTime >= endDateTime) {
-      Swal(
-        "Error!",
-        "End Date Time cannot set before or same as start date time!",
-        "error"
-      );
-      return;
     }
   };
 
