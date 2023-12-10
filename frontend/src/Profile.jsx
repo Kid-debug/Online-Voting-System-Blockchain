@@ -190,6 +190,19 @@ function Profile() {
                       <hr className="border-light m-0" />
                       <div className="card-body">
                         <div className="row">
+                        <div className="col-md-12 mb-3 mt-3">
+                            <label htmlFor="userKey" className="form-label">
+                             User Key
+                            </label>
+                            <input
+                              id="userKey"
+                              name="userKey"
+                              type="text"
+                              className="form-control"
+                              value={auth.userKey}
+                              disabled="true"
+                            />
+                          </div>
                           <div className="col-md-12 mb-3 mt-3">
                             <label htmlFor="email" className="form-label">
                               E-mail
