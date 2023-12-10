@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import Header from "./container/Header";
 import Footer from "./container/Footer";
 import "./stylesheets/profile.css";
@@ -6,6 +6,9 @@ import axios from "axios";
 import useAuth from "./hooks/useAuth";
 import { EyeInvisibleOutlined, EyeOutlined } from "@ant-design/icons";
 import Swal from "sweetalert";
+import Web3 from "web3";
+import votingContract from "../../build/contracts/VotingSystem.json";
+import { contractAddress } from "../../config";
 
 const TAB_ACCOUNT = "account-general";
 const TAB_CHANGE_PASSWORD = "account-change-password";
@@ -21,74 +24,36 @@ function Profile() {
   const [newPasswordVisible, setNewPasswordVisible] = useState(false);
   const [repeatNewPasswordVisible, setRepeatNewPasswordVisible] =
     useState(false);
+  const [walletAddress, setWalletAddress] = useState("");
+  const [walletBalance, setWalletBalance] = useState("");
 
   // Retrieve the auth context
   const { auth } = useAuth();
 
+  useEffect(() => {
+    const fetchMetaAccount = async () => {
+      try {
+        const accounts = await window.ethereum.request({
+          method: "eth_requestAccounts",
+        });
+        setWalletAddress(accounts[0]);
+
+        // get balance
+        const web3 = new Web3(window.ethereum);
+        const balance = await web3.eth.getBalance(accounts[0]);
+        const walletBalance = web3.utils.fromWei(balance, "ether");
+        console.log("Balance:", balance);
+        setWalletBalance(walletBalance);
+      } catch (error) {
+        console.error("Error fetching Event:", error);
+      }
+    };
+
+    fetchMetaAccount();
+  }, []);
+
   const handleTabClick = (tabId) => {
     setActiveTab(tabId);
-  };
-
-  const handleChangePassword = async (event) => {
-    event.preventDefault();
-
-    try {
-      // Replace with actual token from auth context or state management
-      const token = auth?.accessToken;
-
-      const response = await axios.post(
-        "http://localhost:3000/api/change-password",
-        {
-          ...values,
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      Swal({
-        title: "Change Password Successfully!",
-        text: response.data.msg,
-        icon: "success",
-        button: {
-          text: "OK",
-        },
-      });
-      handleReset();
-    } catch (error) {
-      if (error.response) {
-        // If the backend sends an array of errors
-        if (error.response.data.errors) {
-          Swal({
-            icon: "error",
-            title: "Failed to Change Password!",
-            text: error.response.data.errors.map((e) => e.msg).join("\n"),
-            button: {
-              text: "OK",
-            },
-          });
-        } else {
-          // If the backend sends a single error message
-          Swal({
-            icon: "error",
-            title: "Failed to Change Password!",
-            text: error.response.data.msg,
-            button: {
-              text: "OK",
-            },
-          });
-        }
-      } else {
-        // Handle other errors here
-        console.error("Updating Password error:", error);
-        Swal({
-          icon: "error",
-          title: "Internal Server Error",
-          text: "Network error occurred.",
-          confirmButtonText: "OK",
-        });
-      }
-    }
   };
 
   // Reset the form fields to initial state
@@ -104,7 +69,7 @@ function Profile() {
     <div className="app-container">
       <Header />
       <main>
-        <form onSubmit={handleChangePassword}>
+        <form>
           <div className="container light-style flex-grow-1 container-p-y">
             <h2 className="font-weight-bold py-3 mb-4">Edit Profile</h2>
             <div className="card-profile overflow-hidden">
@@ -157,6 +122,32 @@ function Profile() {
                               type="email"
                               className="form-control"
                               value={auth.email}
+                              disabled="true"
+                            />
+                          </div>
+                          <div className="col-md-12 mb-3 mt-3">
+                            <label htmlFor="walletAddress" className="form-label">
+                              MetaMask Account
+                            </label>
+                            <input
+                              id="walletAddress"
+                              name="walletAddress"
+                              type="text"
+                              className="form-control"
+                              value={walletAddress}
+                              disabled="true"
+                            />
+                          </div>
+                          <div className="col-md-12 mb-3 mt-3">
+                            <label htmlFor="walletBalance" className="form-label">
+                              Wallet Balance
+                            </label>
+                            <input
+                              id="walletBalance"
+                              name="walletBalance"
+                              type="text"
+                              className="form-control"
+                              value={walletBalance}
                               disabled="true"
                             />
                           </div>
