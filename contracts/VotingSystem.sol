@@ -259,9 +259,15 @@ contract VotingSystem {
         category.status = _category.status;
     }
 
-    function updateCategoryName(uint256 _categoryId, string memory _newCategoryName) public {
+    function updateCategoryName(
+        uint256 _categoryId,
+        string memory _newCategoryName
+    ) public {
         // Check if the category exists
-        require(categories[_categoryId].categoryId != 0, "Category does not exist");
+        require(
+            categories[_categoryId].categoryId != 0,
+            "Category does not exist"
+        );
 
         // Check if the new category name is different from the existing name in the list
         // and not the same as the current category name being updated
@@ -269,7 +275,7 @@ contract VotingSystem {
             if (i != _categoryId) {
                 require(
                     keccak256(bytes(_newCategoryName)) !=
-                    keccak256(bytes(categories[i].categoryName)),
+                        keccak256(bytes(categories[i].categoryName)),
                     "Category name already exists"
                 );
             }
@@ -280,15 +286,24 @@ contract VotingSystem {
     }
 
     function deleteCategory(uint256 _categoryId) public {
-        require(categories[_categoryId].categoryId != 0, "Category does not exist");
+        require(
+            categories[_categoryId].categoryId != 0,
+            "Category does not exist"
+        );
 
         // Check if there are any events associated with the category
-        require(categories[_categoryId].events.length == 0, "Cannot delete category with events");
+        require(
+            categories[_categoryId].events.length == 0,
+            "Cannot delete category with events"
+        );
 
         // Check if there are any candidates associated with the category
         for (uint256 i = 1; i <= eventCount; i++) {
             Event storage currentEvent = events[i];
-            if (currentEvent.categoryId == _categoryId && currentEvent.candidates.length > 0) {
+            if (
+                currentEvent.categoryId == _categoryId &&
+                currentEvent.candidates.length > 0
+            ) {
                 revert("Cannot delete category with candidates");
             }
         }
@@ -388,7 +403,6 @@ contract VotingSystem {
                     (_startDateTime >=
                         categories[_categoryId].events[i].startDateTime))
             ) {
-                
                 return true;
             }
         }
@@ -750,7 +764,6 @@ contract VotingSystem {
         voteEvents[voteEventCount] = newVoteEvent;
 
         // add the vote count of the chosen candidate
-        addVoteCount(_candidateId);
         addVoteCountIn(_categoryId, _eventId, _candidateId);
 
         string memory concatenatedValues = string(
@@ -758,10 +771,6 @@ contract VotingSystem {
         );
 
         emit VoteEvent(_voterKey, concatenatedValues, _candidateId);
-    }
-
-    function addVoteCount(uint256 _candidateId) internal {
-        candidates[_candidateId].voteCount += 1;
     }
 
     function addVoteCountIn(
@@ -789,7 +798,7 @@ contract VotingSystem {
         }
     }
 
-     function isVoted(
+    function isVoted(
         uint256 _categoryId,
         uint256 _eventId,
         string memory _voterKey
@@ -814,29 +823,51 @@ contract VotingSystem {
         return false;
     }
 
-    function getCandidateVoteCount(uint256 _candidateId)
-        public
-        view
-        returns (uint256 count)
-    {
-        return candidates[_candidateId].voteCount;
-    }
+    // function getVoteEventCandidate(uint256 _categoryId, uint256 _eventId)
+    //     public
+    //     view
+    //     returns (Candidate[] memory)
+    // {
+    //     Event[] memory eventsFound = categories[_categoryId].events;
 
-    function getVoteEventCandidate(uint256 _categoryId, uint256 _eventId)
-        public
-        view
-        returns (Candidate[] memory)
-    {
-        Event[] memory eventsFound = categories[_categoryId].events;
+    //     for (uint256 i = 0; i < eventsFound.length; i++) {
+    //         if (eventsFound[i].eventId == _eventId) {
+    //             return eventsFound[i].candidates;
+    //         }
+    //     }
 
-        for (uint256 i = 0; i < eventsFound.length; i++) {
-            if (eventsFound[i].eventId == _eventId) {
-                return eventsFound[i].candidates;
+    //     // If the event is not found, return an empty array or handle the situation accordingly
+    //     return new Candidate[](0);
+    // }
+
+    function markWinner(uint256 _categoryId, uint256 _eventId) public {
+        categories[_categoryId].events;
+
+        for (uint256 i = 0; i < categories[_categoryId].events.length; i++) {
+            if (categories[_categoryId].events[i].eventId == _eventId) {
+                Candidate storage winner = categories[_categoryId]
+                    .events[i]
+                    .candidates[0];
+                for (
+                    uint256 j = 0;
+                    j < categories[_categoryId].events[i].candidates.length-1;
+                    j++
+                ) {
+                    if (
+                        winner.voteCount <
+                        categories[_categoryId]
+                            .events[i]
+                            .candidates[j + 1]
+                            .voteCount
+                    ) {
+                        winner = categories[_categoryId].events[i].candidates[
+                            j + 1
+                        ];
+                    }
+                }
+                winner.win = true;
             }
         }
-
-        // If the event is not found, return an empty array or handle the situation accordingly
-        return new Candidate[](0);
     }
 
     function whoIsTheWinner(uint256 _categoryId, uint256 _eventId)
