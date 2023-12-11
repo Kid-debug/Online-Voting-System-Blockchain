@@ -27,22 +27,8 @@ function Voting() {
     useState({});
 
   useEffect(() => {
-    function getCurrentDateTimeInMalaysia() {
-      // Get the current date and time in UTC
-      const now = new Date();
-      // Convert it to Malaysia time (UTC+8)
-      const malaysiaTime = new Date(now.getTime() + 8 * 60 * 60 * 1000);
-      // Format the date and time to be suitable for the datetime-local input
-      const formattedDateTime = malaysiaTime.toISOString().slice(0, 16);
-      return formattedDateTime;
-    }
-
     // Function to run every second
     const everySecondFunction = async () => {
-      const currentTime = getCurrentDateTimeInMalaysia();
-      const unixCurrentTime = new Date(currentTime).getTime() / 1000;
-      setCurrentDatetTime(unixCurrentTime);
-
       const web3 = new Web3(window.ethereum);
       await window.ethereum.enable();
 
@@ -55,16 +41,13 @@ function Voting() {
         .getEventById(categoryId, eventId)
         .call();
 
-      const eventStartTime = Number(event.startDateTime);
-      const eventEndDate = Number(event.endDateTime);
       // check if the current date and the start data and end date
       if (
-        unixCurrentTime >= eventStartTime &&
-        unixCurrentTime <= eventEndDate
+       event.status == 2
       ) {
         setIsClose(false);
       }
-      if (unixCurrentTime > eventEndDate) {
+      if (event.status != 1 && event.status != 2) {
         setIsClose(true);
         setIsEnd(true);
       }
@@ -72,63 +55,6 @@ function Voting() {
 
     // Set up an interval to run every second
     setInterval(everySecondFunction, 1000);
-
-    // Function to run every second
-    const countWinner = async () => {
-      if (isEnd) {
-        const web3 = new Web3(window.ethereum);
-        await window.ethereum.enable();
-
-        const contract = new web3.eth.Contract(
-          votingContract.abi,
-          contractAddress
-        );
-
-        const isMarkedWinner = await contract.methods
-          .isMarkWinner(categoryId, eventId)
-          .call();
-
-        if (!isMarkedWinner) {
-          try {
-            const ganacheUrl = "HTTP://127.0.0.1:7545";
-            const privateKey =
-              "0x7e714a5c55233c1adc7400de839ece13c124d433b1266178211e948ffa1f7a5d";
-
-            const web3 = new Web3(new Web3.providers.HttpProvider(ganacheUrl));
-
-            const contract = new web3.eth.Contract(
-              votingContract.abi,
-              contractAddress
-            );
-
-            const account = web3.eth.accounts.privateKeyToAccount(privateKey);
-            web3.eth.accounts.wallet.add(account);
-
-            await contract.methods.markWinner(categoryId, eventId).send({
-              from: account.address,
-              gas: 200000,
-            });
-
-            const event = await contract.methods
-              .getEventById(categoryId, eventId)
-              .call();
-
-            event.status = 3; // 1: Upcoming, 2: In Progress, 3: Completed, 4： Cancel
-
-            await contract.methods.updateEvent(event).send({
-              from: account.address,
-              gas: 200000,
-            });
-            
-          } catch (error) {
-            console.error("Error to count winner : ", error.message);
-          }
-        }
-      }
-    };
-
-    // Set up an interval to run every second
-    setInterval(countWinner, 1000);
 
     const fetchCategories = async () => {
       try {
