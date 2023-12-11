@@ -78,7 +78,7 @@ function ElectionList() {
         const eventList = await contract.methods
           .getAllCategoryEvent(categoryId)
           .call();
-        
+
         const eventPromises = eventList.map(async (event) => {
           const categoryName = await contract.methods
             .getCategoryById(event.categoryId)
@@ -88,7 +88,7 @@ function ElectionList() {
             eventName: event.eventName,
             categoryName: categoryName.categoryName,
             candidatesCount: Number(event.candidateCount),
-            eventStatus: event.status,
+            eventStatus: Number(event.status),
             eventStartDate: Number(event.startDateTime),
             eventEndDate: Number(event.endDateTime),
           };
@@ -111,16 +111,17 @@ function ElectionList() {
   };
 
   const getElectionStatus = (election) => {
-    const currentDate = currentDateTime;
-    const startDate = election.eventStartDate;
-    const endDate = election.eventEndDate;
-
-    if (currentDate >= startDate && currentDate <= endDate) {
-      return "In Progess";
-    } else if (currentDate < startDate) {
+    // 1: Upcoming, 2: In Progress, 3: Completed, 4： Cancel
+    const status = election.eventStatus;
+    console.log("status : ", status);
+    if (status == 1) {
       return "Upcoming";
+    } else if (status == 2) {
+      return "Processing";
+    } else if (status == 3) {
+      return "Marking Winner";
     } else {
-      return "Completed";
+      return "Complete";
     }
   };
 

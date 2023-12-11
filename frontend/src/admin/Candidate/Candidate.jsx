@@ -14,6 +14,7 @@ function Candidate() {
   const [sortColumn, setSortColumn] = useState(null);
   const [sortDirection, setSortDirection] = useState(null);
   const IMAGE_BASE_URL = "http://localhost:3000/uploads/";
+
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -41,7 +42,13 @@ function Candidate() {
             candidateName: candidate.name,
             candidateDesc: candidate.description,
             candidateVoteCount: Number(candidate.voteCount),
+            candidateIsWin: String(candidate.win),
+            categoryId: candidate.categoryId,
             categoryName: category.categoryName,
+            eventId: candidate.eventId,
+            eventStartDate: event.startDateTime,
+            eventEndDate: event.endDateTime,
+            eventStatus: event.status,
             eventName: event.eventName,
             imageFileName: candidate.imageFileName,
           };
@@ -66,6 +73,7 @@ function Candidate() {
     candidateName: "Candidate Name",
     candidateDesc: "Description",
     candidateVoteCount: "Vote Count",
+    candidateIsWin: "Win",
     imageFileName: "Image",
     Action: "Action",
   };
@@ -77,6 +85,7 @@ function Candidate() {
     "candidateName",
     "candidateDesc",
     "candidateVoteCount",
+    "candidateIsWin",
     "imageFileName",
     "Action",
   ];

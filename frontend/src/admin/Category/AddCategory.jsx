@@ -20,7 +20,13 @@ function AddCategory() {
     }
 
     try {
+      // const ganacheUrl = "HTTP://127.0.0.1:7545"; // Replace with your Ganache URL
+      // const privateKey = '0x7e714a5c55233c1adc7400de839ece13c124d433b1266178211e948ffa1f7a5d';
+
       console.log("Attempting to add category...");
+
+    //  const web3 = new Web3(new Web3.providers.HttpProvider(ganacheUrl));
+
       const web3 = new Web3(window.ethereum);
       await window.ethereum.enable();
       const accounts = await web3.eth.getAccounts();
@@ -31,12 +37,18 @@ function AddCategory() {
         contractAddress
       );
 
-      console.log("contract", contract);
+      //const account = web3.eth.accounts.privateKeyToAccount(privateKey);
+      //web3.eth.accounts.wallet.add(account);
 
       // Call the addCategory function in your smart contract
       await contract.methods.addCategory(categoryName).send({
         from: accounts[0],
       });
+
+      // await contract.methods.addCategory(categoryName).send({
+      //   from: account.address,
+      //   gas: 200000,
+      // })
 
       // prompt success message
       Swal({

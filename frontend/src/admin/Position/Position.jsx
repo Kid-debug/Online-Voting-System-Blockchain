@@ -17,7 +17,6 @@ function Position() {
   const [categoryToDelete, setCategoryToDelete] = useState(null);
   const [currentDateTime, setCurrentDatetTime] = useState();
 
-
   useEffect(() => {
     function getCurrentDateTimeInMalaysia() {
       // Get the current date and time in UTC
@@ -30,7 +29,7 @@ function Position() {
     }
     // Function to run every second
     const everySecondFunction = async () => {
-     const currentTime =  getCurrentDateTimeInMalaysia();
+      const currentTime = getCurrentDateTimeInMalaysia();
       const unixCurrentTime = new Date(currentTime).getTime() / 1000;
       setCurrentDatetTime(unixCurrentTime);
     };
@@ -66,8 +65,8 @@ function Position() {
             eventName: event.eventName,
             categoryId: event.categoryId,
             categoryName: categoryName.categoryName,
-            candidatesCount : Number(event.candidateCount),
-            eventStatus: event.status,
+            candidatesCount: Number(event.candidateCount),
+            eventStatus: Number(event.status),
             eventStartDate: Number(event.startDateTime),
             eventEndDate: Number(event.endDateTime),
           };
@@ -88,7 +87,7 @@ function Position() {
     eventId: "ID",
     eventName: "Event Name",
     categoryName: "Category Name",
-    candidatesCount : "Candidates",
+    candidatesCount: "Candidates",
     eventStatus: "Status",
     eventStartDate: "Start Date",
     eventEndDate: "End Date",
@@ -120,16 +119,18 @@ function Position() {
   };
 
   const getElectionStatus = (election) => {
-    const currentDate = currentDateTime;
-    const startDate = election.eventStartDate;
-    const endDate = election.eventEndDate;
 
-    if (currentDate >= startDate && currentDate <= endDate) {
-      return "In Progess";
-    } else if (currentDate < startDate) {
+// 1: Upcoming, 2: In Progress, 3: Completed, 4： Cancel
+    const status = election.eventStatus;
+    console.log("status : ", status);
+    if (status == 1) {
       return "Upcoming";
-    } else {
-      return "Completed";
+    } else if(status == 2){
+      return "Processing";
+    }else if(status == 3){
+      return "Marking Winner";
+    }else{
+      return "Complete";
     }
   };
 
@@ -236,14 +237,14 @@ function Position() {
   };
 
   const formatUnixTimestamp = (timestamp) => {
-    const formattedDate = new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: 'numeric',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric',
-      second: 'numeric',
-      timeZone: 'Asia/Kuala_Lumpur', // Set the desired time zone
+    const formattedDate = new Intl.DateTimeFormat("en-US", {
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+      timeZone: "Asia/Kuala_Lumpur", // Set the desired time zone
     }).format(timestamp * 1000); // Convert timestamp to milliseconds
 
     return formattedDate;
@@ -318,11 +319,11 @@ function Position() {
                       </>
                     ) : column === "eventStatus" ? (
                       getElectionStatus(row)
-                    ) : column === "eventStartDate"?(
+                    ) : column === "eventStartDate" ? (
                       formatUnixTimestamp(row.eventStartDate)
-                    ): column === "eventEndDate"?(
+                    ) : column === "eventEndDate" ? (
                       formatUnixTimestamp(row.eventEndDate)
-                    ): (
+                    ) : (
                       row[column]
                     )}
                   </td>

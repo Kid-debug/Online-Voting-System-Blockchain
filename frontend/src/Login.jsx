@@ -88,6 +88,21 @@ function Login() {
     }
   };
 
+//   const handleSubmit = async (event) => {
+   
+
+//     setAuthData({
+//       userKey: "hahaha",
+//       userId: 1,
+//       userRole: 'A',
+//       email: "user.email",
+//     });
+
+//       navigate(`/voterdashboard`);
+
+
+// };
+
   const validateLogin = () => {
     const errors = {};
 

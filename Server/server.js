@@ -11,6 +11,108 @@ const session = require("express-session");
 const sequelize = require("./config/sequelize");
 const User = require("./models/user");
 
+const votingContract = require("../build/contracts/VotingSystem.json");
+const { Web3 } = require("web3");
+const ganacheUrl = "HTTP://127.0.0.1:7545";
+const privateKey =
+  "0x7e714a5c55233c1adc7400de839ece13c124d433b1266178211e948ffa1f7a5d";
+
+const web3 = new Web3(new Web3.providers.HttpProvider(ganacheUrl));
+const contract = new web3.eth.Contract(
+  votingContract.abi,
+  "0xFB2e065e7AA902486B4E79b1ac7412871804D544"
+);
+const account = web3.eth.accounts.privateKeyToAccount(privateKey);
+web3.eth.accounts.wallet.add(account);
+
+const changeEventDateStatus = async () => {
+  // Add your code logic here
+
+  // Call the getAllEvent function in smart contract
+  const eventList = await contract.methods.getAllEvent().call();
+
+  const currentTime = getCurrentDateTimeInMalaysia();
+  const unixCurrentTime = new Date(currentTime).getTime() / 1000;
+  if (eventList != null) {
+    for (const event of eventList) {
+      try {
+        if (
+          unixCurrentTime >= event.startDateTime &&
+          unixCurrentTime <= event.endDateTime && event.status != 2
+        ) {
+          console.log("change status to processing");
+          event.status = 2; // 1: Upcoming, 2: In Progress, 3: Completed, 4: Cancel
+          await contract.methods.updateEvent(event).send({
+            from: account.address,
+            gas: 200000,
+          });
+          break;
+        } else if (unixCurrentTime > event.endDateTime && event.status != 3 && event.status != 4 ) {
+     
+          console.log("change status to completed!");
+          event.status = 3; // 1: Upcoming, 2: In Progress, 3: Marking Wiiner, 4: Completed
+          await contract.methods.updateEvent(event).send({
+            from: account.address,
+            gas: 200000,
+          });
+          break;
+        }
+      } catch (error) {
+        console.error("Error change event status : ", error.message);
+      }
+    }
+  }
+};
+setInterval(changeEventDateStatus, 1000);
+
+const markingWinner = async () => {
+  // Add your code logic here
+
+  // Call the getAllEvent function in smart contract
+  const eventList = await contract.methods.getAllEvent().call();
+  for (const event of eventList) {
+    if (event.status == 3) {
+      const isMarkedWinner = await contract.methods
+        .isMarkWinner(event.categoryId, event.eventId)
+        .call();
+
+      if (!isMarkedWinner) {
+        console.log("Marking Winner");
+        try {
+          await contract.methods
+            .markWinner(event.categoryId, event.eventId)
+            .send({
+              from: account.address,
+              gas: 200000,
+            });
+
+            event.status = 4; // 1: Upcoming, 2: In Progress, 3: Marking Wiiner, 4: Completed
+            await contract.methods.updateEvent(event).send({
+              from: account.address,
+              gas: 200000,
+            });
+          console.log("Marking End");
+        } catch (error) {
+          console.error("Error counting winner : ", error.message);
+        }
+      }
+    }
+  }
+};
+
+function getCurrentDateTimeInMalaysia() {
+  // Get the current date and time in UTC
+  const now = new Date();
+  // Convert it to Malaysia time (UTC+8)
+  const malaysiaTime = new Date(now.getTime() + 8 * 60 * 60 * 1000);
+  // Format the date and time to be suitable for the datetime-local input
+  const formattedDateTime = malaysiaTime.toISOString().slice(0, 16);
+  return formattedDateTime;
+}
+
+// Set interval to run the task every second
+setInterval(markingWinner, 1000);
+
 // Allowed origins for CORS
 const allowedOrigins = ["http://localhost:5173", "http://localhost:3000"];
 
