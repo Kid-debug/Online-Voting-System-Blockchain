@@ -7,8 +7,8 @@ import "../../stylesheets/list.css";
 import Swal from "sweetalert";
 import axios from "../../api/axios";
 
-function Voter() {
-  const [voters, setVoters] = useState([]);
+function AdminPage() {
+  const [admins, setAdmins] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
@@ -16,10 +16,10 @@ function Voter() {
   const [sortDirection, setSortDirection] = useState(null);
 
   useEffect(() => {
-    fetchVoters();
+    fetchAdmins();
   }, []);
 
-  const fetchVoters = async () => {
+  const fetchAdmins = async () => {
     try {
       const web3 = new Web3(window.ethereum);
       await window.ethereum.enable();
@@ -28,23 +28,23 @@ function Voter() {
         contractAddress
       );
 
-      const voterList = await contract.methods.getAllVoter().call();
-      const formattedVoters = voterList
-        .filter((voter) => Number(voter.id) !== 0)
-        .map((voter) => ({
-          ID: Number(voter.id),
-          Email: voter.email,
-          Status: voter.status,
-          Role: voter.role === "U" ? "Voter" : undefined,
+      const adminList = await contract.methods.getAllAdmin().call();
+      const formattedAdmins = adminList
+        .filter((admin) => Number(admin.id) !== 0)
+        .map((admin) => ({
+          ID: Number(admin.id),
+          Email: admin.email,
+          Status: admin.status,
+          Role: admin.role === "A" ? "Admin" : "Super Admin",
         }));
 
-      setVoters(formattedVoters);
+      setAdmins(formattedAdmins);
     } catch (error) {
-      console.error("Error fetching voters:", error);
+      console.error("Error fetching admins:", error);
     }
   };
 
-  const columns = ["ID", "Email", "Role", "Status"];
+  const columns = ["ID", "Email", "Role", "Status", "Action"];
 
   // Function to handle sorting
   const handleSort = (column) => {
@@ -58,10 +58,9 @@ function Voter() {
     }
   };
 
-  // Helper function to filter the data based on the search term
-  const filterData = (voters) => {
-    return voters.filter((item) =>
-      Object.values(item).some((value) =>
+  const filterData = (admins) => {
+    return admins.filter((admin) =>
+      Object.values(admin).some((value) =>
         value.toString().toLowerCase().includes(searchTerm.toLowerCase())
       )
     );
@@ -69,7 +68,7 @@ function Voter() {
 
   // Sort the filtered data
   const sortedData = sortColumn
-    ? filterData(voters).sort((a, b) => {
+    ? filterData(admins).sort((a, b) => {
         if (sortColumn === "ID") {
           return sortDirection === "asc"
             ? a[sortColumn] - b[sortColumn]
@@ -80,7 +79,7 @@ function Voter() {
             : b[sortColumn].localeCompare(a[sortColumn]);
         }
       })
-    : filterData(voters);
+    : filterData(admins);
 
   // Get total number of pages
   const totalPages = Math.ceil(sortedData.length / itemsPerPage);
@@ -119,7 +118,18 @@ function Voter() {
     setCurrentPage(1); // Reset to the first page when changing items per page
   };
 
-  const updateVoterStatus = async (voterId, newStatus) => {
+  const handleBlockClick = () => {
+    // Call to SweetAlert to show the modal
+    Swal({
+      title: "Blocked",
+      text: "Super Admin account is restricted from updating details!",
+      icon: "warning",
+      buttons: "OK",
+      dangerMode: true,
+    });
+  };
+
+  const updateAdminStatus = async (adminId, newStatus) => {
     try {
       const web3 = new Web3(window.ethereum);
       await window.ethereum.enable();
@@ -130,25 +140,25 @@ function Voter() {
       );
 
       // Fetch the voter's email using getVoterEmailById
-      const voterEmail = await contract.methods
-        .getVoterEmailById(voterId)
+      const adminEmail = await contract.methods
+        .getVoterEmailById(adminId)
         .call();
 
       await contract.methods
-        .editUserStatus(voterId, newStatus)
+        .editUserStatus(adminId, newStatus)
         .send({ from: accounts[0] });
 
       // Send email when the status is updated
       if (newStatus === "1") {
-        sendUnBannedEmail(voterEmail);
+        sendUnBannedEmail(adminEmail);
       } else if (newStatus === "2") {
-        sendBannedEmail(voterEmail);
+        sendBannedEmail(adminEmail);
       }
 
-      Swal("Success!", "Voter status updated successfully.", "success");
-      fetchVoters(); // Refresh the voter list
+      Swal("Success!", "Admin status updated successfully.", "success");
+      fetchAdmins(); // Refresh the admin list
     } catch (error) {
-      let errorMessage = "An error occurred while updating the voter status.";
+      let errorMessage = "An error occurred while updating the admin status.";
       // Check if the error message includes a revert
       if (error.message && error.message.includes("revert")) {
         const matches = error.message.match(/revert (.+)/);
@@ -161,7 +171,7 @@ function Voter() {
       }
       Swal({
         icon: "error",
-        title: "Error updating voter status!",
+        title: "Error updating admin status!",
         text: errorMessage,
       });
     }
@@ -181,7 +191,14 @@ function Voter() {
 
   return (
     <div className="container mt-5">
-      <h2>Voter List</h2>
+      <h2>Admin List</h2>
+      <Link
+        to="/admin/createAdmin"
+        className="btn btn-success mb-3"
+        style={{ marginLeft: "auto" }}
+      >
+        Add New Admin
+      </Link>
       <div className="mt-3"></div>
       <div className="input-group mb-3">
         <div className="input-group-prepend">
@@ -222,7 +239,7 @@ function Voter() {
               </td>
             </tr>
           ) : (
-            currentItems.map((voter, rowIndex) => (
+            currentItems.map((admin, rowIndex) => (
               <tr key={rowIndex}>
                 {columns.map((column, colIndex) => {
                   // If the column is 'Status', provide a dropdown to change status
@@ -231,25 +248,44 @@ function Voter() {
                       <td key={colIndex} className="data-cell">
                         <select
                           className="form-select"
-                          value={voter.Status.toString()}
+                          value={admin.Status.toString()}
                           onChange={(e) =>
-                            updateVoterStatus(voter.ID, e.target.value)
+                            updateAdminStatus(admin.ID, e.target.value)
                           }
-                          disabled={voter.Role !== "Voter"}
+                          disabled={admin.Role !== "Admin"}
                         >
-                          <option value="0" disabled>
-                            No Verified
-                          </option>
                           <option value="1">Verified</option>
                           <option value="2">Banned</option>
                         </select>
+                      </td>
+                    );
+                  } else if (column === "Action") {
+                    // Provide action buttons based on role
+                    return (
+                      <td key={colIndex} className="data-cell">
+                        {admin.Role === "Admin" && (
+                          <Link
+                            to={`/admin/editAdmin/${admin.ID}`}
+                            className="btn btn-primary btn-lg block"
+                          >
+                            <i className="bi bi-pencil"></i>
+                          </Link>
+                        )}
+                        {admin.Role === "Super Admin" && (
+                          <button
+                            onClick={handleBlockClick}
+                            className="btn btn-danger btn-lg block"
+                          >
+                            <i className="bi bi-pencil"></i>
+                          </button>
+                        )}
                       </td>
                     );
                   } else {
                     // For all other columns, just display the value
                     return (
                       <td key={colIndex} className="data-cell">
-                        {voter[column]}
+                        {admin[column]}
                       </td>
                     );
                   }
@@ -259,7 +295,7 @@ function Voter() {
           )}
         </tbody>
       </table>
-      {voters.length > 0 && (
+      {admins.length > 0 && (
         <div className="pagination-buttons">
           <button
             disabled={currentPage === 1}
@@ -308,4 +344,4 @@ function Voter() {
   );
 }
 
-export default Voter;
+export default AdminPage;

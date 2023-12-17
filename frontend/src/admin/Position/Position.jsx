@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import votingContract from "../../../../build/contracts/VotingSystem.json";
 import Web3 from "web3";
 import { contractAddress } from "../../../../config";
+import Swal from "sweetalert";
 
 function Position() {
   const [events, setEvents] = useState([]);
@@ -42,45 +43,51 @@ function Position() {
   }, []); // Empty dependency array to ensure it runs only once when the component mounts
 
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const web3 = new Web3(window.ethereum);
-        const accounts = await web3.eth.getAccounts();
-        await window.ethereum.enable();
+    fetchEvents();
+  }, []);
 
-        const contract = new web3.eth.Contract(
-          votingContract.abi,
-          contractAddress
-        );
+  const fetchEvents = async () => {
+    try {
+      const web3 = new Web3(window.ethereum);
+      const accounts = await web3.eth.getAccounts();
+      await window.ethereum.enable();
 
-        // Call the getAllEvent function in smart contract
-        const eventList = await contract.methods.getAllEvent().call();
+      const contract = new web3.eth.Contract(
+        votingContract.abi,
+        contractAddress
+      );
 
-        const eventPromises = eventList.map(async (event) => {
-          const categoryName = await contract.methods
-            .getCategoryById(event.categoryId)
-            .call();
-          return {
-            eventId: Number(event.eventId),
-            eventName: event.eventName,
-            categoryId: event.categoryId,
-            categoryName: categoryName.categoryName,
-            candidatesCount: Number(event.candidateCount),
-            eventStatus: Number(event.status),
-            eventStartDate: Number(event.startDateTime),
-            eventEndDate: Number(event.endDateTime),
-          };
-        });
+      // Call the getAllEvent function in smart contract
+      const eventList = await contract.methods.getAllEvent().call();
+      const filteredEvents = eventList.filter(
+        (event) => Number(event.eventId) !== 0
+      );
 
-        const formattedEvents = await Promise.all(eventPromises);
-        setEvents(formattedEvents);
-      } catch (error) {
-        console.error("Error fetching Event:", error);
-      }
-    };
+      const eventPromises = filteredEvents.map(async (event) => {
+        const categoryName = await contract.methods
+          .getCategoryById(event.categoryId)
+          .call();
+        return {
+          eventId: Number(event.eventId),
+          eventName: event.eventName,
+          categoryId: event.categoryId,
+          categoryName: categoryName.categoryName,
+          candidatesCount: Number(event.candidateCount),
+          eventStatus: Number(event.status),
+          eventStartDate: Number(event.startDateTime),
+          eventEndDate: Number(event.endDateTime),
+        };
+      });
 
-    fetchCategories();
-  }, []); // The empty dependency array ensures that this effect runs once, similar to componentDidMount
+      // Await all the promises and then filter the results
+      const formattedEvents = await Promise.all(eventPromises);
+
+      setEvents(formattedEvents);
+      console.log(formattedEvents);
+    } catch (error) {
+      console.error("Error fetching Event:", error);
+    }
+  };
 
   // Define a mapping between API keys and display names
   const columnMapping = {
@@ -119,17 +126,16 @@ function Position() {
   };
 
   const getElectionStatus = (election) => {
-
-// 1: Upcoming, 2: In Progress, 3: Completed, 4： Cancel
+    // 1: Upcoming, 2: In Progress, 3: Completed, 4： Cancel
     const status = election.eventStatus;
     console.log("status : ", status);
     if (status == 1) {
       return "Upcoming";
-    } else if(status == 2){
+    } else if (status == 2) {
       return "Processing";
-    }else if(status == 3){
+    } else if (status == 3) {
       return "Marking Winner";
-    }else{
+    } else {
       return "Complete";
     }
   };
@@ -205,34 +211,79 @@ function Position() {
     setCurrentPage(1); // Reset to the first page when changing items per page
   };
 
-  const handleDeleteCategory = (eventId) => {
-    setCategoryToDelete(eventId);
+  // Update the eventToDelete state to store both categoryId and eventId
+  const handleDeleteEvent = (categoryId, eventId) => {
+    setEventToDelete({ categoryId, eventId });
     setShowDeleteConfirmation(true);
   };
 
   const cancelDelete = () => {
     setShowDeleteConfirmation(false);
-    setCategoryToDelete(null);
+    setEventToDelete(null);
   };
 
   const confirmDelete = async () => {
+    if (!eventToDelete) return;
+
+    const { categoryId, eventId } = eventToDelete;
     setShowDeleteConfirmation(false);
 
     try {
-      // Handle category deletion from the smart contract if needed
-      console.log(`Deleting category with ID ${categoryToDelete}`);
+      console.log(
+        `Attempting to delete position with ID ${eventId} from category with ID ${categoryId}`
+      );
+      const web3 = new Web3(window.ethereum);
+      await window.ethereum.enable();
+      const accounts = await web3.eth.getAccounts();
 
-      // Fetch updated categories after deletion
-      fetchCategories();
+      const contract = new web3.eth.Contract(
+        votingContract.abi,
+        contractAddress
+      );
+
+      // Call the deleteEvent function in your smart contract
+      await contract.methods.deleteEvent(categoryId, eventId).send({
+        from: accounts[0],
+      });
+
+      console.log(
+        `Position with ID ${eventId} deleted successfully from category with ID ${categoryId}`
+      );
+
+      // Fetch updated events after deletion
+      fetchEvents();
+
+      // Prompt success message
+      Swal("Success!", "You've successfully deleted the position.", "success");
     } catch (error) {
-      console.error("Error deleting category:", error);
+      let errorMessage = "An error occurred while deleting the position.";
+      // Check if the error message includes a revert
+      if (error.message && error.message.includes("revert")) {
+        const matches = error.message.match(/revert (.+)/);
+        errorMessage =
+          matches && matches[1]
+            ? matches[1]
+            : "Transaction reverted without a reason.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      // Show an alert with the error message
+      Swal({
+        icon: "error",
+        title: "Error Deleting Position!",
+        text: errorMessage,
+      });
+
+      // Reset the eventToDelete state
+      setEventToDelete(null);
     }
   };
 
   const getConfirmationContent = () => {
     return {
-      title: "Delete Category Confirmation",
-      content: "Are you sure you want to delete this category?",
+      title: "Delete Position Confirmation",
+      content: "Are you sure you want to delete this position?",
     };
   };
 
@@ -305,13 +356,15 @@ function Position() {
                     {column === "Action" ? (
                       <>
                         <Link
-                          to={`/admin/editCategory/${row.eventId}`}
+                          to={`/admin/editPosition/${row.categoryId}/${row.eventId}`}
                           className="btn btn-primary btn-sm"
                         >
                           <i className="fs-4 bi-pencil"></i>
                         </Link>
                         <button
-                          onClick={() => handleDeleteCategory(row.eventId)}
+                          onClick={() =>
+                            handleDeleteEvent(row.categoryId, row.eventId)
+                          }
                           className="btn btn-danger btn-sm"
                         >
                           <i className="fs-4 bi-trash"></i>

@@ -62,7 +62,7 @@ function Login() {
               userRole: user.role,
               email: user.email,
             });
-
+            console.log(user.role);
             // navigate to home
             if (user.role === "U") {
               navigate(`/voterdashboard`);
@@ -88,20 +88,18 @@ function Login() {
     }
   };
 
-//   const handleSubmit = async (event) => {
-   
+  //   const handleSubmit = async (event) => {
 
-//     setAuthData({
-//       userKey: "hahaha",
-//       userId: 1,
-//       userRole: 'A',
-//       email: "user.email",
-//     });
+  //     setAuthData({
+  //       userKey: "hahaha",
+  //       userId: 1,
+  //       userRole: 'A',
+  //       email: "user.email",
+  //     });
 
-//       navigate(`/voterdashboard`);
+  //       navigate(`/voterdashboard`);
 
-
-// };
+  // };
 
   const validateLogin = () => {
     const errors = {};
@@ -195,9 +193,6 @@ function Login() {
           </button>
           <Link to="/register" className="btn btn-light w-100 mb-2">
             Create User Account
-          </Link>
-          <Link to="/adminregister" className="btn btn-secondary w-100">
-            Create Admin Account
           </Link>
           <div className="text-center">
             <Link to="/forgotPass" className="text-white text-decoration-none">

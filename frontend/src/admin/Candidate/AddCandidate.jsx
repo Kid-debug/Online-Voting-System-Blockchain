@@ -118,6 +118,12 @@ function AddCandidate() {
       Swal("Error!", "All input fields must be specified.", "error");
       return;
     }
+
+    // Check if a file is selected
+    if (!file) {
+      Swal("Error!", "Please select an image file.", "error");
+      return;
+    }
     try {
       const formData = new FormData();
       formData.append("file", file);
@@ -150,6 +156,30 @@ function AddCandidate() {
         text: "You've successfully added a new candidate.",
       });
     } catch (error) {
+      let errorMessage = "An error occurred while creating the candidate.";
+      // Check if the error message includes a revert
+      if (error.response && error.response.data) {
+        // Extracting and displaying the specific message from the Node.js server
+        errorMessage = error.response.data.message || error.response.data;
+      } else if (error.message) {
+        if (error.message.includes("revert")) {
+          // Handling smart contract revert message
+          const matches = error.message.match(/revert (.+)/);
+          errorMessage =
+            matches && matches[1]
+              ? matches[1]
+              : "Transaction reverted without a reason.";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+
+      Swal({
+        icon: "error",
+        title: "Error creating candidate!",
+        text: errorMessage,
+      });
+
       // Check if the image file name is used by any candidate
       const web3 = new Web3(window.ethereum);
       await window.ethereum.enable();
@@ -172,28 +202,6 @@ function AddCandidate() {
           console.error("Error deleting the file:", deleteError);
         }
       }
-      let errorMessage = "An error occurred while creating the candidate.";
-      // Check if the error message includes a revert
-      if (error.response && error.response.data) {
-        // Extracting and displaying the specific message from the Node.js server
-        errorMessage = error.response.data.message || error.response.data;
-      } else if (error.message) {
-        if (error.message.includes("revert")) {
-          // Handling smart contract revert message
-          const matches = error.message.match(/revert (.+)/);
-          errorMessage =
-            matches && matches[1]
-              ? matches[1]
-              : "Transaction reverted without a reason.";
-        } else {
-          errorMessage = error.message;
-        }
-      }
-      Swal({
-        icon: "error",
-        title: "Error creating candidate!",
-        text: errorMessage,
-      });
     }
   };
 
@@ -246,7 +254,7 @@ function AddCandidate() {
         </div>
         <div className="col-12">
           <label htmlFor="inputname4" className="form-label">
-            First Name
+            Candidate Name
           </label>
           <input
             type="text"

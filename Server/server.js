@@ -10,6 +10,7 @@ const cookieParser = require("cookie-parser");
 const session = require("express-session");
 const sequelize = require("./config/sequelize");
 const User = require("./models/user");
+const { v4: uuidv4 } = require("uuid");
 
 const votingContract = require("../build/contracts/VotingSystem.json");
 const { Web3 } = require("web3");
@@ -38,7 +39,8 @@ const changeEventDateStatus = async () => {
       try {
         if (
           unixCurrentTime >= event.startDateTime &&
-          unixCurrentTime <= event.endDateTime && event.status != 2
+          unixCurrentTime <= event.endDateTime &&
+          event.status != 2
         ) {
           console.log("change status to processing");
           event.status = 2; // 1: Upcoming, 2: In Progress, 3: Completed, 4: Cancel
@@ -47,8 +49,11 @@ const changeEventDateStatus = async () => {
             gas: 200000,
           });
           break;
-        } else if (unixCurrentTime > event.endDateTime && event.status != 3 && event.status != 4 ) {
-     
+        } else if (
+          unixCurrentTime > event.endDateTime &&
+          event.status != 3 &&
+          event.status != 4
+        ) {
           console.log("change status to completed!");
           event.status = 3; // 1: Upcoming, 2: In Progress, 3: Marking Wiiner, 4: Completed
           await contract.methods.updateEvent(event).send({
@@ -86,11 +91,11 @@ const markingWinner = async () => {
               gas: 200000,
             });
 
-            event.status = 4; // 1: Upcoming, 2: In Progress, 3: Marking Wiiner, 4: Completed
-            await contract.methods.updateEvent(event).send({
-              from: account.address,
-              gas: 200000,
-            });
+          event.status = 4; // 1: Upcoming, 2: In Progress, 3: Marking Wiiner, 4: Completed
+          await contract.methods.updateEvent(event).send({
+            from: account.address,
+            gas: 200000,
+          });
           console.log("Marking End");
         } catch (error) {
           console.error("Error counting winner : ", error.message);
@@ -123,11 +128,8 @@ const storage = multer.diskStorage({
   },
   filename: function (req, file, cb) {
     const originalname = path.parse(file.originalname);
-    const hash = crypto
-      .createHash("md5")
-      .update(originalname.name)
-      .digest("hex");
-    const filename = hash + originalname.ext;
+    const randomString = uuidv4(); // Generate a random string using uuid
+    const filename = randomString + originalname.ext;
     cb(null, filename);
   },
 });
@@ -190,14 +192,6 @@ app.use("/api", userRouter);
 app.use("/", webRouter);
 
 app.post("/upload", upload.single("file"), async (req, res) => {
-  if (!req.file) {
-    return res
-      .status(400)
-      .send(
-        "File upload error: No file uploaded or file is not an image or too large"
-      );
-  }
-
   try {
     const filename = req.file.filename;
     res.status(200).json({ imageFileName: filename });
@@ -242,9 +236,9 @@ sequelize
 // Error handling for file upload issues
 app.use((err, req, res, next) => {
   if (err instanceof multer.MulterError && err.code === "LIMIT_FILE_SIZE") {
-    return res.status(400).send("File size limit is 1MB");
+    return res.status(400).json({ message: "File size limit is 1MB" });
   } else if (err.message === "Only images are allowed") {
-    return res.status(400).send("Only images are allowed");
+    return res.status(400).json({ message: "Only images are allowed" });
   }
   err.statusCode = err.statusCode || 500;
   err.message = err.message || "Internal Server Error";

@@ -1,0 +1,151 @@
+/* Vote History List Styles */
+.filter-container {
+  margin-top: 3%;
+  margin-bottom: 20px;
+  padding-left: 5%;
+  padding-right: 5%;
+}
+
+/* Styling for form elements with flexibility and wrapping */
+form.d-flex {
+  display: flex;
+  flex-wrap: wrap; /* Allow elements to stack on smaller screens */
+  gap: 10px; /* Space between elements */
+  margin-bottom: 20px;
+}
+
+/* Full width for input and select elements */
+.form-control,
+.form-select {
+  flex-grow: 1; /* Take available space */
+  margin-right: 10px; /* Space between form elements */
+  border-radius: 5px;
+  padding: 10px; /* Larger padding for better touch targets */
+  font-size: 1rem; /* Increase font size for better readability */
+}
+
+/* Rounded borders for search box and filter select */
+#searchBox,
+#filterSelect {
+  font-size: 1.2rem;
+  border-radius: 25px;
+}
+
+/* Align items in the date range filter for a clean look */
+.date-range-filter {
+  display: flex;
+  justify-content: space-between; /* This will space out your date pickers evenly */
+  margin-bottom: 20px; /* Consistent bottom margin for separation */
+  padding-left: 5%;
+  padding-right: 5%;
+}
+
+/* Styling for the date picker elements */
+.react-datepicker-wrapper {
+  flex-grow: 1; /* Allow the date picker to grow and fill the space */
+  max-width: calc(
+    50% - 10px
+  ); /* Adjust the width calculation to match search/filter width */
+}
+
+/* Responsive card container with wrapping */
+.card-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around; /* This will take care of horizontal alignment */
+  gap: 20px; /* Consistent gap between cards */
+  margin-top: 20px; /* Consistent top margin */
+  padding-left: 5%;
+  padding-right: 5%;
+}
+
+/* Responsive card styling */
+.card {
+  flex: 1 0 280px; /* Card grows but starts at 280px wide */
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  box-shadow: 2px 2px 6px #ccc;
+  overflow: hidden;
+  margin-bottom: 20px; /* Space below each card */
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+/* Card interaction effects */
+.card:hover {
+  transform: scale(1.03); /* Slight scale for interaction feedback */
+  box-shadow: 4px 4px 12px #ccc;
+}
+
+/* Card content styling for better readability */
+.card-body {
+  padding: 15px;
+}
+
+.card-title {
+  font-size: 1.5rem; /* Increase the font size */
+  margin-bottom: 10px; /* Space below the title */
+  font-weight: bold;
+}
+
+.card-text {
+  font-size: 1.13rem; /* Standard font size for text */
+  margin-bottom: 5px; /* Space between text elements */
+}
+
+/* Centering container for the button */
+.btn-center-container {
+  display: flex; /* Use flexbox to center the button */
+  justify-content: center; /* Center the button horizontally */
+  margin-top: 10px; /* Space from the above element */
+}
+
+/* Button styles for interaction */
+.btn-outline-success {
+  color: #fff !important;
+  background-color: #007bff !important;
+  padding: 10px 20px; /* Larger padding for a bigger clickable area */
+  font-size: 1rem; /* Larger font size for better readability */
+  margin-top: 10px; /* Space from the above element */
+  transition: all 0.2s ease-in-out; /* Smooth transition for hover effect */
+}
+
+.btn-outline-success:hover {
+  background-color: #004080 !important; /* Darker blue color on hover */
+}
+
+/* Message when no records are found */
+.no-matching-records {
+  color: red;
+  font-size: 1.25rem; /* Larger font size for visibility */
+  margin-top: 20px; /* Space from the above element */
+  text-align: center;
+}
+
+/* Responsive design adjustments */
+@media (max-width: 768px) {
+  /* Adjustments for medium devices and below */
+  .form-control,
+  .form-select {
+    margin-right: 0; /* Remove margin on smaller screens */
+  }
+  .date-range-filter {
+    flex-direction: column;
+    gap: 10px; /* Space between stacked elements */
+  }
+
+  .react-datepicker-wrapper {
+    max-width: none; /* Allow the date pickers to take full width on smaller screens */
+  }
+}
+
+@media (max-width: 576px) {
+  /* Adjustments for small devices */
+  .card {
+    flex: 1 0 100%; /* Full width cards on very small screens */
+  }
+}
+
+.custom-date-picker {
+  font-size: 1.15rem !important;
+  width: 260px !important; /* Adjust the width to your preference */
+}

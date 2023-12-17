@@ -55,7 +55,7 @@ function EditCategory() {
       );
 
       await contract.methods
-        .updateCategoryName(categoryId, categoryName)
+        .updateCategory(categoryId, categoryName)
         .send({ from: accounts[0] });
 
       Swal("Success!", "Category updated successfully.", "success");
