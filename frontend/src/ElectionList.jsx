@@ -80,17 +80,27 @@ function ElectionList() {
           .call();
 
         const eventPromises = eventList.map(async (event) => {
-          const categoryName = await contract.methods
+          const category = await contract.methods
             .getCategoryById(event.categoryId)
             .call();
+          const candidates = await contract.methods
+            .getVoteEventCandidate(event.categoryId, event.eventId)
+            .call();
+
+          let votetotal = 0;
+          for(let i=0; i<candidates.length;i++){
+            votetotal += Number(candidates[i].voteCount);
+          }
+
           return {
             eventId: Number(event.eventId),
             eventName: event.eventName,
-            categoryName: categoryName.categoryName,
+            categoryName: category.categoryName,
             candidatesCount: Number(event.candidateCount),
             eventStatus: Number(event.status),
             eventStartDate: Number(event.startDateTime),
             eventEndDate: Number(event.endDateTime),
+            eventVoteTotal : votetotal
           };
         });
 
@@ -118,7 +128,7 @@ function ElectionList() {
       return "No Candidates";
     } else if (status === 2) {
       return "Up Comming";
-    } else  if (status === 3) {
+    } else if (status === 3) {
       return "Processing";
     } else if (status === 4) {
       return "Marking Winner";
@@ -128,7 +138,7 @@ function ElectionList() {
   };
 
   const getElectionAction = (election) => {
-    if (getElectionStatus(election) === "Ongoing" && !has_voted) {
+    if (getElectionStatus(election) === "Processing" && !has_voted) {
       return <button onClick={() => vote(election)}>Vote</button>;
     } else {
       return "View Details";
@@ -188,11 +198,12 @@ function ElectionList() {
         <table className="data-table election-table mt-4">
           <thead>
             <tr>
-              <th>Event No.</th>
-              <th>Event Name</th>
+              <th>No.</th>
+              <th>Position</th>
               <th>Start Date</th>
               <th>End Date</th>
               <th>Status</th>
+              <th>Total Voted</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -211,6 +222,7 @@ function ElectionList() {
                   <td>{formatUnixTimestamp(election.eventStartDate)}</td>
                   <td>{formatUnixTimestamp(election.eventEndDate)}</td>
                   <td>{getElectionStatus(election)}</td>
+                  <td>{election.eventVoteTotal}</td>
                   <td>
                     <Link
                       to={`/voting/${categoryId}/${election.eventId}`}
