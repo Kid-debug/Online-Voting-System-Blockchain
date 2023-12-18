@@ -15,7 +15,7 @@ function Candidate() {
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const [sortColumn, setSortColumn] = useState(null);
   const [sortDirection, setSortDirection] = useState(null);
-  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [candidateToDelete, setCandidateToDelete] = useState(null);
   const IMAGE_BASE_URL = "http://localhost:3000/uploads/";
 
@@ -24,52 +24,56 @@ function Candidate() {
   }, []);
 
   const fetchCandidates = async () => {
-    try {
-      const web3 = new Web3(window.ethereum);
-      await window.ethereum.enable();
+      try {
+        const web3 = new Web3(window.ethereum);
+        await window.ethereum.enable();
 
-      const contract = new web3.eth.Contract(
-        votingContract.abi,
-        contractAddress
-      );
+        const contract = new web3.eth.Contract(
+          votingContract.abi,
+          contractAddress
+        );
 
-      // Call the getAllEvent function in smart contract
-      const candidatesList = await contract.methods.getAllCandidates().call();
-      console.log("candidateList : ", candidatesList);
-      const filteredCandidates = candidatesList.filter(
+        // Call the getAllEvent function in smart contract
+        const candidatesList = await contract.methods.getAllCandidates().call();
+        console.log("candidateList : ", candidatesList);
+const filteredCandidates = candidatesList.filter(
         (candidate) => Number(candidate.id) !== 0
       );
       console.log(candidatesList);
 
-      const candidatePromises = filteredCandidates.map(async (candidate) => {
-        const category = await contract.methods
-          .getCategoryById(candidate.categoryId)
-          .call();
-        const event = await contract.methods
-          .getEventById(candidate.categoryId, candidate.eventId)
-          .call();
-        return {
-          candidateId: Number(candidate.id),
-          candidateName: candidate.name,
-          candidateDesc: candidate.description,
-          candidateVoteCount: Number(candidate.voteCount),
-          categoryId: candidate.categoryId,
-          categoryName: category.categoryName,
-          eventId: candidate.eventId,
-          eventName: event.eventName,
-          imageFileName: candidate.imageFileName,
-        };
-      });
+        const candidatePromises = filteredCandidates.map(async (candidate) => {
+          const category = await contract.methods
+            .getCategoryById(candidate.categoryId)
+            .call();
+          const event = await contract.methods
+            .getEventById(candidate.categoryId, candidate.eventId)
+            .call();
+          return {
+            candidateId: Number(candidate.id),
+            candidateName: candidate.name,
+            candidateDesc: candidate.description,
+            candidateVoteCount: Number(candidate.voteCount),
+            candidateIsWin: String(candidate.win),
+            categoryId: candidate.categoryId,
+            categoryName: category.categoryName,
+            eventId: candidate.eventId,
+            eventStartDate: event.startDateTime,
+            eventEndDate: event.endDateTime,
+            eventStatus: event.status,
+            eventName: event.eventName,
+            imageFileName: candidate.imageFileName,
+          };
+        });
 
-      // Await all the promises and then filter the results
+        // Await all the promises and then filter the results
       const formattedCandidates = await Promise.all(candidatePromises);
 
-      console.log("Event", formattedCandidates);
-      setCandidates(formattedCandidates);
-    } catch (error) {
-      console.error("Error fetching Candidates:", error);
-    }
-  };
+        console.log("Event", formattedCandidates);
+        setCandidates(formattedCandidates);
+      } catch (error) {
+        console.error("Error fetching Candidates:", error);
+      }
+    };
 
   // Define a mapping between API keys and display names
   const columnMapping = {
@@ -362,7 +366,7 @@ function Candidate() {
                       >
                         <i className="fs-4 bi-pencil"></i>
                       </Link>
-
+                      
                       <button
                         onClick={() =>
                           handleDeleteCandidate(
@@ -386,7 +390,7 @@ function Candidate() {
           ))}
         </tbody>
       </table>
-      {showDeleteConfirmation && (
+{showDeleteConfirmation && (
         <div className="confirm">
           <div className="confirm__window">
             <div className="confirm__titlebar">
@@ -418,50 +422,50 @@ function Candidate() {
         </div>
       )}
       {candidates.length > 0 && (
-        <div className="pagination-buttons">
+      <div className="pagination-buttons">
+        <button
+          disabled={currentPage === 1}
+          onClick={() => handlePageChange(currentPage - 1)}
+          className="page-button"
+        >
+          &#8249;&#8249;
+        </button>
+        {generatePaginationButtons().map((page) => (
           <button
-            disabled={currentPage === 1}
-            onClick={() => handlePageChange(currentPage - 1)}
-            className="page-button"
-          >
-            &#8249;&#8249;
-          </button>
-          {generatePaginationButtons().map((page) => (
-            <button
-              key={page}
-              onClick={() => handlePageChange(page)}
-              style={{
-                fontWeight: page === currentPage ? "bold" : "normal",
-              }}
-              className="page-button" // Added className to button element
-            >
-              {page}
-            </button>
-          ))}
-          <button
-            disabled={currentPage === totalPages}
-            onClick={() => handlePageChange(currentPage + 1)}
+            key={page}
+            onClick={() => handlePageChange(page)}
+            style={{
+              fontWeight: page === currentPage ? "bold" : "normal",
+            }}
             className="page-button" // Added className to button element
           >
-            &#8250;&#8250;
+            {page}
           </button>
-          <label>
-            Items per page:
-            <select
-              value={itemsPerPage}
-              onChange={(e) =>
+        ))}
+        <button
+          disabled={currentPage === totalPages}
+          onClick={() => handlePageChange(currentPage + 1)}
+          className="page-button" // Added className to button element
+        >
+          &#8250;&#8250;
+        </button>
+        <label>
+          Items per page:
+          <select
+            value={itemsPerPage}
+            onChange={(e) =>
                 handleItemsPerPageChange(parseInt(e.target.value))
               }
-              className="items-per-page-select" // Added className to select element
-            >
-              <option value={5}>5</option>
-              <option value={10}>10</option>
-              <option value={15}>15</option>
-              <option value={20}>20</option>
-            </select>
-          </label>
-        </div>
-      )}
+            className="items-per-page-select" // Added className to select element
+          >
+            <option value={5}>5</option>
+            <option value={10}>10</option>
+            <option value={15}>15</option>
+            <option value={20}>20</option>
+          </select>
+        </label>
+      </div>
+)}
     </div>
   );
 }
