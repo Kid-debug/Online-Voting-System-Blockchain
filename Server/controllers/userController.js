@@ -489,75 +489,106 @@ function generateVerificationCode(length) {
   return code;
 }
 
+// const forgetPassword = async (req, res) => {
+//   const errors = validationResult(req);
+//   if (!errors.isEmpty()) {
+//     return res.status(400).json({ errors: errors.array() });
+//   }
+
+//   try {
+//     const { email } = req.body;
+//     const user = await User.findOne({ where: { email } });
+
+//     if (user) {
+//       // Find the most recent reset password entry for the email
+//       const resetEntry = await ResetPassword.findOne({
+//         where: { email: email },
+//         order: [["created_at", "DESC"]],
+//       });
+
+//       // Check if the entry exists and is within the last 15 minutes
+//       if (resetEntry) {
+//         const timeSinceLastReset = new Date() - new Date(resetEntry.created_at);
+//         if (timeSinceLastReset < 15 * 60 * 1000) {
+//           return res.status(429).json({
+//             msg: "A reset link has already been sent recently. Please wait for 15 minutes before requesting a new one.",
+//           });
+//         }
+//       }
+
+//       const token = randomstring.generate();
+
+//       const verificationCode = generateVerificationCode(10);
+//       console.log(verificationCode);
+
+//       // Prepare the email content
+//       const content = `
+//         <p>We heard that you lost your password.</p>\n
+//         <p>Don't worry. Please click the following link and enter the following code to change your password:</p>\n
+//         <p><a href='http://localhost:5173/reset-password/${token}'>http://localhost:5173/reset-password/${token}</a></p>\n
+//         <p>Code:${verificationCode}</p>\n
+//         <p>Please be reminded that the code is valid for 24 hours</p>\n
+//         <p>If you did not request for password reset, please ignore this email.</p>\n
+//         <p>Thank you.</p>\n
+//         <br><br><br>
+//         <p>[This is a computer generated message which requires no signature.]</p><br>
+//         <p>*** THIS IS AN AUTO GENERATED EMAIL NOTIFICATION. PLEASE DO NOT REPLY. ***</p>
+//       `;
+
+//       // Send the password reset email
+//       await sendMail(email, "Forget Password (Online Voting System)", content);
+
+//       // Destroy any existing reset password entries for the email
+//       await ResetPassword.destroy({ where: { email: email } });
+
+//       // Create a new reset password entry
+//       await ResetPassword.create({
+//         email: email,
+//         token: token,
+//         verification_code: verificationCode,
+//         created_at: new Date(),
+//       });
+
+//       return res
+//         .status(200)
+//         .json({ msg: "Email Sent Successfully for Reset Password" });
+//     } else {
+//       return res.status(401).json({ msg: "Email does not exist." });
+//     }
+//   } catch (error) {
+//     console.error("Error in forgetPassword:", error);
+//     return res.status(500).json({ msg: "Internal Server Error." });
+//   }
+// };
+
 const forgetPassword = async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
+  // Prepare the email content
+  const content =
+    "<p>We heard that you lost your password.</p>\n" +
+    "<p>Don't worry. Please click the following link and enter the following code to change your password:</p>\n" +
+    "<p><a href='http://localhost:5173/reset-password/" +
+    req.body.randomToken +
+    "'>http://localhost:5173/reset-password/" +
+    req.body.randomToken +
+    "</a></p>\n" +
+    "<p>Code:" +
+    req.body.code +
+    "</p>\n" +
+    "<p>Please be reminded that the link is valid for 24 hours</p>\n" +
+    "<p>If you did not request for password reset, please ignore this email.</p>\n" +
+    "<p>Thank you.</p>\n" +
+    "<br><br><br>" +
+    "<p>[This is a computer generated message which requires no signature.]</p><br>" +
+    "<p>*** THIS IS AN AUTO GENERATED EMAIL NOTIFICATION. PLEASE DO NOT REPLY. ***</p>";
+
+  email = req.body.email;
 
   try {
-    const { email } = req.body;
-    const user = await User.findOne({ where: { email } });
-
-    if (user) {
-      // Find the most recent reset password entry for the email
-      const resetEntry = await ResetPassword.findOne({
-        where: { email: email },
-        order: [["created_at", "DESC"]],
-      });
-
-      // Check if the entry exists and is within the last 15 minutes
-      if (resetEntry) {
-        const timeSinceLastReset = new Date() - new Date(resetEntry.created_at);
-        if (timeSinceLastReset < 15 * 60 * 1000) {
-          return res.status(429).json({
-            msg: "A reset link has already been sent recently. Please wait for 15 minutes before requesting a new one.",
-          });
-        }
-      }
-
-      const token = randomstring.generate();
-
-      const verificationCode = generateVerificationCode(10);
-      console.log(verificationCode);
-
-      // Prepare the email content
-      const content = `
-        <p>We heard that you lost your password.</p>\n
-        <p>Don't worry. Please click the following link and enter the following code to change your password:</p>\n
-        <p><a href='http://localhost:5173/reset-password/${token}'>http://localhost:5173/reset-password/${token}</a></p>\n
-        <p>Code:${verificationCode}</p>\n
-        <p>Please be reminded that the code is valid for 24 hours</p>\n
-        <p>If you did not request for password reset, please ignore this email.</p>\n
-        <p>Thank you.</p>\n
-        <br><br><br>
-        <p>[This is a computer generated message which requires no signature.]</p><br>
-        <p>*** THIS IS AN AUTO GENERATED EMAIL NOTIFICATION. PLEASE DO NOT REPLY. ***</p>
-      `;
-
-      // Send the password reset email
-      await sendMail(email, "Forget Password (Online Voting System)", content);
-
-      // Destroy any existing reset password entries for the email
-      await ResetPassword.destroy({ where: { email: email } });
-
-      // Create a new reset password entry
-      await ResetPassword.create({
-        email: email,
-        token: token,
-        verification_code: verificationCode,
-        created_at: new Date(),
-      });
-
-      return res
-        .status(200)
-        .json({ msg: "Email Sent Successfully for Reset Password" });
-    } else {
-      return res.status(401).json({ msg: "Email does not exist." });
-    }
+    // Send the password reset email
+    await sendMail(email, "Forget Password (Online Voting System)", content);
+    res.json({ success: true, message: "Email sent successfully" });
   } catch (error) {
-    console.error("Error in forgetPassword:", error);
-    return res.status(500).json({ msg: "Internal Server Error." });
+    res.status(500).json({ success: false, message: "Failed to send email" });
   }
 };
 

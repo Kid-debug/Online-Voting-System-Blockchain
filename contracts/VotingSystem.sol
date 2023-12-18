@@ -43,6 +43,13 @@ contract VotingSystem {
         string imageFileName;
     }
 
+    struct ResetPassword {
+        string email;
+        string token;
+        uint256 code;
+        uint256 createdTime;
+    }
+
     struct voteEventStruct {
         uint256 id;
         string voterKey;
@@ -70,6 +77,7 @@ contract VotingSystem {
     mapping(uint256 => voteEventStruct) public voteEvents;
     mapping(uint256 => Voter) public voters;
     mapping(string => bool) private usedImageFileNames;
+    mapping(string => ResetPassword) public resetPasswords;
 
     uint256 categoryCount;
     uint256 candidateCount;
@@ -80,6 +88,70 @@ contract VotingSystem {
     constructor() {
         owner = msg.sender;
         addAdmin("superadmin@gmail.com", "SuperAdmin!123", "S");
+    }
+
+    function addResetPasswordRequest(string memory _email, string memory _token, uint256 _code) public {
+        // Create and store the new reset password request
+        resetPasswords[_email] = ResetPassword({
+            email: _email,
+            token: _token,
+            code: _code,
+            createdTime: block.timestamp // Use the current block timestamp
+        });
+    }
+
+    function isRecentResetRequest(string memory _email) public view returns (bool) {
+        ResetPassword memory request = resetPasswords[_email];
+        if (request.createdTime == 0) {
+            return false; // No request exists
+        }
+        uint256 age = block.timestamp - request.createdTime;
+        return age < 24 hours;
+    }
+
+    function isResetPasswordTokenValid(string memory _token) public view returns (bool, string memory) {
+        // Ensure the token string is not empty
+        require(bytes(_token).length > 0, "Token is empty");
+
+        // Iterate through all reset password requests
+        for (uint256 i = 1; i <= voterCount; i++) {
+            // Check if the token matches and is not expired (24 hours validity)
+            if (keccak256(bytes(resetPasswords[voters[i].email].token)) == keccak256(bytes(_token))
+                && (block.timestamp - resetPasswords[voters[i].email].createdTime) < 24 hours) {
+                return (true, voters[i].email); // Valid token found
+            }
+        }
+        // No valid token found, return false and empty string
+        return (false, "");
+    }
+
+    function isVerificationCodeValid(uint256 _userInputCode) public view returns (bool) {
+        // Iterate through all reset password requests
+        for (uint256 i = 1; i <= voterCount; i++) {
+            ResetPassword memory resetRequest = resetPasswords[voters[i].email];
+            // Check if the input code matches the stored code and the request is not expired
+            if (resetRequest.code == _userInputCode && (block.timestamp - resetRequest.createdTime) < 24 hours) {
+                return true; // Verification code is valid and not expired
+            }
+        }
+        return false; // No valid verification code found
+    }
+
+    function updateUserPassword(string memory _email, string memory _password) public {
+        require(checkUserExistByEmail(_email), "User does not exist.");
+
+        // Ensure there is a recent reset password request
+        require(isRecentResetRequest(_email), "No recent reset request found.");
+
+        bytes32 hashedPassword = keccak256(abi.encodePacked(_password));
+        for (uint256 i = 1; i <= voterCount; i++) {
+            if (keccak256(bytes(_email)) == keccak256(bytes(voters[i].email))) {
+                voters[i].password = hashedPassword;
+
+                // Delete the reset password request after updating the password
+                delete resetPasswords[_email];
+            }
+        }
     }
 
     function addAdmin(
@@ -275,6 +347,15 @@ contract VotingSystem {
         return voters[_voterId].email;
     }
 
+    function checkUserExistByEmail(string memory _email) public view returns (bool) {
+        for (uint256 i = 1; i <= voterCount; i++) {
+            if (keccak256(abi.encodePacked(_email)) == keccak256(abi.encodePacked(voters[i].email))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     function updateVoterPassword(string memory _key, string memory _password)
         public
     {
@@ -330,7 +411,7 @@ contract VotingSystem {
         return false;
     }
 
-    function addCategory(string memory _categoryName) public {
+    /* function addCategory(string memory _categoryName) public {
         // check if the category is exist
         for (uint256 i = 1; i <= categoryCount; i++) {
             require(
@@ -380,7 +461,7 @@ contract VotingSystem {
 
         // If no associated events, candidates, or vote events, delete the category
         delete categories[_categoryId];
-    }
+    } */
 
     /* function addEvent(
         uint256 _categoryId,

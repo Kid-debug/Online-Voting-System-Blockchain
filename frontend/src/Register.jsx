@@ -76,7 +76,7 @@ function Register() {
 
           setErrorMessage(errorMessage);
         }
-      } catch (err) {
+      } catch (error) {
         let errorMessage =
           "An error occurred while creating the admin account.";
         // Check if the error message includes a revert
