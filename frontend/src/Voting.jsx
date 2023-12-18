@@ -20,7 +20,7 @@ function Voting() {
   const IMAGE_BASE_URL = "http://localhost:3000/uploads/";
   const authData = JSON.parse(sessionStorage.getItem("auth"));
   const userKey = authData ? authData.userKey : null;
-  const [currentDateTime, setCurrentDatetTime] = useState();
+  const [isCandidatesExist, setIsCandidatesExist] = useState(false);
 
   // State for President candidates
   const [expandedDescriptionPresident, setExpandedDescriptionPresident] =
@@ -42,9 +42,7 @@ function Voting() {
         .call();
 
       // check if the current date and the start data and end date
-      if (
-       event.status == 2
-      ) {
+      if (event.status == 2) {
         setIsClose(false);
       }
       if (event.status != 1 && event.status != 2) {
@@ -89,6 +87,10 @@ function Voting() {
         setEventName(event.eventName);
 
         setCandidates(candidatesList);
+
+        if (candidatesList != null) {
+          setIsCandidatesExist(true);
+        }
       } catch (error) {
         console.error("Error fetching Event:", error);
       }
@@ -169,7 +171,7 @@ function Voting() {
                 className={`col-auto mx-3 card-block py-2 text-center radio ${
                   selectedCandidateId === candidate.id ? "selected" : ""
                 }`}
-              >
+                style={{ backgroundColor: candidate.win ? 'lightgreen' : 'initial' }}>
                 <input
                   type="radio"
                   name="candidatePresident"
@@ -178,7 +180,7 @@ function Voting() {
                   onChange={() => handleRadioClickPresident(candidate.id)}
                   style={{ display: "none" }}
                 />
-                <div className="flex-row">
+                <div className="flex-row" >
                   <div className="col">
                     <div className="pic p-3 m-3">
                       <img
@@ -207,6 +209,9 @@ function Voting() {
                         </a>
                       )}
                     </p>
+                    {isEnd && (
+                      <p>Vote Count: {Number(candidate.voteCount)}</p>
+                    )}
                     {selectedCandidateId === candidate.id && (
                       <div className="radio-button">
                         <i className="fa fa-check" />

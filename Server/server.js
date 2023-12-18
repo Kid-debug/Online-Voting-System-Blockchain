@@ -16,11 +16,12 @@ const { Web3 } = require("web3");
 const ganacheUrl = "HTTP://127.0.0.1:7545";
 const privateKey =
   "0x7e714a5c55233c1adc7400de839ece13c124d433b1266178211e948ffa1f7a5d";
+const { contractAddress } = require('../config-server');
 
 const web3 = new Web3(new Web3.providers.HttpProvider(ganacheUrl));
 const contract = new web3.eth.Contract(
   votingContract.abi,
-  "0xFB2e065e7AA902486B4E79b1ac7412871804D544"
+  contractAddress
 );
 const account = web3.eth.accounts.privateKeyToAccount(privateKey);
 web3.eth.accounts.wallet.add(account);
@@ -38,7 +39,8 @@ const changeEventDateStatus = async () => {
       try {
         if (
           unixCurrentTime >= event.startDateTime &&
-          unixCurrentTime <= event.endDateTime && event.status != 2
+          unixCurrentTime <= event.endDateTime &&
+          event.status != 2
         ) {
           console.log("change status to processing");
           event.status = 2; // 1: Upcoming, 2: In Progress, 3: Completed, 4: Cancel
@@ -47,10 +49,13 @@ const changeEventDateStatus = async () => {
             gas: 200000,
           });
           break;
-        } else if (unixCurrentTime > event.endDateTime && event.status != 3 && event.status != 4 ) {
-     
+        } else if (
+          unixCurrentTime > event.endDateTime &&
+          event.status != 3 &&
+          event.status != 4
+        ) {
           console.log("change status to completed!");
-          event.status = 3; // 1: Upcoming, 2: In Progress, 3: Marking Wiiner, 4: Completed
+          event.status = 3; // 1: Upcoming, 2: In Progress, 3: Marking Wiiner, 4: Completed, 5: H   as no candidate
           await contract.methods.updateEvent(event).send({
             from: account.address,
             gas: 200000,
@@ -70,35 +75,39 @@ const markingWinner = async () => {
 
   // Call the getAllEvent function in smart contract
   const eventList = await contract.methods.getAllEvent().call();
-  for (const event of eventList) {
-    if (event.status == 3) {
-      const isMarkedWinner = await contract.methods
-        .isMarkWinner(event.categoryId, event.eventId)
-        .call();
+  if (eventList != null) {
+    for (const event of eventList) {
+      if (event.status == 3 && event.candidates!=null) {
+        const isMarkedWinner = await contract.methods
+          .isMarkWinner(event.categoryId, event.eventId)
+          .call();
 
-      if (!isMarkedWinner) {
-        console.log("Marking Winner");
-        try {
-          await contract.methods
-            .markWinner(event.categoryId, event.eventId)
-            .send({
-              from: account.address,
-              gas: 200000,
-            });
+        if (!isMarkedWinner) {
+          console.log("Marking Winner");
+          try {
+            await contract.methods
+              .markWinner(event.categoryId, event.eventId)
+              .send({
+                from: account.address,
+                gas: 200000,
+              });
 
             event.status = 4; // 1: Upcoming, 2: In Progress, 3: Marking Wiiner, 4: Completed
             await contract.methods.updateEvent(event).send({
               from: account.address,
               gas: 200000,
             });
-          console.log("Marking End");
-        } catch (error) {
-          console.error("Error counting winner : ", error.message);
+            console.log("Marking End");
+          } catch (error) {
+            console.error("Error counting winner : ", error.message);
+          }
         }
       }
     }
   }
 };
+
+setInterval(markingWinner, 1000);
 
 function getCurrentDateTimeInMalaysia() {
   // Get the current date and time in UTC
@@ -109,9 +118,6 @@ function getCurrentDateTimeInMalaysia() {
   const formattedDateTime = malaysiaTime.toISOString().slice(0, 16);
   return formattedDateTime;
 }
-
-// Set interval to run the task every second
-setInterval(markingWinner, 1000);
 
 // Allowed origins for CORS
 const allowedOrigins = ["http://localhost:5173", "http://localhost:3000"];

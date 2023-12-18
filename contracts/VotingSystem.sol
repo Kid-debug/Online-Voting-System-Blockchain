@@ -48,6 +48,7 @@ contract VotingSystem {
         string voterKey;
         uint256 categoryId;
         uint256 eventId;
+        uint256 votedCandidateId;
         bool voted;
     }
 
@@ -285,38 +286,61 @@ contract VotingSystem {
         categories[_categoryId].categoryName = _newCategoryName;
     }
 
-    function deleteCategory(uint256 _categoryId) public {
-        require(
-            categories[_categoryId].categoryId != 0,
-            "Category does not exist"
-        );
+    // function deleteCategory(uint256 _categoryId) public {
+    //     require(
+    //         categories[_categoryId].categoryId != 0,
+    //         "Category does not exist"
+    //     );
 
-        // Check if there are any events associated with the category
-        require(
-            categories[_categoryId].events.length == 0,
-            "Cannot delete category with events"
-        );
+    //     // Check if there are any events associated with the category
+    //     require(
+    //         categories[_categoryId].events.length == 0,
+    //         "Cannot delete category with events"
+    //     );
 
+    //     // Check if there are any candidates associated with the category
+    //     for (uint256 i = 1; i <= eventCount; i++) {
+    //         Event storage currentEvent = events[i];
+    //         if (
+    //             currentEvent.categoryId == _categoryId &&
+    //             currentEvent.candidates.length > 0
+    //         ) {
+    //             revert("Cannot delete category with candidates");
+    //         }
+    //     }
+
+    //     // Check if there are any vote events associated with the category
+    //     for (uint256 i = 1; i <= voteEventCount; i++) {
+    //         if (voteEvents[i].categoryId == _categoryId) {
+    //             revert("Cannot delete category with vote events");
+    //         }
+    //     }
+
+    //     // If no associated events, candidates, or vote events, delete the category
+    //     delete categories[_categoryId];
+    // }
+
+    function getAllVotedHistory(string memory _userKey) public view returns (voteEventStruct[] memory) {
         // Check if there are any candidates associated with the category
-        for (uint256 i = 1; i <= eventCount; i++) {
-            Event storage currentEvent = events[i];
-            if (
-                currentEvent.categoryId == _categoryId &&
-                currentEvent.candidates.length > 0
-            ) {
-                revert("Cannot delete category with candidates");
-            }
-        }
-
-        // Check if there are any vote events associated with the category
+        voteEventStruct[] memory voteEventFound = new voteEventStruct[](
+            voteEventCount
+        );
+        uint256 count = 0;
         for (uint256 i = 1; i <= voteEventCount; i++) {
-            if (voteEvents[i].categoryId == _categoryId) {
-                revert("Cannot delete category with vote events");
+            if ( keccak256(bytes(voteEvents[i].voterKey)) ==  keccak256(bytes(_userKey))) {
+                // Store the matching vote event in the array
+                voteEventFound[count] = voteEvents[i];
+                count += 1;
             }
         }
 
-        // If no associated events, candidates, or vote events, delete the category
-        delete categories[_categoryId];
+        // Resize the array to remove any unused slots
+        assembly {
+            mstore(voteEventFound, count)
+        }
+
+        // Return the dynamic array of matching vote events
+        return voteEventFound;
     }
 
     function addEvent(
@@ -757,6 +781,7 @@ contract VotingSystem {
             voterKey: _voterKey,
             categoryId: _categoryId,
             eventId: _eventId,
+            votedCandidateId : _candidateId,
             voted: true
         });
 
