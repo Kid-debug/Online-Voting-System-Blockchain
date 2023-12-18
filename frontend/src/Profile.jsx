@@ -77,23 +77,18 @@ function Profile() {
         return;
       }
 
-     
-
       console.log("user  : ", user);
       console.log("email  : ", auth.email);
       console.log("currentPassword  : ", values.currentPassword);
 
       await contract.methods
-        .updateVoterPassword(
-          auth.userKey,
-          values.newPassword
-        )
+        .updateVoterPassword(auth.userKey, values.newPassword)
         .send({ from: accounts[0] });
 
       Swal({
         icon: "success",
-        title: "Candidate Created!",
-        text: "You've successfully added a new candidate.",
+        title: "Password Updated!",
+        text: "You've successfully change your password.",
       });
     } catch (error) {
       // Check if the image file name is used by any candidate
@@ -102,7 +97,7 @@ function Profile() {
     handleResetInput();
   };
 
-  const handleResetInput = () =>{
+  const handleResetInput = () => {
     setValues({
       currentPassword: "",
       newPassword: "",
@@ -122,23 +117,29 @@ function Profile() {
     }
 
     // Check if password is not empty and meets requirements
-     if (values.newPassword.length < 8) {
+    if (values.newPassword.length < 8) {
       Swal("Error!", "Password must be at least 8 characters long!", "error");
     } else if (
       !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/.test(
         values.newPassword
       )
     ) {
-        Swal("Error!", "Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character!", "error");
-        return false
-    }
-
-    if (values.newPassword != values.repeatNewPassword) {
-      Swal("Error!", "Repeat new Password is not same with the new password!", "error");
+      Swal(
+        "Error!",
+        "Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character!",
+        "error"
+      );
       return false;
     }
 
- 
+    if (values.newPassword != values.repeatNewPassword) {
+      Swal(
+        "Error!",
+        "Repeat new Password is not same with the new password!",
+        "error"
+      );
+      return false;
+    }
 
     return true;
   };
@@ -190,9 +191,9 @@ function Profile() {
                       <hr className="border-light m-0" />
                       <div className="card-body">
                         <div className="row">
-                        <div className="col-md-12 mb-3 mt-3">
+                          <div className="col-md-12 mb-3 mt-3">
                             <label htmlFor="userKey" className="form-label">
-                             User Key
+                              User Key
                             </label>
                             <input
                               id="userKey"
@@ -375,7 +376,7 @@ function Profile() {
               </div>
             </div>
             <div className="text-right mt-3">
-            {shouldDisplayButtons && (
+              {shouldDisplayButtons && (
                 <>
                   <button
                     type="button"

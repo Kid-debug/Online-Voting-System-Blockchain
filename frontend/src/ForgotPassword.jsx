@@ -1,41 +1,134 @@
-import React, { useState } from "react";
-import axios from "axios";
+import React, { useEffect, useState } from "react";
+import axios from "./api/axios";
 import { useNavigate } from "react-router-dom";
 import "./stylesheets/style.css";
+import Web3 from "web3";
+import votingContract from "../../build/contracts/VotingSystem.json";
+import { contractAddress } from "../../config";
+import cryptoRandomString from "crypto-random-string";
 
 function ForgotPassword() {
   const [email, setEmail] = useState("");
   const navigate = useNavigate();
-  const [backendErrors, setBackendErrors] = useState([]);
+  const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setBackendErrors([]);
+    setErrorMessage("");
     setSuccessMessage("");
 
+    if (!email.trim()) {
+      setErrorMessage("Email is required");
+      return;
+    }
+
     try {
-      const response = await axios.post(
-        "http://localhost:3000/api/forget-password",
-        { email }
+      const emailLower = email.toLowerCase();
+
+      // Initialize web3 and the contract
+      const web3 = new Web3(window.ethereum);
+      await window.ethereum.enable();
+      const contract = new web3.eth.Contract(
+        votingContract.abi,
+        contractAddress
       );
-      // Handle success response
-      navigate("/resetPass", { state: { successMessage: response.data.msg } });
-    } catch (error) {
-      if (error.response) {
-        // If the backend sends an array of errors
-        if (error.response.data.errors) {
-          setBackendErrors(error.response.data.errors);
-        } else {
-          // If the backend sends a single error message
-          setBackendErrors([{ msg: error.response.data.msg }]);
-        }
-      } else {
-        // Handle other errors like network errors
-        setBackendErrors([{ msg: "Network error or server not responding." }]);
+
+      // Check if the email exists in the smart contract
+      const emailExists = await contract.methods
+        .checkUserExistByEmail(emailLower)
+        .call();
+      if (!emailExists) {
+        setErrorMessage("Email does not exist.");
+        return;
       }
+
+      // Check if a recent reset password request exists
+      const recentRequestExists = await contract.methods
+        .isRecentResetRequest(emailLower)
+        .call();
+      if (recentRequestExists) {
+        setErrorMessage(
+          `You have previously requested to reset your password. Please check your email: ${emailLower}`
+        );
+        return;
+      }
+
+      // Generate a verification token
+      const randomToken = cryptoRandomString({ length: 16 });
+      //Generate a 6-digit verification code
+      const code = generateVerificationCode();
+
+      try {
+        const web3 = new Web3(window.ethereum);
+        await window.ethereum.enable();
+        const accounts = await web3.eth.getAccounts();
+        const contract = new web3.eth.Contract(
+          votingContract.abi,
+          contractAddress
+        );
+        await contract.methods
+          .addResetPasswordRequest(emailLower, randomToken, code)
+          .send({ from: accounts[0] });
+
+        // setSuccessMessage("Email Sent Successfully for Reset Password");
+
+        //send password reset email
+        const response = await axios.post("/api/forget-password", {
+          email,
+          randomToken,
+          code,
+        });
+
+        // Check if the response indicates a successful email send
+        if (response.data && response.data.success) {
+          // Navigate to the PasswordResetConfirmation page with success message
+          navigate("/resetPass", {
+            state: { successMessage: response.data.message },
+          });
+        } else {
+          // Handle the case where the email sending wasn't successful
+          setErrorMessage(
+            response.data.message || "Failed to send reset password email."
+          );
+        }
+      } catch (error) {
+        let errorMessage = "An error occurred while adding the reset password.";
+        // Check if the error message includes a revert
+        if (error.message && error.message.includes("revert")) {
+          const matches = error.message.match(/revert (.+)/);
+          errorMessage =
+            matches && matches[1]
+              ? matches[1]
+              : "Transaction reverted without a reason.";
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+
+        setErrorMessage(errorMessage);
+      }
+    } catch (error) {
+      let errorMessage = "An error occurred while checking the email account.";
+      // Check if the error message includes a revert
+      if (error.message && error.message.includes("revert")) {
+        const matches = error.message.match(/revert (.+)/);
+        errorMessage =
+          matches && matches[1]
+            ? matches[1]
+            : "Transaction reverted without a reason.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      setErrorMessage(errorMessage);
     }
   };
+
+  function generateVerificationCode() {
+    const min = 100000;
+    const max = 999999;
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
 
   return (
     <div className="loginPage">
@@ -45,13 +138,13 @@ function ForgotPassword() {
             {successMessage}
           </div>
         )}
-        {backendErrors.length > 0 && (
+
+        {errorMessage && (
           <div className="alert alert-danger" role="alert">
-            {backendErrors.map((error, index) => (
-              <div key={index}>{error.msg}</div>
-            ))}
+            {errorMessage}
           </div>
         )}
+
         <h2>Forgot Password</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-3">
