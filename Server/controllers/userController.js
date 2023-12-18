@@ -97,6 +97,85 @@ const sendEmail = async (req, res) => {
   await sendMail(req.body.email, mailSubject, content);
 };
 
+const sendEmailByAddAdmin = async (req, res) => {
+  const mailSubject = "Your account has been registered by Super Admin";
+  const content =
+    "<h2>Hi, " +
+    req.body.email +
+    "!</h2>" +
+    "<p>We are excited to inform you that your account has been successfully registered by our Super Admin.</p>" +
+    "<p>Welcome aboard! As a registered admin, you now have access to a range of features and functionalities within our system.</p>" +
+    "<p>Thank you for joining our system. We look forward to your active participation!</p>" +
+    "<p>To proceed with your login, click the following link:</p>" +
+    "<p><a href='http://localhost:5173'>http://localhost:5173</a><p><br>" +
+    "<p>If you have any questions or need assistance, feel free to reach out to our support team at:</p>" +
+    "<p><strong>nghs-wm20@student.tarc.edu.my</strong> or <strong>woonzl-wm20@student.tarc.edu.my</strong></p><br>" +
+    "<p>Sincerely,</p><br>" +
+    "<p>Hooi Seng & Zhong Liang</p>\n" +
+    "<p>Online Voting System</p>";
+  await sendMail(req.body.email, mailSubject, content);
+};
+
+const sendEmailByRemoveAdmin = async (req, res) => {
+  //for updating the email, then will send this to the previous email and remind them
+  const mailSubject =
+    "Your account has been permanently removed by Super Admin";
+  const content =
+    "<h2>Your account has been permanently removed by our Super Admin.</h2>" +
+    "<p>You have been removed from using the University Campus Voting System for the following reasons:</p><br>" +
+    "<ul style='font-size: 14px;'>" +
+    "<b><li>Prolonged inactivity or failure to perform administrative duties.</li>" +
+    "<li>Failure to comply with system policies and guidelines.</li>" +
+    "<li>No longer actively participating in any voting processes.</li>" +
+    "<li>Misuse of administrative privileges.</li>" +
+    "</ul>" +
+    "<br>" +
+    "<p>If you have any questions or need assistance, feel free to reach out to our support team at:</p>" +
+    "<p><strong>nghs-wm20@student.tarc.edu.my</strong> or <strong>woonzl-wm20@student.tarc.edu.my</strong></p><br>" +
+    "<p>Sincerely,</p><br>" +
+    "<p>Hooi Seng & Zhong Liang</p>\n" +
+    "<p>Online Voting System</p>";
+  await sendMail(req.body.email, mailSubject, content);
+};
+
+const sendEmailByUnBanned = async (req, res) => {
+  const mailSubject = "Your Account has been unbanned";
+  const content =
+    "<h2>Your account has been unbanned.</h2>\n" +
+    "<p>Hey there,</p>" +
+    "<p>We hope this message finds you well. We wanted to inform you that your appeal regarding the account ban has been carefully reviewed by our team.</p>" +
+    "<p>After thorough consideration, we are pleased to inform you that your account has been unbanned, and you can now continue to use our Online Voting System without any restrictions.</p>" +
+    "<br>" +
+    "<p>We appreciate your understanding and cooperation throughout this process. If you have any further questions or concerns, please feel free to reach out to us at:</p>" +
+    "<p><strong>nghs-wm20@student.tarc.edu.my</strong> or <strong>woonzl-wm20@student.tarc.edu.my</strong></p><br>" +
+    "<p>Sincerely,</p><br>" +
+    "<p>Hooi Seng & Zhong Liang</p>\n" +
+    "<p>Online Voting System</p>";
+  await sendMail(req.body.email, mailSubject, content);
+};
+
+const sendEmailByBanned = async (req, res) => {
+  const mailSubject = "Your Account has been temporarily banned";
+  const content =
+    "<h2>Your account has been temporarily banned.</h2>" +
+    "<p>You have been banned from using the University Campus Voting System for the following reasons:</p><br>" +
+    "<ul style='font-size: 14px;'>" +
+    "<b><li>Sending excessive new feedback content</li>" +
+    "<li>Harassing or discriminating against other voters or candidates</li>" +
+    "<li>Sharing false information about candidates or the voting process</li>" +
+    "<li>Using inappropriate language or content in feedback within the platform</li>" +
+    "<li>Engaging in disruptive behavior that hinders the positive voting experience of others</li>" +
+    "<li>Sharing confidential voting information with unauthorized individuals</li></b>" +
+    "</ul>" +
+    "<br>" +
+    "<p>If you would like to appeal to unban your account, please contact one of the following emails:</p>" +
+    "<p><strong>nghs-wm20@student.tarc.edu.my</strong> or <strong>woonzl-wm20@student.tarc.edu.my</strong></p><br>" +
+    "<p>Sincerely,</p><br>" +
+    "<p>Hooi Seng & Zhong Liang</p>\n" +
+    "<p>Online Voting System</p>";
+  await sendMail(req.body.email, mailSubject, content);
+};
+
 const registerAdmin = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -670,4 +749,8 @@ module.exports = {
   resetPassword,
   changePassword,
   sendEmail,
+  sendEmailByBanned,
+  sendEmailByUnBanned,
+  sendEmailByAddAdmin,
+  sendEmailByRemoveAdmin,
 };

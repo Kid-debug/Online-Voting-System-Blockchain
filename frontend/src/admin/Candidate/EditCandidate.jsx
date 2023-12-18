@@ -1,115 +1,243 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "../../api/axios";
+import Web3 from "web3";
+import votingContract from "../../../../build/contracts/VotingSystem.json";
+import { contractAddress } from "../../../../config";
 import Swal from "sweetalert";
+import axios from "../../api/axios";
 
 function EditCandidate() {
+  // Define state for selected category and election
+  const [selectedCategoryId, setSelectedCategory] = useState("");
+  const [selectedEventId, setSelectedEvent] = useState("");
+  const [categories, setCategories] = useState([]);
+  const [events, setEvents] = useState([]);
   const [candidateName, setCandidateName] = useState("");
-  const [studentID, setStudentID] = useState("");
-  const [candidateImage, setCandidateImage] = useState("");
+  const [candidateDesc, setCandidateDesc] = useState("");
+  const [candidateStdId, setCandidateStdId] = useState("");
   const [file, setFile] = useState(null);
+  const [imageFileName, setImageFileName] = useState("");
+  const IMAGE_BASE_URL = "http://localhost:3000/uploads/";
 
-  const handleImageFile = (e) => {
-    setFile(e.target.files[0]);
+  const handleFileChange = (event) => {
+    setFile(event.target.files[0]);
+  };
+
+  // Handle category change events
+  const handleCategoryChange = (event) => {
+    setSelectedCategory(event.target.value);
+  };
+
+  const handleEventChanged = (event) => {
+    setSelectedEvent(event.target.value);
+  };
+
+  // Handle category change events
+  const handleCandidateNameChange = (event) => {
+    setCandidateName(event.target.value);
+  };
+
+  // Handle category change events
+  const handleCandidateDescChange = (event) => {
+    setCandidateDesc(event.target.value);
+  };
+
+  // Handle category change events
+  const handleCandidateStdIdChange = (event) => {
+    setCandidateStdId(event.target.value);
   };
 
   const navigate = useNavigate();
-  const { candidateId } = useParams();
+  const { categoryId, eventId, candidateId } = useParams();
+
+  const fetchCandidateDetails = async () => {
+    try {
+      const web3 = new Web3(window.ethereum);
+      await window.ethereum.enable();
+      const accounts = await web3.eth.getAccounts();
+
+      const contract = new web3.eth.Contract(
+        votingContract.abi,
+        contractAddress
+      );
+
+      const candidate = await contract.methods
+        .getCandidateById(categoryId, eventId, candidateId)
+        .call();
+
+      setSelectedCategory(Number(candidate.categoryId));
+      setSelectedEvent(Number(candidate.eventId));
+      setCandidateName(candidate.name);
+      setCandidateDesc(candidate.description);
+      setCandidateStdId(Number(candidate.studentId));
+      setImageFileName(candidate.imageFileName);
+    } catch (error) {
+      console.error("Error fetching candidates:", error);
+    }
+  };
 
   useEffect(() => {
-    const fetchCandidates = async () => {
+    fetchCandidateDetails();
+  }, [categoryId, eventId, candidateId]);
+
+  useEffect(() => {
+    // Fetch categories when the component mounts
+    const fetchCategories = async () => {
       try {
-        const response = await axios.get(
-          `api/retrieveCandidate/${candidateId}`
+        const web3 = new Web3(window.ethereum);
+        await window.ethereum.enable();
+
+        const contract = new web3.eth.Contract(
+          votingContract.abi,
+          contractAddress
         );
-        const candidate = response.data;
-        setCandidateName(candidate.candidate_name);
-        setStudentID(candidate.student_id);
-        setCandidateImage(candidate.candidate_image);
+
+        // Call the getAllCategory function in your smart contract
+        const categoryList = await contract.methods.getAllCategory().call();
+        const formattedCategories = categoryList.filter(
+          (category) => Number(category.categoryId) !== 0
+        );
+
+        setCategories(formattedCategories);
       } catch (error) {
-        console.error("Error fetching candidates:", error);
-        Swal({
-          icon: "error",
-          title: "Failed to Fetch Candidate!",
-          text: "Could not retrieve candidate data.",
-          button: {
-            text: "OK",
-          },
-        });
+        console.error("Error fetching categories:", error);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  // Fetch events when the component mounts or when selectedCategory changes
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        if (!selectedCategoryId) {
+          // If selectedCategory is empty, exit early
+          return;
+        }
+
+        const web3 = new Web3(window.ethereum);
+        await window.ethereum.enable();
+
+        const contract = new web3.eth.Contract(
+          votingContract.abi,
+          contractAddress
+        );
+
+        // Call the getAllCategoryEvent function in your smart contract
+        const eventList = await contract.methods
+          .getAllCategoryEvent(selectedCategoryId)
+          .call();
+        const formattedEvents = eventList.filter(
+          (event) => Number(event.eventId) !== 0
+        );
+        setEvents(formattedEvents);
+      } catch (error) {
+        console.error("Error fetching Event:", error);
       }
     };
 
-    if (candidateId) {
-      fetchCandidates();
-    }
-  }, [candidateId]);
+    // Fetch events when the component mounts or when selectedCategory changes
+    fetchEvents();
+  }, [selectedCategoryId]);
 
-  const handleSubmit = async (event) => {
+  const handleEditCandidate = async (event) => {
     event.preventDefault();
 
-    const formData = new FormData();
-    formData.append("candidate_name", candidateName);
-    formData.append("student_id", studentID);
-    if (file) {
-      formData.append("candidate_image", file);
-    }
+    let imageFileNameToUse;
 
+    if (
+      !selectedCategoryId ||
+      !selectedEventId ||
+      !candidateName ||
+      !candidateDesc ||
+      !candidateStdId
+    ) {
+      Swal("Error!", "All input fields must be filled in.", "error");
+      return;
+    }
     try {
-      const response = await axios.put(
-        `/api/updateCandidate/${candidateId}`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
+      // If a new file is selected, upload it
+      if (file) {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const response = await axios.post("/upload", formData);
+        imageFileNameToUse = response.data.imageFileName;
+      } else {
+        // If no new file is uploaded, use the existing imageFileName
+        imageFileNameToUse = imageFileName;
+      }
+
+      const web3 = new Web3(window.ethereum);
+      await window.ethereum.enable();
+      const accounts = await web3.eth.getAccounts();
+      const contract = new web3.eth.Contract(
+        votingContract.abi,
+        contractAddress
       );
 
+      await contract.methods
+        .updateCandidate(
+          candidateId,
+          candidateName,
+          candidateDesc,
+          Number(candidateStdId),
+          selectedCategoryId,
+          selectedEventId,
+          imageFileNameToUse
+        )
+        .send({ from: accounts[0] });
+
+      Swal("Success!", "Candidate updated successfully.", "success");
+
+      // Delete the old image after updating the new image
+      if (imageFileName && imageFileName !== imageFileNameToUse) {
+        await axios.delete("/deleteFile", {
+          data: { filename: imageFileName },
+        });
+      }
+
+      fetchCandidateDetails();
+    } catch (error) {
+      let errorMessage = "An error occurred while updating the category.";
+      // Check if the error message includes a revert
+      if (error.message && error.message.includes("revert")) {
+        const matches = error.message.match(/revert (.+)/);
+        errorMessage =
+          matches && matches[1]
+            ? matches[1]
+            : "Transaction reverted without a reason.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
       Swal({
-        title: "Update Candidate Successfully!",
-        text: response.data.msg,
-        icon: "success",
-        button: {
-          text: "OK",
-        },
+        icon: "error",
+        title: "Error updating candidate!",
+        text: errorMessage,
       });
 
-      // Update the candidate image to the new one
-      setCandidateImage(URL.createObjectURL(file));
-    } catch (error) {
-      if (error.response) {
-        // If the backend sends an array of errors
-        if (error.response.data.errors) {
-          Swal({
-            icon: "error",
-            title: "Failed to Update Candidate!",
-            text: error.response.data.errors.map((e) => e.msg).join("\n"),
-            button: {
-              text: "OK",
-            },
+      // Check if the image file name is used by any candidate
+      const web3 = new Web3(window.ethereum);
+      await window.ethereum.enable();
+      const accounts = await web3.eth.getAccounts();
+      const contract = new web3.eth.Contract(
+        votingContract.abi,
+        contractAddress
+      );
+      const imageInUse = await contract.methods
+        .isImageFileNameUsed(imageFileNameToUse)
+        .call();
+
+      // If the image file name is not in use, delete the file
+      if (!imageInUse && error.message) {
+        try {
+          await axios.delete("/deleteFile", {
+            data: { filename: imageFileNameToUse },
           });
-        } else {
-          // If the backend sends a single error message
-          Swal({
-            icon: "error",
-            title: "Failed to Update Candidate!",
-            text: error.response.data.msg,
-            button: {
-              text: "OK",
-            },
-          });
+        } catch (deleteError) {
+          console.error("Error deleting the file:", deleteError);
         }
-      } else {
-        // Handle other errors here
-        console.error("Updating Candidate error:", error);
-        Swal({
-          icon: "error",
-          title: "Internal Server Error",
-          text: "Network error occurred.",
-          button: {
-            text: "OK",
-          },
-        });
       }
     }
   };
@@ -117,51 +245,114 @@ function EditCandidate() {
   return (
     <div className="d-flex flex-column align-items-center pt-4">
       <h2>Update Candidate</h2>
-      <form className="row g-3 w-50" onSubmit={handleSubmit}>
+      <form className="row g-3 w-50">
         <div className="col-12">
-          <label htmlFor="inputCandidateName" className="form-label">
+          <label htmlFor="electionSelect" className="form-label">
+            Category
+          </label>
+          <select
+            id="electionSelect"
+            className="form-select"
+            value={selectedCategoryId}
+            onChange={handleCategoryChange}
+            disabled="true"
+          >
+            {categories.map((category) => (
+              <option
+                key={Number(category.categoryId)}
+                value={Number(category.categoryId)}
+              >
+                {category.categoryName}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="col-12">
+          <label htmlFor="eventSelect" className="form-label">
+            Position
+          </label>
+          <select
+            id="eventSelect"
+            className="form-select"
+            value={selectedEventId}
+            onChange={handleEventChanged}
+            disabled="true"
+          >
+            {events.map((event) => (
+              <option key={Number(event.eventId)} value={Number(event.eventId)}>
+                {event.eventName}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="col-12">
+          <label htmlFor="inputname4" className="form-label">
             Candidate Name
           </label>
           <input
             type="text"
             className="form-control"
-            id="inputCandidateName"
-            placeholder="Enter Candidate Name"
+            id="inputname4"
+            placeholder="Enter First Name (eg: Ng Hooi Seng)"
             value={candidateName}
-            onChange={(e) => setCandidateName(e.target.value)}
-            maxLength={100}
+            onChange={handleCandidateNameChange}
           />
         </div>
+
         <div className="col-12">
-          <label htmlFor="inputStudentID" className="form-label">
+          <label htmlFor="inputDescription4" className="form-label">
             Student ID
+          </label>
+          <input
+            type="number"
+            className="form-control"
+            id="inputDescription4"
+            placeholder="Enter Student ID"
+            value={candidateStdId}
+            onChange={handleCandidateStdIdChange}
+          />
+        </div>
+
+        <div className="col-12">
+          <label htmlFor="inputDescription4" className="form-label">
+            Description
           </label>
           <input
             type="text"
             className="form-control"
-            id="inputStudentID"
-            placeholder="Enter Student ID"
-            value={studentID}
-            onChange={(e) => setStudentID(e.target.value)}
-            maxLength={10}
+            id="inputDescription4"
+            placeholder="Enter Candidate Description"
+            value={candidateDesc}
+            onChange={handleCandidateDescChange}
           />
         </div>
-        <div className="col-12 mb-3 d-flex flex-column align-items-start">
+        <div className="col-12 d-flex flex-column align-items-start">
           <label htmlFor="inputCandidateImageFile" className="form-label">
             Edit Image
+            <div>
+              {" "}
+              <label htmlFor="inputCandidateImageFile">
+                <img
+                  src={`${IMAGE_BASE_URL}${imageFileName}`}
+                  alt={imageFileName}
+                  className="image"
+                />
+              </label>
+            </div>
             <input
               type="file"
               className="form-control"
               id="inputCandidateImageFile"
-              onChange={handleImageFile}
+              onChange={handleFileChange}
             />
-          </label>
-          <label htmlFor="inputCandidateImageFile">
-            <img src={candidateImage} alt={candidateImage} className="image" />
           </label>
         </div>
         <div className="col-12">
-          <button type="submit" className="btn btn-primary">
+          <button
+            type="submit"
+            className="btn btn-primary"
+            onClick={handleEditCandidate}
+          >
             Edit
           </button>
         </div>

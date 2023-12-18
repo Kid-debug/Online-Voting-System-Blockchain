@@ -3,7 +3,7 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import axios from "axios";
 import useAuth from "../hooks/useAuth";
-import Web3 from 'web3';
+import Web3 from "web3";
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -12,13 +12,16 @@ function Dashboard() {
   const [isPositionOpen, setIsPositionOpen] = useState(false);
   const [isCandidatesOpen, setIsCandidatesOpen] = useState(false);
   const [isVotersOpen, setIsVotersOpen] = useState(false);
+  const [isAdminsOpen, setIsAdminsOpen] = useState(false);
   const [isElectionOpen, setIsElectionOpen] = useState(false);
 
   const [walletAddress, setWalletAddress] = useState("");
   const [walletBalance, setWalletBalance] = useState("");
 
-
   const { logout } = useAuth();
+  const { auth } = useAuth();
+  const role = auth.userRole;
+  const userId = auth.userId;
 
   const handleLogout = async () => {
     try {
@@ -54,8 +57,8 @@ function Dashboard() {
     setIsVotersOpen(!isVotersOpen);
   };
 
-  const toggleElection = () => {
-    setIsElectionOpen(!isElectionOpen);
+  const toggleAdmins = () => {
+    setIsAdminsOpen(!isAdminsOpen);
   };
 
   async function requestAccount() {
@@ -69,9 +72,9 @@ function Dashboard() {
         const accounts = await window.ethereum.request({
           method: "eth_requestAccounts",
         });
-      
+
         setWalletAddress(accounts[0]);
-      
+
         // get balance
         const web3 = new Web3(window.ethereum);
         const balance = await web3.eth.getBalance(accounts[0]);
@@ -227,49 +230,43 @@ function Dashboard() {
                         Display Voters
                       </Link>
                     </li>
-                    <li>
-                      <Link
-                        to="/admin/createVoter"
-                        className="nav-link px-0 align-middle text-white"
-                      >
-                        Add New Voter
-                      </Link>
-                    </li>
                   </ul>
                 )}
               </li>
-              <li>
-                <button
-                  onClick={toggleElection}
-                  className="nav-link px-0 align-middle text-white"
-                  style={{ background: "none", border: "none" }}
-                >
-                  <i className="fs-4 bi-box2-fill"></i>{" "}
-                  <span className="ms-1 d-none d-sm-inline">
-                    Manage Election
-                  </span>
-                </button>
-                {isElectionOpen && (
-                  <ul>
-                    <li>
-                      <Link
-                        to="/admin/election"
-                        className="nav-link px-0 align-middle text-white"
-                      >
-                        Display Elections
-                      </Link>
-                    </li>
-                    <li>
-                      <Link
-                        to="/admin/createElection"
-                        className="nav-link px-0 align-middle text-white"
-                      >
-                        Add New Election
-                      </Link>{" "}
-                    </li>
-                  </ul>
-                )}
-              </li>
+              {role === "S" && (
+                <li>
+                  <button
+                    onClick={toggleAdmins}
+                    className="nav-link px-0 align-middle text-white"
+                    style={{ background: "none", border: "none" }}
+                  >
+                    <i className="fs-4 bi-people"></i>{" "}
+                    <span className="ms-1 d-none d-sm-inline">
+                      Manage Admins
+                    </span>
+                  </button>
+                  {isAdminsOpen && (
+                    <ul>
+                      <li>
+                        <Link
+                          to="/admin/admin"
+                          className="nav-link px-0 align-middle text-white"
+                        >
+                          Display Admin
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          to="/admin/createAdmin"
+                          className="nav-link px-0 align-middle text-white"
+                        >
+                          Add New Admin
+                        </Link>
+                      </li>
+                    </ul>
+                  )}
+                </li>
+              )}
               <li>
                 <a
                   href="/admin/adminfeedback"
@@ -290,6 +287,19 @@ function Dashboard() {
                   </span>
                 </a>
               </li>
+              {role === "A" && (
+                <li>
+                  <Link
+                    to={`/admin/editAdmin/${userId}`}
+                    className="nav-link px-0 align-middle text-white"
+                  >
+                    <i className="fs-4 bi-lock"></i>{" "}
+                    <span className="ms-1 d-none d-sm-inline">
+                      Change Password
+                    </span>
+                  </Link>
+                </li>
+              )}
               <li>
                 <div className="App">
                   <header className="App-header">

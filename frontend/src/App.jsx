@@ -7,21 +7,19 @@ import Dashboard from "./admin/Dashboard";
 import Category from "./admin/Category/Category";
 import Position from "./admin/Position/Position";
 import Candidate from "./admin/Candidate/Candidate";
+import AdminPage from "./admin/Admin/AdminPage";
 import Voter from "./admin/Voter/Voter";
-import Election from "./admin/Election/Election";
 import AdminFeedback from "./admin/Feedback/AdminFeedback";
 import EditFeedback from "./admin/Feedback/EditFeedback";
 import Home from "./admin/Home";
-import AddVoter from "./admin/Voter/AddVoter";
-import EditVoter from "./admin/Voter/EditVoter";
+import AddAdmin from "./admin/Admin/AddAdmin";
+import EditAdmin from "./admin/Admin/EditAdmin";
 import AddCategory from "./admin/Category/AddCategory";
 import EditCategory from "./admin/Category/EditCategory";
 import AddPosition from "./admin/Position/AddPosition";
 import EditPosition from "./admin/Position/EditPosition";
 import AddCandidate from "./admin/Candidate/AddCandidate";
 import EditCandidate from "./admin/Candidate/EditCandidate";
-import AddElection from "./admin/Election/AddElection";
-import EditElection from "./admin/Election/EditElection";
 import VoterDashboard from "./VoterDashboard";
 import About from "./About";
 import ElectionList from "./ElectionList";
@@ -44,10 +42,12 @@ import { AuthProvider } from "./context/AuthProvider";
 import SessionHandler from "./component/SessionHandler";
 import MailVerification from "./MailVerification";
 import ResetPassword from "./ResetPassword";
+import VoteHistoryList from "./VoteHistoryList";
 
 const ROLES = {
   User: "U",
   Admin: "A",
+  SuperAdmin: "S",
 };
 
 function App() {
@@ -70,7 +70,11 @@ function App() {
           />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
 
-          <Route element={<RequireAuth allowedRoles={[ROLES.Admin]} />}>
+          <Route
+            element={
+              <RequireAuth allowedRoles={[ROLES.Admin, ROLES.SuperAdmin]} />
+            }
+          >
             <Route path="/admin" element={<Dashboard />}>
               {/* The "index" route represents the default child route */}
               <Route index element={<Home />} />
@@ -78,33 +82,41 @@ function App() {
               <Route path="category" element={<Category />} />
               <Route path="position" element={<Position />} />
               <Route path="candidate" element={<Candidate />} />
+              <Route path="admin" element={<AdminPage />} />
               <Route path="voter" element={<Voter />} />
-              <Route path="election" element={<Election />} />
               <Route path="adminfeedback" element={<AdminFeedback />} />
               <Route path="reportsummary" element={<ReportSummary />} />
               <Route
                 path="editfeedback/:feedbackId"
                 element={<EditFeedback />}
               />
-              <Route path="createVoter" element={<AddVoter />} />
-              <Route path="editVoter" element={<EditVoter />} />
+              <Route path="createAdmin" element={<AddAdmin />} />
+              <Route path="editAdmin/:id" element={<EditAdmin />} />
               <Route path="createCategory" element={<AddCategory />} />
               <Route
                 path="editCategory/:categoryId"
                 element={<EditCategory />}
               />
               <Route path="createPosition" element={<AddPosition />} />
-              <Route path="editPosition" element={<EditPosition />} />
+              <Route
+                path="editPosition/:categoryId/:eventId"
+                element={<EditPosition />}
+              />
               <Route path="createCandidate" element={<AddCandidate />} />
-              <Route path="editCandidate" element={<EditCandidate />} />
-              <Route path="createElection" element={<AddElection />} />
-              <Route path="editElection" element={<EditElection />} />
+              <Route
+                path="editCandidate/:categoryId/:eventId/:candidateId"
+                element={<EditCandidate />}
+              />
               {/* ... more nested admin routes */}
             </Route>
           </Route>
 
           <Route
-            element={<RequireAuth allowedRoles={[ROLES.User, ROLES.Admin]} />}
+            element={
+              <RequireAuth
+                allowedRoles={[ROLES.User, ROLES.Admin, ROLES.SuperAdmin]}
+              />
+            }
           >
             <Route path="/voterdashboard" element={<VoterDashboard />} />
             <Route path="/about" element={<About />} />
@@ -123,7 +135,8 @@ function App() {
               element={<EditUserFeedback />}
             />
             <Route path="/profile" element={<Profile />} />
-            <Route path="/result" element={<Result />} />
+            <Route path="/result/:categoryId/:eventId" element={<Result />} />
+            <Route path="/votehistorylist" element={<VoteHistoryList />} />
           </Route>
           {/* Catch-all route for undefined paths */}
           <Route path="*" element={<Missing />} />

@@ -165,7 +165,7 @@ function UserFeedbackList() {
       setExpandedFeedback(feedbackID);
     }
   };
-  const handleBlockClick = (feedbackId) => {
+  const handleBlockClick = () => {
     // Call to SweetAlert to show the modal
     Swal({
       title: "Blocked",
@@ -281,7 +281,7 @@ function UserFeedbackList() {
                             </Link>
                           ) : row.status === "Mark As Reviewed" ? (
                             <button
-                              onClick={() => handleBlockClick(row.feedback_id)}
+                              onClick={handleBlockClick}
                               className="btn btn-danger btn-sm block"
                             >
                               <i className="fs-4 bi-pencil"></i>

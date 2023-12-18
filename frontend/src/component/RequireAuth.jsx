@@ -6,7 +6,7 @@ const RequireAuth = ({ allowedRoles }) => {
   const { auth } = useContext(AuthContext);
   const location = useLocation();
 
-  if (!auth?.userKey) {
+  if (!auth?.userId) {
     return <Navigate to="/" state={{ from: location }} replace />;
   } else if (allowedRoles && !allowedRoles.includes(auth?.userRole)) {
     return <Navigate to="/unauthorized" state={{ from: location }} replace />;

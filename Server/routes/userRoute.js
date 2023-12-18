@@ -37,6 +37,14 @@ router.post(
   userController.changePassword
 );
 
+//manage admin
+router.post("/sendEmailByAddAdmin", userController.sendEmailByAddAdmin);
+router.post("/sendEmailByRemoveAdmin", userController.sendEmailByRemoveAdmin);
+
+//change user status
+router.post("/sendEmailByBanned", userController.sendEmailByBanned);
+router.post("/sendEmailByUnBanned", userController.sendEmailByUnBanned);
+
 //feedback (user)
 router.post(
   "/submitFeedback",

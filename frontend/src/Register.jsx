@@ -12,8 +12,9 @@ function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [backendErrors, setBackendErrors] = useState([]);
+  const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [backendErrors, setBackendErrors] = useState([]);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   //removeItem kill session
@@ -26,6 +27,7 @@ function Register() {
     // If there are no errors, proceed with form submission
     if (Object.keys(errors).length === 0) {
       setBackendErrors([]);
+      setErrorMessage("");
       setSuccessMessage(""); // Reset success message on new submission
       try {
         const emailLower = email.toLowerCase();
@@ -54,13 +56,41 @@ function Register() {
             email,
             randomToken,
           });
-          console.log("Form submitted successfully");
+
+          setSuccessMessage(
+            "You've successfully registered with us. Please check your email to proceed the verification!"
+          );
         } catch (error) {
-          console.error("Error Msg : ", error.message);
+          let errorMessage =
+            "An error occurred while creating the admin account.";
+          // Check if the error message includes a revert
+          if (error.message && error.message.includes("revert")) {
+            const matches = error.message.match(/revert (.+)/);
+            errorMessage =
+              matches && matches[1]
+                ? matches[1]
+                : "Transaction reverted without a reason.";
+          } else if (error.message) {
+            errorMessage = error.message;
+          }
+
+          setErrorMessage(errorMessage);
         }
-      
       } catch (err) {
-        console.error(err);
+        let errorMessage =
+          "An error occurred while creating the admin account.";
+        // Check if the error message includes a revert
+        if (error.message && error.message.includes("revert")) {
+          const matches = error.message.match(/revert (.+)/);
+          errorMessage =
+            matches && matches[1]
+              ? matches[1]
+              : "Transaction reverted without a reason.";
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+
+        setErrorMessage(errorMessage);
       }
     } else {
       // Handle errors (e.g., display error messages)
@@ -72,10 +102,12 @@ function Register() {
   const validateSignUp = () => {
     const errors = {};
 
-    // Check if email is not empty
+    // Check if email is not empty and must be tarumt student account
     if (!email.trim()) {
-      errors.email = "•Email is required";
-    } 
+      errors.email = "• Email is required";
+    } else if (!email.trim().toLowerCase().endsWith("@student.tarc.edu.my")) {
+      errors.email = "• Email must be a @student.tarc.edu.my";
+    }
 
     // Check if password is not empty and meets requirements
     if (!password.trim()) {
@@ -106,6 +138,12 @@ function Register() {
         {successMessage && (
           <div className="alert alert-success" role="alert">
             {successMessage}
+          </div>
+        )}
+
+        {errorMessage && (
+          <div className="alert alert-danger" role="alert">
+            {errorMessage}
           </div>
         )}
 

@@ -15,9 +15,9 @@ function Header() {
     //   await axios.get("http://localhost:3000/api/logout", {
     //     withCredentials: true,
     //   });
-      logout();
-      navigate("/");
-      setIsNavExpanded(false); // Collapse the navbar on logout
+    logout();
+    navigate("/");
+    setIsNavExpanded(false); // Collapse the navbar on logout
     // } catch (error) {
     //   console.error("Logout failed", error);
     // }
@@ -73,7 +73,7 @@ function Header() {
             </li>
             <li className="nav-item">
               <Link
-                to="/result"
+                to="/votehistorylist"
                 className="nav-link mx-2"
                 onClick={() => setIsNavExpanded(false)}
               >
