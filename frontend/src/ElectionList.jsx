@@ -115,10 +115,12 @@ function ElectionList() {
     const status = election.eventStatus;
     console.log("status : ", status);
     if (status == 1) {
-      return "Upcoming";
-    } else if (status == 2) {
+      return "No Candidates";
+    } else if (status === 2) {
+      return "Up Comming";
+    } else  if (status === 3) {
       return "Processing";
-    } else if (status == 3) {
+    } else if (status === 4) {
       return "Marking Winner";
     } else {
       return "Complete";

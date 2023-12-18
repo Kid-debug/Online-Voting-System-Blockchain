@@ -7,11 +7,13 @@ import Web3 from "web3";
 import { contractAddress } from "../../config";
 import votingContract from "../../build/contracts/VotingSystem.json";
 import { useParams } from "react-router-dom";
+import Swal from "sweetalert";
 
 function Voting() {
   const [candidates, setCandidates] = useState([]);
   const { categoryId, eventId } = useParams();
   const [eventName, setEventName] = useState(null);
+  const [eventStatus, setEventStatus] = useState(null);
   const [categoryName, setCategoryName] = useState(null);
   const [selectedCandidateId, setSelectedCandidateId] = useState("");
   const [isVoted, setIsVoted] = useState();
@@ -40,12 +42,13 @@ function Voting() {
       const event = await contract.methods
         .getEventById(categoryId, eventId)
         .call();
+      // 1- no candidates, 2- Upcomming, 3- Processing, 4- Marking Winner, 5 Completed
 
       // check if the current date and the start data and end date
-      if (event.status == 2) {
+      if (event.status == 3) {
         setIsClose(false);
       }
-      if (event.status != 1 && event.status != 2) {
+      if (event.status != 1 && event.status != 2 && event.status != 3) {
         setIsClose(true);
         setIsEnd(true);
       }
@@ -85,6 +88,7 @@ function Voting() {
         console.log("category : ", category);
         setCategoryName(category.categoryName);
         setEventName(event.eventName);
+        setEventStatus(event.status);
 
         setCandidates(candidatesList);
 
@@ -143,7 +147,16 @@ function Voting() {
         from: accounts[0], // Assuming the user's account is the first account
       });
 
-    // Show the confirmation modal
+    setIsVoted(true);
+
+    Swal({
+      icon: "success",
+      title: "Successfully Voted!",
+      text: "You've successfully voted a candidate.",
+    });
+  };
+
+  const handleShowConfirmationModal = () => {
     setShowConfirmationModal(true);
   };
 
@@ -156,11 +169,11 @@ function Voting() {
       <div className="container mt-5 pt-5">
         {/* President */}
         <div className="grey-container">
-          <h5>
+          <h2 style={{ textAlign: "center" }}>
             {categoryName} - {eventName}
-          </h5>
+          </h2>
         </div>
-        <h4>{isVoted ? noticeVoted : instruction}</h4>
+        <h4>{eventStatus == 5 ? "" : isVoted ? noticeVoted : instruction}</h4>
         <div className="radio-group row justify-content-between px-3 text-center a mt-4">
           {candidates.length === 0 ? (
             <h4>No matching records found</h4>
@@ -171,7 +184,10 @@ function Voting() {
                 className={`col-auto mx-3 card-block py-2 text-center radio ${
                   selectedCandidateId === candidate.id ? "selected" : ""
                 }`}
-                style={{ backgroundColor: candidate.win ? 'lightgreen' : 'initial' }}>
+                style={{
+                  backgroundColor: candidate.win ? "lightgreen" : "initial",
+                }}
+              >
                 <input
                   type="radio"
                   name="candidatePresident"
@@ -180,7 +196,7 @@ function Voting() {
                   onChange={() => handleRadioClickPresident(candidate.id)}
                   style={{ display: "none" }}
                 />
-                <div className="flex-row" >
+                <div className="flex-row">
                   <div className="col">
                     <div className="pic p-3 m-3">
                       <img
@@ -209,9 +225,7 @@ function Voting() {
                         </a>
                       )}
                     </p>
-                    {isEnd && (
-                      <p>Vote Count: {Number(candidate.voteCount)}</p>
-                    )}
+                    {isEnd && <p>Vote Count: {Number(candidate.voteCount)}</p>}
                     {selectedCandidateId === candidate.id && (
                       <div className="radio-button">
                         <i className="fa fa-check" />
@@ -231,7 +245,7 @@ function Voting() {
           type="submit"
           style={{ width: "270px" }}
           className="vote-submit submit-btn"
-          onClick={handleSubmit}
+          onClick={handleShowConfirmationModal}
           hidden={isVoted || isClose}
         >
           Submit
@@ -260,12 +274,7 @@ function Voting() {
               <button
                 className="confirm__button confirm__button--ok confirm__button--fill"
                 onClick={() => {
-                  // Replace the following with your actual vote submission logic
-                  alert(
-                    "Your vote is pending, need to go to email verification to verify your vote!!!"
-                  );
-                  navigate("/verification");
-                  setShowConfirmationModal(false);
+                  handleSubmit(), setShowConfirmationModal(false);
                 }}
               >
                 OK
