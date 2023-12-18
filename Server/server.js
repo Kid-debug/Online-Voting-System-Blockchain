@@ -108,8 +108,6 @@ const markingWinner = async () => {
             gas: 200000,
           });
           console.log("Marking End");
-        } catch (error) {
-          console.error("Error counting winner : ", error.message);
         }
       }
     }
