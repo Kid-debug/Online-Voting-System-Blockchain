@@ -54,23 +54,30 @@ function EditCandidate() {
     try {
       const web3 = new Web3(window.ethereum);
       await window.ethereum.enable();
-      const accounts = await web3.eth.getAccounts();
 
       const contract = new web3.eth.Contract(
         votingContract.abi,
         contractAddress
       );
 
-      const candidate = await contract.methods
-        .getCandidateById(categoryId, eventId, candidateId)
+      const candidates = await contract.methods
+        .getAllCandidatesInEvent(categoryId, eventId)
         .call();
 
-      setSelectedCategory(Number(candidate.categoryId));
-      setSelectedEvent(Number(candidate.eventId));
-      setCandidateName(candidate.name);
-      setCandidateDesc(candidate.description);
-      setCandidateStdId(Number(candidate.studentId));
-      setImageFileName(candidate.imageFileName);
+        let candidatesFound;
+      for(let i =0; i<candidates.length; i++){
+        if(candidates[i].id == candidateId){
+          candidatesFound = candidates[i];
+          break;
+        }
+      }
+      
+      setSelectedCategory(Number(candidatesFound.categoryId));
+      setSelectedEvent(Number(candidatesFound.eventId));
+      setCandidateName(candidatesFound.name);
+      setCandidateDesc(candidatesFound.description);
+      setCandidateStdId(Number(candidatesFound.studentId));
+      setImageFileName(candidatesFound.imageFileName);
     } catch (error) {
       console.error("Error fetching candidates:", error);
     }
