@@ -14,7 +14,7 @@ import Select from "react-select";
 function ElectionResult() {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
-  const [selectedYear, setSelectedYear] = useState();
+  const [selectedYear, setSelectedYear] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("0"); // "0" represents "All"
   const [categories, setCategories] = useState([]);
   const [events, setEvents] = useState([]);
