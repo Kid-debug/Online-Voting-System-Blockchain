@@ -12,7 +12,41 @@ function MailVerification() {
   const { token } = useParams();
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const [isVerify, setVerify] = useState(false);
+  const [isVerify, setVerify] = useState(true);
+
+  const fetchCandidate = async () => {
+    try {
+      const web3 = new Web3(window.ethereum);
+      await window.ethereum.enable();
+      const accounts = await web3.eth.getAccounts();
+
+      const contract = new web3.eth.Contract(
+        votingContract.abi,
+        contractAddress
+      );
+
+      // Call the getAllCategory function in your smart contract
+      const voterList = await contract.methods.getAllVoter().call();
+      for(let i=0;i<voterList.length;i++){
+        if(voterList[i].token == token && Number(voterList[i].status) != 0){
+          setVerify(true);
+          setSuccessMessage("Account Already Verify !");
+          break;
+        }
+      }
+      if(!isVerify){
+        setVerify(false);
+      }
+
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCandidate();
+  }, []); // The empty dependency array ensures that this effect runs once, similar to componentDidMount
+
 
   const verifyUser = async () => {
     try {
