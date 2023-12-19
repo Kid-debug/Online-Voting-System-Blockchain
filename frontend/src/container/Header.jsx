@@ -73,11 +73,20 @@ function Header() {
             </li>
             <li className="nav-item">
               <Link
-                to="/votehistorylist"
+                to="/votehistory"
                 className="nav-link mx-2"
                 onClick={() => setIsNavExpanded(false)}
               >
                 Vote History
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link
+                to="/electionResult"
+                className="nav-link mx-2"
+                onClick={() => setIsNavExpanded(false)}
+              >
+                Election Result
               </Link>
             </li>
             <li className="nav-item dropdown">

@@ -187,12 +187,14 @@ function Voting() {
                 style={{
                   backgroundColor: candidate.win ? "lightgreen" : "initial",
                 }}
+               
               >
                 <input
                   type="radio"
                   name="candidatePresident"
                   value={Number(candidate.id)}
                   checked={selectedCandidateId === candidate.id}
+                  disabled={eventStatus !== 3} 
                   onChange={() => handleRadioClickPresident(candidate.id)}
                   style={{ display: "none" }}
                 />

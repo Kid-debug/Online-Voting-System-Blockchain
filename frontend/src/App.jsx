@@ -29,7 +29,7 @@ import Feedback from "./Feedback";
 import UserFeedbackList from "./UserFeedbackList";
 import EditUserFeedback from "./EditUserFeedback";
 import Profile from "./Profile";
-import Result from "./Result";
+import VoteHistory from "./VoteHistory";
 import ElectionDetails from "./ElectionDetails";
 import ForgotPassword from "./ForgotPassword";
 import PasswordResetConfirmation from "./PasswordResetConfirmation";
@@ -43,6 +43,7 @@ import SessionHandler from "./component/SessionHandler";
 import MailVerification from "./MailVerification";
 import ResetPassword from "./ResetPassword";
 import VoteHistoryList from "./VoteHistoryList";
+import ElectionResult from "./ElectionResult";
 
 const ROLES = {
   User: "U",
@@ -135,8 +136,9 @@ function App() {
               element={<EditUserFeedback />}
             />
             <Route path="/profile" element={<Profile />} />
-            <Route path="/result/:categoryId/:eventId" element={<Result />} />
+            <Route path="/voteHistory" element={<VoteHistory />} />
             <Route path="/votehistorylist" element={<VoteHistoryList />} />
+            <Route path="/electionResult" element={<ElectionResult />} />
           </Route>
           {/* Catch-all route for undefined paths */}
           <Route path="*" element={<Missing />} />
