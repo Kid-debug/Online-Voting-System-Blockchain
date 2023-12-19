@@ -7,11 +7,14 @@ import Web3 from "web3";
 import { contractAddress } from "../../config";
 import votingContract from "../../build/contracts/VotingSystem.json";
 import { useParams } from "react-router-dom";
+import Swal from "sweetalert";
+import winnerIcon from "./images/winner-icon.png";
 
 function Voting() {
   const [candidates, setCandidates] = useState([]);
   const { categoryId, eventId } = useParams();
   const [eventName, setEventName] = useState(null);
+  const [eventStatus, setEventStatus] = useState(null);
   const [categoryName, setCategoryName] = useState(null);
   const [selectedCandidateId, setSelectedCandidateId] = useState("");
   const [isVoted, setIsVoted] = useState();
@@ -20,7 +23,7 @@ function Voting() {
   const IMAGE_BASE_URL = "http://localhost:3000/uploads/";
   const authData = JSON.parse(sessionStorage.getItem("auth"));
   const userKey = authData ? authData.userKey : null;
-  const [currentDateTime, setCurrentDatetTime] = useState();
+  const [isCandidatesExist, setIsCandidatesExist] = useState(false);
 
   // State for President candidates
   const [expandedDescriptionPresident, setExpandedDescriptionPresident] =
@@ -40,12 +43,13 @@ function Voting() {
       const event = await contract.methods
         .getEventById(categoryId, eventId)
         .call();
+      // 1- no candidates, 2- Upcomming, 3- Processing, 4- Marking Winner, 5 Completed
 
       // check if the current date and the start data and end date
-      if (event.status == 2) {
+      if (event.status == 3) {
         setIsClose(false);
       }
-      if (event.status != 1 && event.status != 2) {
+      if (event.status != 1 && event.status != 2 && event.status != 3) {
         setIsClose(true);
         setIsEnd(true);
       }
@@ -85,8 +89,13 @@ function Voting() {
         console.log("category : ", category);
         setCategoryName(category.categoryName);
         setEventName(event.eventName);
+        setEventStatus(event.status);
 
         setCandidates(candidatesList);
+
+        if (candidatesList != null) {
+          setIsCandidatesExist(true);
+        }
       } catch (error) {
         console.error("Error fetching Event:", error);
       }
@@ -139,7 +148,16 @@ function Voting() {
         from: accounts[0], // Assuming the user's account is the first account
       });
 
-    // Show the confirmation modal
+    setIsVoted(true);
+
+    Swal({
+      icon: "success",
+      title: "Successfully Voted!",
+      text: "You've successfully voted a candidate.",
+    });
+  };
+
+  const handleShowConfirmationModal = () => {
     setShowConfirmationModal(true);
   };
 
@@ -152,11 +170,11 @@ function Voting() {
       <div className="container mt-5 pt-5 votesss">
         {/* President */}
         <div className="grey-container">
-          <h5>
+          <h2 style={{ textAlign: "center" }}>
             {categoryName} - {eventName}
-          </h5>
+          </h2>
         </div>
-        <h4>{isVoted ? noticeVoted : instruction}</h4>
+        <h4>{eventStatus == 5 ? "" : isVoted ? noticeVoted : instruction}</h4>
         <div className="radio-group row justify-content-between px-3 text-center a mt-4">
           {candidates.length === 0 ? (
             <h4>No matching records found</h4>
@@ -167,17 +185,45 @@ function Voting() {
                 className={`col-auto mx-3 card-block py-2 text-center radio ${
                   selectedCandidateId === candidate.id ? "selected" : ""
                 }`}
+                style={{
+                  backgroundColor: candidate.win ? "rgb(159, 252, 193)" : "initial",
+                }}
               >
                 <input
                   type="radio"
                   name="candidatePresident"
                   value={Number(candidate.id)}
                   checked={selectedCandidateId === candidate.id}
+                  disabled={eventStatus !== 3}
                   onChange={() => handleRadioClickPresident(candidate.id)}
                   style={{ display: "none" }}
                 />
                 <div className="flex-row">
                   <div className="col">
+                    {isEnd && (
+                      <p style={{ fontSize: "19px" }}>
+                        Vote Count:{" "}
+                        <strong>{Number(candidate.voteCount)}</strong>
+                      </p>
+                    )}
+                    {candidate.win && (
+                      <div
+                        className="winner-indicator"
+                        style={{
+                          position: "absolute",
+                          top: 0,
+                          right: 0,
+                          padding: "5px",
+                        }}
+                      >
+                        <img
+                          className={`irc_mut img-fluid circular-image`}
+                          src={winnerIcon}
+                          alt={candidate.name}
+                          style={{ maxWidth: "100%", height: "auto" }}
+                        />
+                      </div>
+                    )}
                     <div className="pic p-3 m-3">
                       <img
                         className={`irc_mut img-fluid circular-image`}
@@ -185,13 +231,15 @@ function Voting() {
                         alt={candidate.name}
                       />
                     </div>
-                    <p>{candidate.name}</p>
-                    <p>{Number(candidate.studentId)}</p>
-                    <p className="description">
+                    <h4>
+                      <strong>{candidate.name}</strong>
+                    </h4>
+                    <h5>{Number(candidate.studentId)}</h5>
+                    <p className="description" style={{ fontSize: "17px" }}>
                       {expandedDescriptionPresident[candidate.name] ||
-                      candidate.description.length <= 30
+                      candidate.description.length <= 50
                         ? candidate.description
-                        : candidate.description.slice(0, 30) + "..."}
+                        : candidate.description.slice(0, 50) + "..."}
                       {candidate.description.length > 30 && (
                         <a
                           href="#"
@@ -224,7 +272,7 @@ function Voting() {
           type="submit"
           style={{ width: "270px" }}
           className="vote-submit submit-btn"
-          onClick={handleSubmit}
+          onClick={handleShowConfirmationModal}
           hidden={isVoted || isClose}
         >
           Submit
@@ -253,12 +301,7 @@ function Voting() {
               <button
                 className="confirm__button confirm__button--ok confirm__button--fill"
                 onClick={() => {
-                  // Replace the following with your actual vote submission logic
-                  alert(
-                    "Your vote is pending, need to go to email verification to verify your vote!!!"
-                  );
-                  navigate("/verification");
-                  setShowConfirmationModal(false);
+                  handleSubmit(), setShowConfirmationModal(false);
                 }}
               >
                 OK

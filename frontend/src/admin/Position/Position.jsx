@@ -84,7 +84,6 @@ function Position() {
       const formattedEvents = await Promise.all(eventPromises);
 
       setEvents(formattedEvents);
-      console.log(formattedEvents);
     } catch (error) {
       console.error("Error fetching Event:", error);
     }
@@ -141,14 +140,19 @@ function Position() {
   const getElectionStatus = (election) => {
     // 1: Upcoming, 2: In Progress, 3: Completed, 4： Cancel
     const status = election.eventStatus;
-    console.log("status : ", status);
     if (status == 1) {
-      return "Upcoming";
-    } else if (status == 2) {
+      return "No Candidates";
+    } 
+    if (status == 2) {
+      return "Up Comming";
+    } 
+    if (status == 3) {
       return "Processing";
-    } else if (status == 3) {
+    } 
+    if (status == 4) {
       return "Marking Winner";
-    } else {
+    } 
+    if(status == 5) {
       return "Complete";
     }
   };
@@ -400,6 +404,8 @@ function Position() {
                         )}
                       </>
                     ) : column === "Action" ? (
+                
+                      row.eventStatus !== 5 &&  row.eventStatus !== 4 && (
                       <>
                         <Link
                           to={`/admin/editPosition/${row.categoryId}/${row.eventId}`}
@@ -416,6 +422,7 @@ function Position() {
                           <i className="fs-4 bi-trash"></i>
                         </button>
                       </>
+                      )
                     ) : column === "eventStatus" ? (
                       getElectionStatus(row)
                     ) : column === "eventStartDate" ? (

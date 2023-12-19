@@ -29,7 +29,7 @@ import Feedback from "./Feedback";
 import UserFeedbackList from "./UserFeedbackList";
 import EditUserFeedback from "./EditUserFeedback";
 import Profile from "./Profile";
-import Result from "./Result";
+import VoteHistory from "./VoteHistory";
 import ElectionDetails from "./ElectionDetails";
 import ForgotPassword from "./ForgotPassword";
 import PasswordResetConfirmation from "./PasswordResetConfirmation";
@@ -46,6 +46,7 @@ import VoteHistoryList from "./VoteHistoryList";
 import YearlyReport from "./admin/YearlyReport";
 import CategoryReport from "./admin/CategoryReport";
 import PositionReport from "./admin/PositionReport";
+import ElectionResult from "./ElectionResult";
 
 const ROLES = {
   User: "U",
@@ -73,11 +74,11 @@ function App() {
           />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
 
-          {/* <Route
+          <Route
             element={
               <RequireAuth allowedRoles={[ROLES.Admin, ROLES.SuperAdmin]} />
             }
-          > */}
+          >
           <Route path="/admin" element={<Dashboard />}>
             {/* The "index" route represents the default child route */}
             <Route index element={<Home />} />
@@ -108,16 +109,16 @@ function App() {
               element={<EditCandidate />}
             />
             {/* ... more nested admin routes */}
-            {/* </Route> */}
+            </Route>
           </Route>
 
-          {/* <Route
+          <Route
             element={
               <RequireAuth
                 allowedRoles={[ROLES.User, ROLES.Admin, ROLES.SuperAdmin]}
               />
             }
-          > */}
+          >
           <Route path="/voterdashboard" element={<VoterDashboard />} />
           <Route path="/about" element={<About />} />
           <Route path="/electionList/:categoryId" element={<ElectionList />} />
@@ -127,17 +128,18 @@ function App() {
           />
           <Route path="/voting/:categoryId/:eventId" element={<Voting />} />
 
-          <Route path="/verification" element={<Verification />} />
-          <Route path="/feedback" element={<Feedback />} />
-          <Route path="/userfeedbacklist" element={<UserFeedbackList />} />
-          <Route
-            path="/edituserfeedback/:feedbackId"
-            element={<EditUserFeedback />}
-          />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/result/:categoryId/:eventId" element={<Result />} />
-          <Route path="/votehistorylist" element={<VoteHistoryList />} />
-          {/* </Route> */}
+            <Route path="/verification" element={<Verification />} />
+            <Route path="/feedback" element={<Feedback />} />
+            <Route path="/userfeedbacklist" element={<UserFeedbackList />} />
+            <Route
+              path="/edituserfeedback/:feedbackId"
+              element={<EditUserFeedback />}
+            />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/voteHistory" element={<VoteHistory />} />
+            <Route path="/votehistorylist" element={<VoteHistoryList />} />
+            <Route path="/electionResult" element={<ElectionResult />} />
+          </Route>
           {/* Catch-all route for undefined paths */}
           <Route path="*" element={<Missing />} />
         </Routes>

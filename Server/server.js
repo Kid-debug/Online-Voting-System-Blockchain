@@ -54,7 +54,7 @@ const changeEventDateStatus = async () => {
           event.status != 4
         ) {
           console.log("change status to completed!");
-          event.status = 3; // 1: Upcoming, 2: In Progress, 3: Marking Wiiner, 4: Completed
+          event.status = 3; // 1: Upcoming, 2: In Progress, 3: Marking Wiiner, 4: Completed, 5: H   as no candidate
           await contract.methods.updateEvent(event).send({
             from: account.address,
             gas: 200000,
@@ -74,35 +74,45 @@ const markingWinner = async () => {
 
   // Call the getAllEvent function in smart contract
   const eventList = await contract.methods.getAllEvent().call();
-  for (const event of eventList) {
-    if (event.status == 3) {
-      const isMarkedWinner = await contract.methods
-        .isMarkWinner(event.categoryId, event.eventId)
-        .call();
+  if (eventList != null) {
+    for (const event of eventList) {
+      if (event.status == 3 && event.candidates!=null) {
+        const isMarkedWinner = await contract.methods
+          .isMarkWinner(event.categoryId, event.eventId)
+          .call();
 
-      if (!isMarkedWinner) {
-        console.log("Marking Winner");
-        try {
-          await contract.methods
-            .markWinner(event.categoryId, event.eventId)
-            .send({
+        if (!isMarkedWinner) {
+          console.log("Marking Winner");
+          try {
+            await contract.methods
+              .markWinner(event.categoryId, event.eventId)
+              .send({
+                from: account.address,
+                gas: 200000,
+              });
+
+            event.status = 4; // 1: Upcoming, 2: In Progress, 3: Marking Wiiner, 4: Completed
+            await contract.methods.updateEvent(event).send({
               from: account.address,
               gas: 200000,
             });
-
+            console.log("Marking End");
+          } catch (error) {
+            console.error("Error counting winner : ", error.message);
+          }
           event.status = 4; // 1: Upcoming, 2: In Progress, 3: Marking Wiiner, 4: Completed
           await contract.methods.updateEvent(event).send({
             from: account.address,
             gas: 200000,
           });
           console.log("Marking End");
-        } catch (error) {
-          console.error("Error counting winner : ", error.message);
         }
       }
     }
   }
 }; 
+
+setInterval(markingWinner, 1000);
 
 function getCurrentDateTimeInMalaysia() {
   // Get the current date and time in UTC
@@ -113,9 +123,6 @@ function getCurrentDateTimeInMalaysia() {
   const formattedDateTime = malaysiaTime.toISOString().slice(0, 16);
   return formattedDateTime;
 }
-
-// Set interval to run the task every second
-setInterval(markingWinner, 1000);*/
 
 // Allowed origins for CORS
 const allowedOrigins = ["http://localhost:5173", "http://localhost:3000"];

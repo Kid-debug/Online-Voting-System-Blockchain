@@ -152,6 +152,8 @@ function AddPosition() {
         .send({
           from: accounts[0], // Assuming the user's account is the first account
         });
+
+        
       // prompt success message
       Swal({
         icon: "success",
