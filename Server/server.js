@@ -12,17 +12,16 @@ const sequelize = require("./config/sequelize");
 const User = require("./models/user");
 const { v4: uuidv4 } = require("uuid");
 
-const votingContract = require("../build/contracts/VotingSystem.json");
+/*const votingContract = require("../build/contracts/VotingSystem.json");
 const { Web3 } = require("web3");
 const ganacheUrl = "HTTP://127.0.0.1:7545";
 const privateKey =
-  "0x7e714a5c55233c1adc7400de839ece13c124d433b1266178211e948ffa1f7a5d";
+  "0x519a5668ac7a193c383290dfc29368f10565922dd40b7db5cc4ef4d987a72b03";
+
+const { contractAddress } = require("../config-server");
 
 const web3 = new Web3(new Web3.providers.HttpProvider(ganacheUrl));
-const contract = new web3.eth.Contract(
-  votingContract.abi,
-  "0xFB2e065e7AA902486B4E79b1ac7412871804D544"
-);
+const contract = new web3.eth.Contract(votingContract.abi, contractAddress);
 const account = web3.eth.accounts.privateKeyToAccount(privateKey);
 web3.eth.accounts.wallet.add(account);
 
@@ -103,7 +102,7 @@ const markingWinner = async () => {
       }
     }
   }
-};
+}; 
 
 function getCurrentDateTimeInMalaysia() {
   // Get the current date and time in UTC
@@ -116,7 +115,7 @@ function getCurrentDateTimeInMalaysia() {
 }
 
 // Set interval to run the task every second
-setInterval(markingWinner, 1000);
+setInterval(markingWinner, 1000);*/
 
 // Allowed origins for CORS
 const allowedOrigins = ["http://localhost:5173", "http://localhost:3000"];

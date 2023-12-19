@@ -278,13 +278,33 @@ function Dashboard() {
               </li>
               <li>
                 <a
-                  href="/admin/reportsummary"
+                  href="/admin/categoryreport"
                   className="nav-link px-0 align-middle text-white"
                 >
                   <i className="fs-4 bi-graph-up"></i>{" "}
                   <span className="ms-1 d-none d-sm-inline">
-                    Report Summary
+                    Report (Category)
                   </span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/admin/positionreport"
+                  className="nav-link px-0 align-middle text-white"
+                >
+                  <i className="fs-4 bi-graph-up"></i>{" "}
+                  <span className="ms-1 d-none d-sm-inline">
+                    Report (Position)
+                  </span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/admin/yearlyreport"
+                  className="nav-link px-0 align-middle text-white"
+                >
+                  <i className="fs-4 bi-graph-up"></i>{" "}
+                  <span className="ms-1 d-none d-sm-inline">Report (Year)</span>
                 </a>
               </li>
               {role === "A" && (

@@ -268,7 +268,7 @@ function VoteHistoryList() {
   };
 
   return (
-    <div>
+    <div className="voterhome">
       <Header />
       <div className="col-md-12 filter-container">
         <form className="d-flex mb-3">

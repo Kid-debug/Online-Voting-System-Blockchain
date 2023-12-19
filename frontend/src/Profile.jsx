@@ -149,7 +149,7 @@ function Profile() {
       <Header />
       <main>
         <form>
-          <div className="container light-style flex-grow-1 container-p-y">
+          <div className="container light-style flex-grow-1 container-p-y boxesss">
             <h2 className="font-weight-bold py-3 mb-4">Edit Profile</h2>
             <div className="card-profile overflow-hidden">
               <div className="row no-gutters row-bordered row-border-light">

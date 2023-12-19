@@ -103,36 +103,16 @@
 }
 
 .user-card {
-  display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   background-color: #fff;
   border-radius: 10px;
-  padding: 40px;
+  padding: 50px;
   width: 650px;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 2px 20px -5px rgba(0, 0, 0, 0.5);
-}
-
-.user-card:before {
-  content: "";
-  position: absolute;
-  height: 300%;
-  width: 173px;
-  background: #262626;
-  top: -550px;
-  left: -125px;
-  z-index: 0;
-  transform: rotate(17deg);
-}
-
-.user-card-img {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 3;
+  box-shadow: 24px 24px 30px #6d8dad;
 }
 
 .user-card-img img {
@@ -157,6 +137,7 @@
   margin-top: 35px;
   margin-bottom: 30px;
 }
+
 .user-card-info p span {
   font-weight: 700;
   margin-right: 10px;
@@ -234,4 +215,6 @@
 
 .vote-btn:hover {
   background: #006400;
+  color: #e6e7e8;
+  text-decoration: none;
 }

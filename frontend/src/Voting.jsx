@@ -42,9 +42,7 @@ function Voting() {
         .call();
 
       // check if the current date and the start data and end date
-      if (
-       event.status == 2
-      ) {
+      if (event.status == 2) {
         setIsClose(false);
       }
       if (event.status != 1 && event.status != 2) {
@@ -148,10 +146,10 @@ function Voting() {
   const navigate = useNavigate();
 
   return (
-    <div>
+    <div className="voterhome">
       <Header />
 
-      <div className="container mt-5 pt-5">
+      <div className="container mt-5 pt-5 votesss">
         {/* President */}
         <div className="grey-container">
           <h5>

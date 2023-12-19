@@ -34,7 +34,6 @@ footer {
   display: flex;
   background-color: #101010;
   color: white;
-  margin-top: 5%;
 }
 .main-content .box {
   flex-basis: 50%;

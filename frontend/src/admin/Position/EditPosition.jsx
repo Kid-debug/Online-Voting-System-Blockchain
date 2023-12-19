@@ -7,6 +7,7 @@ import Swal from "sweetalert";
 
 function EditPosition() {
   const [positionName, setPositionName] = useState("");
+  const [positionDesc, setPositionDesc] = useState("");
   const [selectedCategoryId, setSelectedCategory] = useState("");
   const [categories, setCategories] = useState([]);
   const [startDateAndTime, setStartDateAndTime] = useState("");
@@ -49,6 +50,10 @@ function EditPosition() {
 
   const handlePositionChange = (event) => {
     setPositionName(event.target.value);
+  };
+
+  const handlePositonDescChange = (event) => {
+    setPositionDesc(event.target.value);
   };
 
   const handleStartDateAndTimeChange = (event) => {
@@ -95,6 +100,7 @@ function EditPosition() {
 
       setSelectedCategory(Number(event.categoryId));
       setPositionName(event.eventName);
+      setPositionDesc(event.eventDesc);
       // Convert BigInt timestamps to ISO format for datetime-local input
       if (!isNaN(Number(event.startDateTime))) {
         setStartDateAndTime(
@@ -152,6 +158,7 @@ function EditPosition() {
     // Ensure that positionName and selectedCategoryId are not empty
     if (
       !positionName ||
+      !positionDesc ||
       !selectedCategoryId ||
       !startDateAndTime ||
       !endDateAndTime
@@ -181,10 +188,11 @@ function EditPosition() {
       const endDateTime = new Date(endDateAndTime).getTime() / 1000;
 
       await contract.methods
-        .updateEvent(
+        .updateEventName(
           selectedCategoryId,
           eventId,
           positionName,
+          positionDesc,
           startDateTime,
           endDateTime
         )
@@ -274,6 +282,19 @@ function EditPosition() {
             placeholder="Enter your position name (e.g., President)"
             value={positionName}
             onChange={handlePositionChange}
+          />
+        </div>
+        <div className="col-12">
+          <label htmlFor="inputDescription4" className="form-label">
+            Position Description
+          </label>
+          <input
+            type="text"
+            className="form-control"
+            id="inputDescription4"
+            placeholder="Enter your position description"
+            value={positionDesc}
+            onChange={handlePositonDescChange}
           />
         </div>
         <div className="col-12">

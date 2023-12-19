@@ -132,7 +132,7 @@ function Feedback() {
   };
 
   return (
-    <div className="feedback-wrapper">
+    <div className="voterhome">
       <Header />
       <div className="container-feedback">
         <form onSubmit={handleFormSubmit}>

@@ -25,7 +25,7 @@ function AddCategory() {
 
       console.log("Attempting to add category...");
 
-    //  const web3 = new Web3(new Web3.providers.HttpProvider(ganacheUrl));
+      //  const web3 = new Web3(new Web3.providers.HttpProvider(ganacheUrl));
 
       const web3 = new Web3(window.ethereum);
       await window.ethereum.enable();
@@ -69,7 +69,7 @@ function AddCategory() {
       } else if (error.message) {
         errorMessage = error.message;
       }
-      Swal({
+      Swal.fire({
         icon: "error",
         title: "Error creating category!",
         text: errorMessage,

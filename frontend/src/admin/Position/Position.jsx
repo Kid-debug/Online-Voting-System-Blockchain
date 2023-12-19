@@ -15,7 +15,7 @@ function Position() {
   const [sortColumn, setSortColumn] = useState(null);
   const [sortDirection, setSortDirection] = useState(null);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
-  const [categoryToDelete, setCategoryToDelete] = useState(null);
+  const [eventToDelete, setEventToDelete] = useState(null);
   const [currentDateTime, setCurrentDatetTime] = useState();
 
   useEffect(() => {
@@ -70,6 +70,7 @@ function Position() {
         return {
           eventId: Number(event.eventId),
           eventName: event.eventName,
+          eventDesc: event.eventDesc,
           categoryId: event.categoryId,
           categoryName: categoryName.categoryName,
           candidatesCount: Number(event.candidateCount),
@@ -93,6 +94,7 @@ function Position() {
   const columnMapping = {
     eventId: "ID",
     eventName: "Event Name",
+    eventDesc: "Event Description",
     categoryName: "Category Name",
     candidatesCount: "Candidates",
     eventStatus: "Status",
@@ -105,6 +107,7 @@ function Position() {
   const columns = [
     "eventId",
     "eventName",
+    "eventDesc",
     "categoryName",
     "candidatesCount",
     "eventStatus",
@@ -112,6 +115,16 @@ function Position() {
     "eventEndDate",
     "Action",
   ];
+
+  const [expandedCategory, setExpandedCategory] = useState(null);
+
+  const toggleExpand = (categoryID) => {
+    if (expandedCategory === categoryID) {
+      setExpandedCategory(null);
+    } else {
+      setExpandedCategory(categoryID);
+    }
+  };
 
   // Function to handle sorting
   const handleSort = (column) => {
@@ -353,7 +366,40 @@ function Position() {
               <tr key={rowIndex}>
                 {columns.map((column, colIndex) => (
                   <td key={colIndex} className="data-cell">
-                    {column === "Action" ? (
+                    {column === "eventDesc" ? (
+                      <>
+                        {row[column].length > 50 &&
+                        expandedCategory !== row.ID ? (
+                          <>
+                            {`${row[column].substring(0, 50)}... `}
+                            <button
+                              onClick={() => toggleExpand(row.ID)}
+                              className="btn btn-link p-0"
+                            >
+                              Read More
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <span
+                              style={{
+                                wordBreak: "break-all",
+                              }}
+                            >
+                              {row[column]}
+                            </span>
+                            {row[column].length > 50 && (
+                              <button
+                                onClick={() => toggleExpand(row.ID)}
+                                className="btn btn-link p-0"
+                              >
+                                Read Less
+                              </button>
+                            )}
+                          </>
+                        )}
+                      </>
+                    ) : column === "Action" ? (
                       <>
                         <Link
                           to={`/admin/editPosition/${row.categoryId}/${row.eventId}`}

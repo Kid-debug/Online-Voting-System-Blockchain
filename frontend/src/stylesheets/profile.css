@@ -7,6 +7,10 @@ body {
   margin-top: 20px;
 }
 
+.app-container {
+  background-color: #f5faff;
+}
+
 .btn-primary {
   padding-left: 8px !important;
   padding-right: 15px !important;

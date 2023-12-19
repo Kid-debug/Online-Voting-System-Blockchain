@@ -327,7 +327,7 @@ function Candidate() {
                       alt={row.imageFileName}
                       className="image"
                     />
-                  ) : column === "Description" ? (
+                  ) : column === "candidateDesc" ? (
                     <>
                       {row[column].length > 50 &&
                       expandedCategory !== row.ID ? (
@@ -342,7 +342,13 @@ function Candidate() {
                         </>
                       ) : (
                         <>
-                          {row[column]}
+                          <span
+                            style={{
+                              wordBreak: "break-all",
+                            }}
+                          >
+                            {row[column]}
+                          </span>
                           {row[column].length > 50 && (
                             <button
                               onClick={() => toggleExpand(row.ID)}

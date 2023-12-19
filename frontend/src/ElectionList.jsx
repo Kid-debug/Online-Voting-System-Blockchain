@@ -165,9 +165,9 @@ function ElectionList() {
   };
 
   return (
-    <div>
+    <div className="voterhome">
       <Header />
-      <div className="election-container">
+      <div className="election-container mb-5">
         <h2 className="mt-5 mb-4">Election List : {categoryName}</h2>
         <div className="input-group mb-3">
           <div className="input-group-prepend">
@@ -211,7 +211,7 @@ function ElectionList() {
                   <td>{getElectionStatus(election)}</td>
                   <td>
                     <Link
-                      to={`/voting/${categoryId}/${election.eventId}`}
+                      to={`/electionDetails/${categoryId}/${election.eventId}`}
                       style={{
                         border: "none",
                         padding: "7px 20px",
