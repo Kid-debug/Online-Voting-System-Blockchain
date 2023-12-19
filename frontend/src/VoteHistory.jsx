@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Header from "./container/Header";
+import { Link } from "react-router-dom";
 import Footer from "./container/Footer";
 import "./stylesheets/result.css";
 import Web3 from "web3";
 import { contractAddress } from "../../config";
 import votingContract from "../../build/contracts/VotingSystem.json";
+import winnerIcon from "./images/winner-icon.png";
 
 function VoteHistory() {
   const { categoryId, eventId } = useParams();
@@ -31,43 +33,51 @@ function VoteHistory() {
         );
 
         const votedHistories = await contract.methods
-        .getAllVotedHistory(userKey)
-        .call();
+          .getAllVotedHistory(userKey)
+          .call();
 
-        const votedHistoriesPromises = votedHistories.map(async (votedHistory) => {
-          const category = await contract.methods
-            .getCategoryById(votedHistory.categoryId)
-            .call();
+        const votedHistoriesPromises = votedHistories.map(
+          async (votedHistory) => {
+            const category = await contract.methods
+              .getCategoryById(votedHistory.categoryId)
+              .call();
             const candidates = await contract.methods
-            .getAllCandidatesInEvent(votedHistory.categoryId, votedHistory.eventId)
-            .call();
+              .getAllCandidatesInEvent(
+                votedHistory.categoryId,
+                votedHistory.eventId
+              )
+              .call();
 
             const event = await contract.methods
-            .getEventById(votedHistory.categoryId,votedHistory.eventId)
-            .call();
-          
-          let candidateFound;
-          for (const candidate of candidates) {
-            if (candidate.id == votedHistory.votedCandidateId) {
-              candidateFound = candidate;
-              // console.log("candidateFound ",candidateFound);
-              break; // If you found the candidate, you can exit the loop
+              .getEventById(votedHistory.categoryId, votedHistory.eventId)
+              .call();
+
+            let candidateFound;
+            for (const candidate of candidates) {
+              if (candidate.id == votedHistory.votedCandidateId) {
+                candidateFound = candidate;
+                // console.log("candidateFound ",candidateFound);
+                break; // If you found the candidate, you can exit the loop
+              }
             }
+            return {
+              candidateName: candidateFound.name,
+              candidateImg: candidateFound.imageFileName,
+              candidateStudId: candidateFound.studentId,
+              candidateWin: candidateFound.win,
+              categoryName: category.categoryName,
+              categoryId: category.categoryId,
+              eventId: event.eventId,
+              eventName: event.eventName,
+              eventStatus: Number(event.status),
+              eventStartDate: Number(event.startDateTime),
+              eventEndDate: Number(event.endDateTime),
+            };
           }
-          return {
-            candidateName: candidateFound.name,
-            candidateImg : candidateFound.imageFileName,
-            candidateStudId: candidateFound.studentId,
-            categoryName: category.categoryName,
-            eventName: event.eventName,
-            eventStatus: Number(event.status),
-            eventStartDate: Number(event.startDateTime),
-            eventEndDate: Number(event.endDateTime),
-          };
-        });
+        );
 
         const formattedCandidates = await Promise.all(votedHistoriesPromises);
-        
+
         setCandidates(formattedCandidates);
 
         //based on vote count to assign the index number, who vote count the highest be the first one then assigned sequentially
@@ -111,7 +121,7 @@ function VoteHistory() {
   };
 
   const visibleCandidates = candidates.slice(0, maxCandidatesToShow);
-console.log("visibleCanm ", visibleCandidates);
+  console.log("visibleCanm ", visibleCandidates);
   return (
     <div>
       <Header />
@@ -130,7 +140,7 @@ console.log("visibleCanm ", visibleCandidates);
                 <tbody>
                   {visibleCandidates.map((candidate, index) => (
                     <tr key={index} className={index === 0 ? "text-white" : ""}>
-                      <td className="number">{index + 1}</td>
+                      <td className="number">{index + 1}</td>               
                       {index === 0 ? (
                         <td className="image">
                           <img
@@ -148,7 +158,11 @@ console.log("visibleCanm ", visibleCandidates);
                           />
                         </td>
                       )}
-                      <td className="name">
+
+                      <td
+                        className="name"
+                        style={{ margin: "auto", width: "18%" }}
+                      >
                         <div className="name-container">
                           <div>{candidate.candidateName}</div>
                         </div>
@@ -159,13 +173,33 @@ console.log("visibleCanm ", visibleCandidates);
                         </div>
                       </td>
                       <td id="vote-info" style={{ fontSize: "20px" }}>
-                        <div className="votes">
-                          {candidate.eventName}
+                        <div className="votes">{candidate.eventName}</div>
+                      </td>
+                      <td id="vote-info" style={{ width: "28%" }}>
+                        <div className="votes" style={{ fontSize: "18px" }}>
+                          Event End :{" "}
+                          {formatUnixTimestamp(candidate.eventEndDate)}
                         </div>
                       </td>
-                      <td id="vote-info" style={{ fontSize: "20px" }}>
-                        <div className="votes">
-                          Event End : {formatUnixTimestamp(candidate.eventEndDate)}
+                      <td>
+                        {candidate.candidateWin && (
+                          <div>
+                            <img
+                              src={winnerIcon}
+                              alt="winner"
+                              style={{ width: "100%", height: "auto" }}
+                            />
+                          </div>
+                        )}
+                      </td>
+                      <td>
+                        <div className="btn-center-container">
+                          <Link
+                            to={`/voting/${candidate.categoryId}/${candidate.eventId}`}
+                            className="btn btn-outline-success"
+                          >
+                            View Details
+                          </Link>
                         </div>
                       </td>
                     </tr>
