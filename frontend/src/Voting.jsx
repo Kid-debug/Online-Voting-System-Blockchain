@@ -8,6 +8,7 @@ import { contractAddress } from "../../config";
 import votingContract from "../../build/contracts/VotingSystem.json";
 import { useParams } from "react-router-dom";
 import Swal from "sweetalert";
+import winnerIcon from "./images/winner-icon.png";
 
 function Voting() {
   const [candidates, setCandidates] = useState([]);
@@ -185,21 +186,44 @@ function Voting() {
                   selectedCandidateId === candidate.id ? "selected" : ""
                 }`}
                 style={{
-                  backgroundColor: candidate.win ? "lightgreen" : "initial",
+                  backgroundColor: candidate.win ? "rgb(159, 252, 193)" : "initial",
                 }}
-               
               >
                 <input
                   type="radio"
                   name="candidatePresident"
                   value={Number(candidate.id)}
                   checked={selectedCandidateId === candidate.id}
-                  disabled={eventStatus !== 3} 
+                  disabled={eventStatus !== 3}
                   onChange={() => handleRadioClickPresident(candidate.id)}
                   style={{ display: "none" }}
                 />
                 <div className="flex-row">
                   <div className="col">
+                    {isEnd && (
+                      <p style={{ fontSize: "19px" }}>
+                        Vote Count:{" "}
+                        <strong>{Number(candidate.voteCount)}</strong>
+                      </p>
+                    )}
+                    {candidate.win && (
+                      <div
+                        className="winner-indicator"
+                        style={{
+                          position: "absolute",
+                          top: 0,
+                          right: 0,
+                          padding: "5px",
+                        }}
+                      >
+                        <img
+                          className={`irc_mut img-fluid circular-image`}
+                          src={winnerIcon}
+                          alt={candidate.name}
+                          style={{ maxWidth: "100%", height: "auto" }}
+                        />
+                      </div>
+                    )}
                     <div className="pic p-3 m-3">
                       <img
                         className={`irc_mut img-fluid circular-image`}
@@ -207,13 +231,15 @@ function Voting() {
                         alt={candidate.name}
                       />
                     </div>
-                    <p>{candidate.name}</p>
-                    <p>{Number(candidate.studentId)}</p>
-                    <p className="description">
+                    <h4>
+                      <strong>{candidate.name}</strong>
+                    </h4>
+                    <h5>{Number(candidate.studentId)}</h5>
+                    <p className="description" style={{ fontSize: "17px" }}>
                       {expandedDescriptionPresident[candidate.name] ||
-                      candidate.description.length <= 30
+                      candidate.description.length <= 50
                         ? candidate.description
-                        : candidate.description.slice(0, 30) + "..."}
+                        : candidate.description.slice(0, 50) + "..."}
                       {candidate.description.length > 30 && (
                         <a
                           href="#"
@@ -227,7 +253,6 @@ function Voting() {
                         </a>
                       )}
                     </p>
-                    {isEnd && <p>Vote Count: {Number(candidate.voteCount)}</p>}
                     {selectedCandidateId === candidate.id && (
                       <div className="radio-button">
                         <i className="fa fa-check" />
