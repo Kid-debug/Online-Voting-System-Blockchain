@@ -9,36 +9,25 @@ import Web3 from "web3";
 import { contractAddress } from "../../config";
 import "./stylesheets/votehistory.css";
 import Swal from "sweetalert";
+import Select from "react-select";
 
 function ElectionResult() {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
-  const [searchKeyword, setSearchKeyword] = useState("");
+  const [selectedYear, setSelectedYear] = useState();
   const [selectedCategory, setSelectedCategory] = useState("0"); // "0" represents "All"
   const [categories, setCategories] = useState([]);
   const [events, setEvents] = useState([]);
+  const [allEventYears, setAllEventYears] = useState();
   const [currentDateTime, setCurrentDateTime] = useState();
   const [filteredVoteData, setFilteredVoteData] = useState([]);
   const IMAGE_BASE_URL = "http://localhost:3000/uploads/";
+  const [expandedDescription, setExpandedDescription] = useState({});
 
-  useEffect(() => {
-    function getCurrentDateTimeInMalaysia() {
-      const now = new Date();
-      const malaysiaTime = new Date(now.getTime() + 8 * 60 * 60 * 1000);
-      const formattedDateTime = malaysiaTime.toISOString().slice(0, 16);
-      return formattedDateTime;
-    }
-
-    const everySecondFunction = async () => {
-      const currentTime = getCurrentDateTimeInMalaysia();
-      const unixCurrentTime = new Date(currentTime).getTime() / 1000;
-      setCurrentDateTime(unixCurrentTime);
-    };
-
-    const intervalId = setInterval(everySecondFunction, 1000);
-
-    return () => clearInterval(intervalId);
-  }, []);
+  const optionsCategory = categories.map((category) => ({
+    value: category.categoryId,
+    label: category.categoryName,
+  }));
 
   useEffect(() => {
     const fetchCategoriesAndEvents = async () => {
@@ -75,15 +64,16 @@ function ElectionResult() {
             candidates: event.candidates,
           }));
 
-          const uniqueYears = Array.from(
-            new Set(
-              eventList
-                .filter((event) => Number(event.eventId) !== 0)
-                .map((event) => new Date(Number(event.startDateTime) * 1000).getFullYear())
-            )
-          );
-          
-
+        // const uniqueYears = Array.from(
+        //   new Set(
+        //     eventList
+        //       .filter((event) => Number(event.eventId) !== 0)
+        //       .map((event) =>
+        //         new Date(Number(event.startDateTime) * 1000).getFullYear()
+        //       )
+        //   )
+        // );
+        // setAllEventYears(uniqueYears);
         setEvents(formattedEvents);
 
         // Fetch category names for each event
@@ -139,13 +129,14 @@ function ElectionResult() {
           .filter((vote) => {
             const matchesCategory =
               selectedCategory === "0"
-                ? true
+                ? false
                 : vote.categoryId === Number(selectedCategory);
 
-            return matchesCategory && vote.status == 5;
+            const matchyear = selectedYear===null? true:getYearFromUnixTimestamp(vote.startDateTime) === selectedYear.getFullYear();
+            console.log("selectedYear",getYearFromUnixTimestamp(vote.startDateTime));
+            return matchesCategory && vote.status == 5 && matchyear;
           })
           .map(async (vote) => {
-            
             const category = await contract.methods
               .getCategoryById(vote.categoryId)
               .call();
@@ -169,62 +160,62 @@ function ElectionResult() {
     };
 
     fetchData();
-  }, [events, searchKeyword, selectedCategory, startDate, endDate]);
+  }, [events, selectedYear, selectedCategory, startDate, endDate]);
 
-  const formatUnixTimestamp = (timestamp) => {
-    const formattedDate = new Intl.DateTimeFormat("en-US", {
-      year: "numeric",
-      month: "numeric",
-      day: "numeric",
-      hour: "numeric",
-      minute: "numeric",
-      second: "numeric",
-      timeZone: "Asia/Kuala_Lumpur",
-    }).format(Number(timestamp) * 1000); // Convert BigInt to number
+  function getYearFromUnixTimestamp(unixTimestamp) {
+    const date = new Date(unixTimestamp * 1000); // Convert Unix timestamp to milliseconds
+    return date.getFullYear();
+  }
 
-    return formattedDate;
+  // Functions for President candidates
+  const handleReadMoreClick = (candidateName) => {
+    setExpandedDescription((prevState) => ({
+      ...prevState,
+      [candidateName]: !prevState[candidateName],
+    }));
   };
 
-  const getEventStatus = (event) => {
-    const currentDate = currentDateTime;
-    const startDate = event.startDateTime;
-    const endDate = event.endDateTime;
-
-    if (currentDate >= startDate && currentDate <= endDate) {
-      return "In Progress";
-    } else if (currentDate < startDate) {
-      return "Upcoming";
-    } else {
-      return "Completed";
-    }
+  const handleOnChangeCategory = (selectedOption) => {
+    setSelectedCategory(selectedOption.value);
   };
 
   return (
     <div>
       <Header />
+      <div style={{ margin: "20px" }}>
+        <h1>Elecetion Result</h1>
+      </div>
       <div className="col-md-12 filter-container">
         <form className="d-flex mb-3">
-          <select
-            onChange={(event) => setSelectedCategory(event.target.value)}
-            className="form-select"
-            aria-label="Filter by category"
-            id="filterSelect"
-          >
-            <option value="0">Filter by all categories</option>
-            {categories.map((category) => (
-              <option key={category.categoryId} value={category.categoryId}>
-                {category.categoryName}
-              </option>
-            ))}
-          </select>
+          <lable>Select Category : </lable>
+          <Select
+            options={optionsCategory}
+            onChange={handleOnChangeCategory}
+            value={optionsCategory.find(
+              (option) => option.value === selectedCategory
+            )}
+            placeholder="Filter by all categories"
+            style={{ width: "200%" }}
+          />
+    
         </form>
+        <lable>Select Year : </lable>
+        <DatePicker
+            selected={selectedYear}
+            className="text-primary text-center"
+            onChange={(date) => setSelectedYear(date)}
+            showYearPicker
+            dateFormat="yyyy"
+          />
       </div>
 
       <div className="card-container mt-3">
         {filteredVoteData.length === 0 ? (
           <div className="card mt-5 mb-5">
             <div className="card-body">
-              <p className="no-matching-records">No matching records found</p>
+              <p className="no-matching-records">
+                Does not found the record.
+              </p>
             </div>
           </div>
         ) : (
@@ -238,40 +229,54 @@ function ElectionResult() {
                 ? vote.candidate.imageFileName
                 : "";
 
-            console.log(winnerName);
             return (
               <div key={vote.eventId} className="card">
                 <div className="card-body" style={{ margin: "auto" }}>
-                  <h2>
-                    {`${vote.categoryName} - ${vote.eventName}`}
-                  </h2>
-                  <div className="pic p-3 m-3">
-                    <img
-                      className={`irc_mut img-fluid circular-image`}
-                      src={`${IMAGE_BASE_URL}${imageName}`}
-                      alt={winnerName.name}
-                    />
-                  </div>
-                  <p className="card-text">
-                    Winner: <strong>{`${winnerName}`}</strong>
-                  </p>
-                  <p className="card-text">{`Start Date: ${formatUnixTimestamp(
-                    vote.startDateTime
-                  )}`}</p>
-                  <p className="card-text">{`End Date: ${formatUnixTimestamp(
-                    vote.endDateTime
-                  )}`}</p>
-                  <p className="card-text">{`Status: ${getEventStatus(
-                    vote
-                  )}`}</p>
-                  {/* Add other fields as needed */}
-                  <div className="btn-center-container">
-                    <Link
-                      to={`/voting/${vote.categoryId}/${vote.eventId}`}
-                      className="btn btn-outline-success"
-                    >
-                      View Details
-                    </Link>
+                  <div style={{ margin: "auto", textAlign: "center" }}>
+                    <h2>{` ${vote.eventName}`}</h2>
+                    <div className="pic p-3 m-3">
+                      <img
+                        className={`irc_mut img-fluid circular-image`}
+                        src={`${IMAGE_BASE_URL}${imageName}`}
+                        alt={winnerName.name}
+                      />
+                    </div>
+                    {/* name */}
+                    <p className="card-text" style={{ fontSize: "150%" }}>
+                      <strong>{`${winnerName}`}</strong>
+                    </p>
+                    {/* student id */}
+                    <p className="card-text" style={{ fontSize: "120%" }}>
+                      {`${vote.candidate.studentId}`}
+                    </p>
+                    {/* description */}
+                    <p className="card-text" style={{ width: "100%" }}>
+                      {expandedDescription[vote.candidate.name] ||
+                      vote.candidate.description.length <= 50
+                        ? vote.candidate.description
+                        : vote.candidate.description.slice(0, 50) + "..."}
+                      {vote.candidate.description.length > 30 && (
+                        <a
+                          href="#"
+                          onClick={() =>
+                            handleReadMoreClick(vote.candidate.name)
+                          }
+                        >
+                          {expandedDescription[vote.candidate.name]
+                            ? " Read Less"
+                            : " Read More"}
+                        </a>
+                      )}
+                    </p>
+                    {/* Add other fields as needed */}
+                    <div className="btn-center-container">
+                      <Link
+                        to={`/voting/${vote.categoryId}/${vote.eventId}`}
+                        className="btn btn-outline-success"
+                      >
+                        View Details
+                      </Link>
+                    </div>
                   </div>
                 </div>
               </div>
