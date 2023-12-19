@@ -179,16 +179,14 @@ function EditPosition() {
 
       const startDateTime = new Date(startDateAndTime).getTime() / 1000;
       const endDateTime = new Date(endDateAndTime).getTime() / 1000;
+      const event = await contract.methods
+        .getEventById(selectedCategoryId, eventId)
+        .call();
+      event.eventName = positionName;
+      event.startDateTime = startDateTime;
+      event.endDateTime = endDateTime;
 
-      await contract.methods
-        .updateEvent(
-          selectedCategoryId,
-          eventId,
-          positionName,
-          startDateTime,
-          endDateTime
-        )
-        .send({ from: accounts[0] });
+      await contract.methods.updateEvent(event).send({ from: accounts[0] });
 
       Swal("Success!", "Position updated successfully.", "success");
     } catch (error) {
