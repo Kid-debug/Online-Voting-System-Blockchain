@@ -97,47 +97,6 @@ const sendEmail = async (req, res) => {
   await sendMail(req.body.email, mailSubject, content);
 };
 
-const sendEmailByAddAdmin = async (req, res) => {
-  const mailSubject = "Your account has been registered by Super Admin";
-  const content =
-    "<h2>Hi, " +
-    req.body.email +
-    "!</h2>" +
-    "<p>We are excited to inform you that your account has been successfully registered by our Super Admin.</p>" +
-    "<p>Welcome aboard! As a registered admin, you now have access to a range of features and functionalities within our system.</p>" +
-    "<p>Thank you for joining our system. We look forward to your active participation!</p>" +
-    "<p>To proceed with your login, click the following link:</p>" +
-    "<p><a href='http://localhost:5173'>http://localhost:5173</a><p><br>" +
-    "<p>If you have any questions or need assistance, feel free to reach out to our support team at:</p>" +
-    "<p><strong>nghs-wm20@student.tarc.edu.my</strong> or <strong>woonzl-wm20@student.tarc.edu.my</strong></p><br>" +
-    "<p>Sincerely,</p><br>" +
-    "<p>Hooi Seng & Zhong Liang</p>\n" +
-    "<p>Online Voting System</p>";
-  await sendMail(req.body.email, mailSubject, content);
-};
-
-const sendEmailByRemoveAdmin = async (req, res) => {
-  //for updating the email, then will send this to the previous email and remind them
-  const mailSubject =
-    "Your account has been permanently removed by Super Admin";
-  const content =
-    "<h2>Your account has been permanently removed by our Super Admin.</h2>" +
-    "<p>You have been removed from using the University Campus Voting System for the following reasons:</p><br>" +
-    "<ul style='font-size: 14px;'>" +
-    "<b><li>Prolonged inactivity or failure to perform administrative duties.</li>" +
-    "<li>Failure to comply with system policies and guidelines.</li>" +
-    "<li>No longer actively participating in any voting processes.</li>" +
-    "<li>Misuse of administrative privileges.</li>" +
-    "</ul>" +
-    "<br>" +
-    "<p>If you have any questions or need assistance, feel free to reach out to our support team at:</p>" +
-    "<p><strong>nghs-wm20@student.tarc.edu.my</strong> or <strong>woonzl-wm20@student.tarc.edu.my</strong></p><br>" +
-    "<p>Sincerely,</p><br>" +
-    "<p>Hooi Seng & Zhong Liang</p>\n" +
-    "<p>Online Voting System</p>";
-  await sendMail(req.body.email, mailSubject, content);
-};
-
 const sendEmailByUnBanned = async (req, res) => {
   const mailSubject = "Your Account has been unbanned";
   const content =
@@ -565,16 +524,13 @@ const forgetPassword = async (req, res) => {
   // Prepare the email content
   const content =
     "<p>We heard that you lost your password.</p>\n" +
-    "<p>Don't worry. Please click the following link and enter the following code to change your password:</p>\n" +
+    "<p>Don't worry. Please click the following link and enter the following code to reset your password:</p>\n" +
     "<p><a href='http://localhost:5173/reset-password/" +
     req.body.randomToken +
     "'>http://localhost:5173/reset-password/" +
     req.body.randomToken +
     "</a></p>\n" +
-    "<p>Code:" +
-    req.body.code +
-    "</p>\n" +
-    "<p>Please be reminded that the link is valid for 24 hours</p>\n" +
+    "<p>Please be reminded that the link is one-time used only!</p>\n" +
     "<p>If you did not request for password reset, please ignore this email.</p>\n" +
     "<p>Thank you.</p>\n" +
     "<br><br><br>" +
@@ -782,6 +738,4 @@ module.exports = {
   sendEmail,
   sendEmailByBanned,
   sendEmailByUnBanned,
-  sendEmailByAddAdmin,
-  sendEmailByRemoveAdmin,
 };
