@@ -50,7 +50,6 @@ contract VotingSystem {
         uint256 categoryId;
         uint256 eventId;
         uint256 votedCandidateId;
-        uint256 votedCandidateId;
         bool voted;
     }
 
@@ -82,455 +81,41 @@ contract VotingSystem {
 
     constructor() {
         owner = msg.sender;
-        // addAdmin("superadmin@gmail.com", "SuperAdmin!123", "S");
-
-        // Hard code data for report and dashboard testing
-        addCategory("FOCS 2021");
-        addCategory("FAFB 2021");
-        addCategory("FOCS 2022");
-        addCategory("FAFB 2022");
-
-        addEvent(1, "Event 1 - 2021", "aaa", 1638345600, 1638432000);
-        addCandidateToEvent(1, 1, "Candidate 1", "Description 1", 123, "image1.jpg");
-        addCandidateToEvent(1, 1, "Candidate 2", "Description 2", 456, "image2.jpg");
-        addCandidateToEvent(1, 1, "Candidate 3", "Description 3", 789, "image3.jpg");
-        addVoteCountIn(1,1,1);
-        addVoteCountIn(1,1,2);
-        addVoteCountIn(1,1,3);
-        addVoteCountIn(1,1,2);
-        addVoteCountIn(1,1,3);
-        addVoteCountIn(1,1,3);
-
-        addEvent(1, "Event 2 - 2021", "aaa", 1638345605, 1638432008);
-        addCandidateToEvent(1, 2, "Candidate 1", "Description 1", 555, "image4.jpg");
-        addCandidateToEvent(1, 2, "Candidate 2", "Description 2", 777, "image5.jpg");
-        addVoteCountIn(1,1,4);
-        addVoteCountIn(1, 2, 4); // Corrected event and candidate IDs
-        addVoteCountIn(1, 2, 5); // Corrected event and candidate IDs
+        addVoter("", "superadmin@gmail.com", "SuperAdmin!123", "S", "");
     }
 
-    //for report
-    function getEventsByCategory(uint256 _categoryId) public view returns (Event[] memory) {
-        require(categories[_categoryId].categoryId != 0, "Category does not exist");
-        return categories[_categoryId].events;
-    }
-
-    function getCandidatesByEvent(uint256 _categoryId, uint256 _eventId) public view returns (Candidate[] memory) {
-        require(categories[_categoryId].categoryId != 0, "Category does not exist");
-        
-        for (uint256 i = 0; i < categories[_categoryId].events.length; i++) {
-            if (categories[_categoryId].events[i].eventId == _eventId) {
-                return categories[_categoryId].events[i].candidates;
-            }
-        }
-        
-        revert("Event does not exist");
-    }
-
-    function addVoteCountIn(
-        uint256 _categoryId,
-        uint256 _eventId,
-        uint256 _candidateId
-    ) internal {
-        // get the events inside the categories
-        Event[] storage eventsFound = categories[_categoryId].events;
-
-        // find the event with param
-        for (uint256 i = 0; i < eventsFound.length; i++) {
-            if (eventsFound[i].eventId == _eventId) {
-                // get the candidate inside the event
-                Candidate[] storage candidatesFound = eventsFound[i].candidates;
-                // find the candidate
-                for (uint256 j = 0; j < candidatesFound.length; j++) {
-                    if (candidatesFound[j].id == _candidateId) {
-                        // found the candidate and plus 1 at the voteCount
-                        candidatesFound[j].voteCount += 1;
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    function getPositionVotes(uint256 categoryId, uint256 year) 
-        public 
-        view 
-        returns (uint256[] memory, uint256[] memory) 
-    {
-        // Initialize dynamic arrays for event IDs and vote counts
-        uint256[] memory eventIds = new uint256[](categories[categoryId].events.length);
-        uint256[] memory voteCounts = new uint256[](categories[categoryId].events.length);
-        uint256 count = 0;
-
-        // Iterate over the events of the given category
-        for (uint256 i = 0; i < categories[categoryId].events.length; i++) {
-            Event storage currentEvent = categories[categoryId].events[i];
-            if (getYear(currentEvent.startDateTime) == year) {
-                uint256 totalVotes = 0;
-
-                // Calculate the total votes for each candidate in the event
-                for (uint256 j = 0; j < currentEvent.candidates.length; j++) {
-                    totalVotes += currentEvent.candidates[j].voteCount;
-                }
-
-                eventIds[count] = currentEvent.eventId;
-                voteCounts[count] = totalVotes;
-                count++;
-            }
-        }
-
-        // Resize arrays to the actual count of events in the specified year
-        uint256[] memory finalEventIds = new uint256[](count);
-        uint256[] memory finalVoteCounts = new uint256[](count);
-        for (uint256 i = 0; i < count; i++) {
-            finalEventIds[i] = eventIds[i];
-            finalVoteCounts[i] = voteCounts[i];
-        }
-
-        return (finalEventIds, finalVoteCounts);
-    }
-
-    function getEventById(uint256 _categoryId, uint256 _eventId)
-        public
-        view
-        returns (Event memory)
-    {
-        // Check if the category exists
-        require(categories[_categoryId].categoryId != 0, "Category does not exist");
-
-        // Find the event
-        bool eventExists = false;
-        uint256 eventIndex;
-        for (uint256 i = 0; i < categories[_categoryId].events.length; i++) {
-            if (categories[_categoryId].events[i].eventId == _eventId) {
-                eventExists = true;
-                eventIndex = i;
-                break;
-            }
-        }
-        require(eventExists, "Event does not exist");
-
-        // Return the event details
-        return categories[_categoryId].events[eventIndex];
-    }
-
-    function getCategoriesInYear(uint256 year) public view returns (Category[] memory) {
-        uint256 count = 0;
-        for (uint256 i = 1; i <= categoryCount; i++) {
-            if (isCategoryInYear(i, year)) {
-                count++;
-            }
-        }
-
-        Category[] memory categoriesInYear = new Category[](count);
-        uint256 index = 0;
-        for (uint256 i = 1; i <= categoryCount; i++) {
-            if (isCategoryInYear(i, year)) {
-                categoriesInYear[index] = categories[i];
-                index++;
-            }
-        }
-
-        return categoriesInYear;
-    }
-
-    function isCategoryInYear(uint256 categoryId, uint256 year) internal view returns (bool) {
-        for (uint256 i = 0; i < categories[categoryId].events.length; i++) {
-            if (getYear(categories[categoryId].events[i].startDateTime) == year) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    function getCategoryYearlyVoteCount(uint256 _categoryId, uint256 _year) public view returns (uint256) {
-        uint256 totalVotes = 0;
-        for (uint256 i = 0; i < categories[_categoryId].events.length; i++) {
-            uint256 eventStart = categories[_categoryId].events[i].startDateTime;
-            uint256 eventYear = getYear(eventStart);
-            if (eventYear == _year) {
-                for (uint256 j = 0; j < categories[_categoryId].events[i].candidates.length; j++) {
-                    totalVotes += categories[_categoryId].events[i].candidates[j].voteCount;
-                }
-            }
-        }
-        return totalVotes;
-    }
-
-    function getYear(uint256 _timestamp) internal pure returns (uint256) {
-        uint256 SECONDS_PER_YEAR = 31536000; // Average seconds in a year, accounting for leap years
-        uint256 EPOCH_YEAR = 1970; // Start of UNIX epoch time
-
-        uint256 year = EPOCH_YEAR + _timestamp / SECONDS_PER_YEAR;
-        return year;
-    }
-
-        function getAvailableYears() public view returns (uint256[] memory) {
-        // Using a dynamic array to collect unique years
-        uint256[] memory uniqueYears = new uint256[](categoryCount * 10); // Adjust size as needed
-        uint256 count = 0;
-
-        // Iterate over all categories
-        for (uint256 i = 1; i <= categoryCount; i++) {
-            // Iterate over all events in each category
-            for (uint256 j = 0; j < categories[i].events.length; j++) {
-                uint256 eventYear = getYear(categories[i].events[j].startDateTime);
-
-                // Check if this year is already in the uniqueYears array
-                bool yearExists = false;
-                for (uint256 k = 0; k < count; k++) {
-                    if (uniqueYears[k] == eventYear) {
-                        yearExists = true;
-                        break;
-                    }
-                }
-
-                // If not, add it
-                if (!yearExists) {
-                    uniqueYears[count] = eventYear;
-                    count++;
-                }
-            }
-        }
-
-        // Copy the unique years into a new array of the correct size
-        uint256[] memory output = new uint256[](count);
-        for (uint256 i = 0; i < count; i++) {
-            output[i] = uniqueYears[i];
-        }
-
-        return output;
-    } 
-
-    /* //for show candidate in candidate list
-    function getEventById(uint256 _categoryId, uint256 _eventId)
-        public
-        view
-        returns (Event memory)
-    {
-        // Check if the category exists
-        require(categories[_categoryId].categoryId != 0, "Category does not exist");
-
-        // Find the event
-        bool eventExists = false;
-        uint256 eventIndex;
-        for (uint256 i = 0; i < categories[_categoryId].events.length; i++) {
-            if (categories[_categoryId].events[i].eventId == _eventId) {
-                eventExists = true;
-                eventIndex = i;
-                break;
-            }
-        }
-        require(eventExists, "Event does not exist");
-
-        // Return the event details
-        return categories[_categoryId].events[eventIndex];
-    } */
-
-    /* 
-    //for voter and admin
-    function addResetPasswordRequest(string memory _email, string memory _token, uint256 _code) public {
-        // Create and store the new reset password request
-        resetPasswords[_email] = ResetPassword({
-            email: _email,
-            token: _token,
-            code: _code,
-            createdTime: block.timestamp // Use the current block timestamp
-        });
-    }
-
-    function isRecentResetRequest(string memory _email) public view returns (bool) {
-        ResetPassword memory request = resetPasswords[_email];
-        if (request.createdTime == 0) {
-            return false; // No request exists
-        }
-        uint256 age = block.timestamp - request.createdTime;
-        return age < 24 hours;
-    }
-
-    function isResetPasswordTokenValid(string memory _token) public view returns (bool, string memory) {
-        // Ensure the token string is not empty
-        require(bytes(_token).length > 0, "Token is empty");
-
-        // Iterate through all reset password requests
-        for (uint256 i = 1; i <= voterCount; i++) {
-            // Check if the token matches and is not expired (24 hours validity)
-            if (keccak256(bytes(resetPasswords[voters[i].email].token)) == keccak256(bytes(_token))
-                && (block.timestamp - resetPasswords[voters[i].email].createdTime) < 24 hours) {
-                return (true, voters[i].email); // Valid token found
-            }
-        }
-        // No valid token found, return false and empty string
-        return (false, "");
-    }
-
-    function isVerificationCodeValid(uint256 _userInputCode) public view returns (bool) {
-        // Iterate through all reset password requests
-        for (uint256 i = 1; i <= voterCount; i++) {
-            ResetPassword memory resetRequest = resetPasswords[voters[i].email];
-            // Check if the input code matches the stored code and the request is not expired
-            if (resetRequest.code == _userInputCode && (block.timestamp - resetRequest.createdTime) < 24 hours) {
-                return true; // Verification code is valid and not expired
-            }
-        }
-        return false; // No valid verification code found
-    }
-
-    function updateUserPassword(string memory _email, string memory _password) public {
-        require(checkUserExistByEmail(_email), "User does not exist.");
-
-        // Ensure there is a recent reset password request
-        require(isRecentResetRequest(_email), "No recent reset request found.");
-
-        bytes32 hashedPassword = keccak256(abi.encodePacked(_password));
-        for (uint256 i = 1; i <= voterCount; i++) {
-            if (keccak256(bytes(_email)) == keccak256(bytes(voters[i].email))) {
-                voters[i].password = hashedPassword;
-
-                // Delete the reset password request after updating the password
-                delete resetPasswords[_email];
-            }
-        }
-    }
-
-    function addAdmin(
-        string memory _email,
-        string memory _password,
-        string memory _role
+    function addVoter(
+         string memory _key,
+         string memory _email,
+         string memory _password,
+         string memory _role,
+         string memory _token
     ) public {
-        // Check if the admin with the given email already exists
-        for (uint256 i = 1; i <= voterCount; i++) {
+         for (uint256 i = 1; i <= voterCount; i++) {
             require(
                 keccak256(bytes(_email)) != keccak256(bytes(voters[i].email)),
-                "Admin with this email already exists"
+                "User already exists"
             );
-        }
+         }
 
-        // Increment the voterCount to use as the new admin's ID
-        voterCount += 1;
+         // total category plus 1, use it as the category's id
+         voterCount += 1;
 
-        // Hash the password
-        bytes32 hashedPassword = keccak256(abi.encodePacked(_password));
+         bytes32 hashedPassword = keccak256(abi.encodePacked(_password));
 
-        // Create and store the new admin
-        Voter storage newAdmin = voters[voterCount];
-        newAdmin.id = voterCount;
-        newAdmin.email = _email;
-        newAdmin.password = hashedPassword;
-        newAdmin.role = _role;
-        newAdmin.status = 1; 
+         // add the category details in the category list
+         Voter storage voter = voters[voterCount];
+         voter.id = voterCount;
+         voter.key = _key;
+         voter.email = _email;
+         voter.password = hashedPassword;
+         voter.role = _role;
+         voter.status = 0;
+         voter.token = _token;
 
-    // Emit the event for adding a new voter/admin
-    emit VoterAdded(voterCount, _email);
+         // emit the category added event
+         emit VoterAdded(voterCount, _key);
     }
-
-    function getAllAdmin() public view returns (Voter[] memory) {
-        // Create an array to store all admins
-        Voter[] memory adminFound = new Voter[](voterCount);
-        uint256 count = 0;
-
-        // Iterate through all voters
-        for (uint256 i = 1; i <= voterCount; i++) {
-            // Check if the voter has the role "A" (Admin) or "S" (SuperAdmin)
-            if (
-                keccak256(bytes(voters[i].role)) == keccak256(bytes("A")) ||
-                keccak256(bytes(voters[i].role)) == keccak256(bytes("S"))
-            ) {
-                // Add the admin to the array
-                adminFound[count] = voters[i];
-                count += 1;
-            }
-        }
-
-        return adminFound;
-    }
-
-    function getAdminById(uint256 _id) public view returns (Voter memory) {
-        return voters[_id];
-    }
-
-    function editAdminEmailPassword(
-        uint256 _adminId, 
-        string memory _newEmail, 
-        string memory _newPassword
-    ) public {
-        // Check if the admin exists
-        require(_adminId > 0 && _adminId <= voterCount, "Admin does not exist.");
-        
-        // Check for email uniqueness if the email is being changed
-        if(keccak256(bytes(_newEmail)) != keccak256(bytes(voters[_adminId].email))) {
-            for (uint256 i = 1; i <= voterCount; i++) {
-                require(
-                    keccak256(bytes(_newEmail)) != keccak256(bytes(voters[i].email)),
-                    "Email already in use."
-                );
-            }
-        }
-
-        voters[_adminId].email = _newEmail;
-        
-        if(bytes(_newPassword).length > 0) {
-            voters[_adminId].password = keccak256(abi.encodePacked(_newPassword));
-        }
-    }
-
-    function editUserStatus(uint256 _adminId, uint256 _newStatus) public {
-        require(_adminId > 0 && _adminId <= voterCount, "Admin or Voter does not exist.");
-
-        require(_newStatus <= 2, "Invalid status.");
-
-        voters[_adminId].status = _newStatus;
-    }
-
-    function getAllVoter() public view returns (Voter[] memory) {
-        Voter[] memory voterFound = new Voter[](voterCount);
-        uint256 count = 0;
-
-        // Iterate through all voters
-        for (uint256 i = 1; i <= voterCount; i++) {
-            // Check if the voter has the role "U" (Voter) 
-            if (
-                keccak256(bytes(voters[i].role)) == keccak256(bytes("U"))
-            ) {
-                voterFound[count] = voters[i];
-                count += 1;
-            }
-        }
-
-        return voterFound;
-    }
-    function addVoter(
-        string memory _key,
-        string memory _email,
-        string memory _password,
-        string memory _role,
-        string memory _token
-    ) public {
-        for (uint256 i = 1; i <= voterCount; i++) {
-            require(
-                keccak256(bytes(_key)) != keccak256(bytes(voters[i].key)),
-                "Voter already exists"
-            );
-        }
-
-        // total category plus 1, use it as the category's id
-        voterCount += 1;
-
-    //     bytes32 hashedPassword = keccak256(abi.encodePacked(_password));
-
-    //     // add the category details in the category list
-    //     Voter storage voter = voters[voterCount];
-    //     voter.id = voterCount;
-    //     voter.key = _key;
-    //     voter.email = _email;
-    //     voter.password = hashedPassword;
-    //     voter.role = _role;
-    //     voter.status = 0;
-    //     voter.token = _token;
-
-    //     // emit the category added event
-    //     emit VoterAdded(voterCount, _key);
-    // }
 
     function loginVoter(string memory _email, string memory _password)
         public
@@ -595,15 +180,17 @@ contract VotingSystem {
         for (uint256 i = 1; i <= voterCount; i++) {
             if (keccak256(bytes(_key)) == keccak256(bytes(voters[i].key))) {
                 voters[i].password = hashedPassword;
+                delete voters[i].token;
             }
         }
-    }
+    } 
 
     function verifyVoterAccount(string memory _token) public returns (bool) {
         require(voters[1].id != 0, "No voter in the list!");
         for (uint256 i = 1; i <= voterCount; i++) {
             if (keccak256(bytes(_token)) == keccak256(bytes(voters[i].token))) {
                 voters[i].status = 1;
+                delete voters[i].token;
                 return true;
             }
         }
@@ -640,19 +227,33 @@ contract VotingSystem {
         }
         return false;
     } 
-    */
 
-    //CRUD
-    function addCategory(string memory _categoryName) public {
-        // check if the category is exist
-        for (uint256 i = 1; i <= categoryCount; i++) {
-            require(
-                keccak256(bytes(_categoryName)) !=
-                    keccak256(bytes(categories[i].categoryName)),
-                "Category already exists"
-            );
+    function getAllVoter() public view returns (Voter[] memory) {
+        Voter[] memory allVoters = new Voter[](voterCount);
+        for (uint256 i = 1; i <= voterCount; i++) {
+            allVoters[i - 1] = voters[i];
         }
+        return allVoters;
+    }
 
+    function editUserStatus(uint256 _id, uint256 _status) public {
+        require(_id > 0 && _id <= voterCount, "User does not exist.");
+
+        voters[_id].status = _status;
+    } 
+
+    // Function to update the token of a voter based on their email
+    function updateVoterTokenByEmail(string memory _email, string memory _newToken) public {
+        for (uint256 i = 1; i <= voterCount; i++) {
+            // Update the token if the email matches
+            if (keccak256(bytes(_email)) == keccak256(bytes(voters[i].email))) {
+                voters[i].token = _newToken;
+                break;
+            }
+        }
+    }
+
+    function addCategory(string memory _categoryName) public {
         // total category plus 1, use it as the category's id
         categoryCount += 1;
 
@@ -664,46 +265,39 @@ contract VotingSystem {
 
         // emit the category added event
         emit CategoryAdded(categoryCount, _categoryName);
-    }
+    } 
 
-    /* function updateCategory(uint256 _categoryId, string memory _newCategoryName) public {
-        // Check if the category exists
-        require(
-            categories[_categoryId].categoryId != 0,
-            "Category does not exist"
+    function updateCategory(uint256 _categoryId, string memory _categoryName) public {
+            categories[_categoryId].categoryName = _categoryName;
+    } 
+
+    function deleteCategory(uint256 _categoryId) public {
+        // If no associated events, candidates, or vote events, delete the category
+        delete categories[_categoryId];
+    } 
+
+    function getAllVotedHistory(string memory _userKey) public view returns (voteEventStruct[] memory) {
+        // Check if there are any candidates associated with the category
+        voteEventStruct[] memory voteEventFound = new voteEventStruct[](
+            voteEventCount
         );
-
-        // Check if the new category name is different from the existing name in the list
-        // and not the same as the current category name being updated
-        for (uint256 i = 1; i <= categoryCount; i++) {
-            if (i != _categoryId) {
-                require(
-                    keccak256(bytes(_newCategoryName)) !=
-                        keccak256(bytes(categories[i].categoryName)),
-                    "Category name already exists"
-                );
+        uint256 count = 0;
+        for (uint256 i = 1; i <= voteEventCount; i++) {
+            if ( keccak256(bytes(voteEvents[i].voterKey)) ==  keccak256(bytes(_userKey))) {
+                // Store the matching vote event in the array
+                voteEventFound[count] = voteEvents[i];
+                count += 1;
             }
         }
 
-        // Update the category name
-        categories[_categoryId].categoryName = _newCategoryName;
+        // Resize the array to remove any unused slots
+        assembly {
+            mstore(voteEventFound, count)
+        }
+
+        // Return the dynamic array of matching vote events
+        return voteEventFound;
     }
-
-    // function deleteCategory(uint256 _categoryId) public {
-    //     require(
-    //         categories[_categoryId].categoryId != 0,
-    //         "Category does not exist"
-    //     );
-
-    //     // Check if there are any events associated with the category
-    //     require(
-    //         categories[_categoryId].events.length == 0,
-    //         "Cannot delete category with events"
-    //     );
-
-        // If no associated events, candidates, or vote events, delete the category
-        delete categories[_categoryId];
-    } */
 
     function addEvent(
         uint256 _categoryId,
@@ -712,17 +306,6 @@ contract VotingSystem {
         uint256 _startDateTime,
         uint256 _endDateTime
     ) public {
-        // check if the category has exists
-        require(
-            categories[_categoryId].categoryId != 0,
-            "Category has not exists"
-        );
-
-        require(
-            isEventExists(_categoryId, _eventName) == false,
-            "Event already exists"
-        );
-
         // find out the category in list by using the paramerter category name
         Category storage category = categories[_categoryId];
 
@@ -739,6 +322,7 @@ contract VotingSystem {
         newEvent.endDateTime = _endDateTime;
     }
 
+/*
     function isEventExists(uint256 _categoryId, string memory _eventName)
         public
         view
@@ -762,7 +346,7 @@ contract VotingSystem {
         }
         // Event not found in the specified category
         return false;
-    }
+    } */
 
     // function isEventStart(
     //     uint256 _categoryId,
@@ -798,86 +382,36 @@ contract VotingSystem {
     //     return false;
     // }
 
-    /* function updateEventName(
+    function updateEventDetails(
         uint256 _categoryId,
         uint256 _eventId,
-        string memory _newEventName,
-        string memory _newEventDesc,
-        uint256 _newStartDateTime,
-        uint256 _newEndDateTime
+        string memory _eventName,
+        string memory _eventDesc,
+        uint256 _startDateTime,
+        uint256 _endDateTime
     ) public {
-        // Check if the category exists
-        require(categories[_categoryId].categoryId != 0, "Category does not exist");
-
-        // Find the event
-        bool eventExists = false;
-        uint256 eventIndex;
         for (uint256 i = 0; i < categories[_categoryId].events.length; i++) {
             if (categories[_categoryId].events[i].eventId == _eventId) {
-                eventExists = true;
-                eventIndex = i;
+                Event storage eventToUpdate = categories[_categoryId].events[i];
+                // Update the event details
+                eventToUpdate.eventName = _eventName;
+                eventToUpdate.eventDesc = _eventDesc;
+                eventToUpdate.startDateTime = _startDateTime;
+                eventToUpdate.endDateTime = _endDateTime;
                 break;
             }
         }
-        require(eventExists, "Event does not exist");
-
-        // Check if the new event name is not the same as other events in the category
-        for (uint256 i = 0; i < categories[_categoryId].events.length; i++) {
-            if (
-                i != eventIndex &&
-                keccak256(bytes(categories[_categoryId].events[i].eventName)) ==
-                keccak256(bytes(_newEventName))
-            ) {
-                revert("Event name already exists");
-            }
-        }
-
-        // Check if the event is not in progress (start date time is in the future)
-        require(
-            !isEventStart(_categoryId, categories[_categoryId].events[eventIndex].eventName, block.timestamp),
-            "Cannot edit event when voting has started"
-        );
-
-        // Update the event details
-        categories[_categoryId].events[eventIndex].eventName = _newEventName;
-        categories[_categoryId].events[eventIndex].eventDesc = _newEventDesc;
-        categories[_categoryId].events[eventIndex].startDateTime = _newStartDateTime;
-        categories[_categoryId].events[eventIndex].endDateTime = _newEndDateTime;
     }
 
     function deleteEvent(uint256 _categoryId, uint256 _eventId) public {
-        // Check if the category exists
-        require(categories[_categoryId].categoryId != 0, "Category does not exist");
-
-        // Find the event
-        bool eventExists = false;
-        uint256 eventIndex;
-        string memory eventName;
         for (uint256 i = 0; i < categories[_categoryId].events.length; i++) {
             if (categories[_categoryId].events[i].eventId == _eventId) {
-                eventExists = true;
-                eventIndex = i;
-                eventName = categories[_categoryId].events[i].eventName;
+                categories[_categoryId].events[i] = categories[_categoryId].events[categories[_categoryId].events.length - 1];
+                categories[_categoryId].events.pop();
                 break;
             }
         }
-        require(eventExists, "Event does not exist");
-
-        // Check if voting has not started using isEventStart
-        require(
-            isEventExists(_event.categoryId, _event.eventId),
-            "Event does not exist!"
-        );
-
-        // Check if there are any candidates associated with the event
-        require(categories[_categoryId].events[eventIndex].candidates.length == 0, "Cannot delete event with candidates");
-
-        // Delete the event from the category's event list
-        for (uint256 i = eventIndex; i < categories[_categoryId].events.length - 1; i++) {
-            categories[_categoryId].events[i] = categories[_categoryId].events[i + 1];
-        }
-        categories[_categoryId].events.pop();
-    } */
+    }
 
     function updateEvent(Event memory _event) public {
         // check if the category is exist
@@ -886,7 +420,7 @@ contract VotingSystem {
             "Category does not exists"
         );
         require(
-            isEventExistsById(_event.categoryId, _event.eventId),
+            isEventExists(_event.categoryId, _event.eventId),
             "Event does not exist!"
         );
         // add the category details in the category list
@@ -906,22 +440,6 @@ contract VotingSystem {
         uint256 _studentId,
         string memory _imageFileName
     ) public {
-        require(
-            categories[_categoryId].categoryId != 0,
-            "Category does not exist"
-        );
-        require(isEventExists(_categoryId, _eventId), "Event does not exist");
-        require(
-            !isCandidateExistsInEvent(_categoryId, _eventId, _studentId),
-            "Candidate already exists"
-        );
-
-        // Check if voting has started for the specified event
-        //require(
-            //!isEventStart(_categoryId, categories[_categoryId].events[_eventId - 1].eventName, block.timestamp),
-            //"Voting has already started, cannot add new candidates"
-        //);
-
         candidateCount += 1;
 
         // Create a new candidate
@@ -949,9 +467,9 @@ contract VotingSystem {
 
         // Mark the image file name as used
         usedImageFileNames[_imageFileName] = true;
-    }
+    } 
 
-    /* function updateCandidate(
+    function updateCandidateDetails(
         uint256 _id,
         string memory _name,
         string memory _description,
@@ -960,110 +478,47 @@ contract VotingSystem {
         uint256 _eventId,
         string memory _imageFileName
     ) public {
-        bool eventExists = false;
-        uint256 eventIndex;
-        string memory eventName;
         for (uint256 i = 0; i < categories[_categoryId].events.length; i++) {
             if (categories[_categoryId].events[i].eventId == _eventId) {
-                eventExists = true;
-                eventIndex = i;
-                eventName = categories[_categoryId].events[i].eventName;
-                break;
+                Event storage myEvent = categories[_categoryId].events[i];
+
+                for (uint256 j = 0; j < myEvent.candidates.length; j++) {
+                    if (myEvent.candidates[j].id == _id) {
+                        Candidate storage candidateToUpdate = myEvent.candidates[j];
+                        candidateToUpdate.name = _name;
+                        candidateToUpdate.description = _description;
+                        candidateToUpdate.studentId = _studentId;
+
+                        if (bytes(_imageFileName).length > 0 && keccak256(bytes(candidateToUpdate.imageFileName)) != keccak256(bytes(_imageFileName))) {
+                            if (bytes(candidateToUpdate.imageFileName).length > 0) {
+                                usedImageFileNames[candidateToUpdate.imageFileName] = false;
+                            }
+                            candidateToUpdate.imageFileName = _imageFileName;
+                            usedImageFileNames[_imageFileName] = true;
+                        }
+                        return;
+                    }
+                }
             }
-        }
-
-        // require(eventExists, "Event does not exist");
-
-        // Check if voting has not started using isEventStart
-        require(
-            !isEventStart(_categoryId, eventName, block.timestamp),
-            "Cannot edit event when voting has started"
-        );
-
-        bool candidateExists = false;
-        uint256 candidateIndex;
-        for (uint256 i = 0; i < categories[_categoryId].events[eventIndex].candidates.length; i++) {
-            if (categories[_categoryId].events[eventIndex].candidates[i].id == _id) {
-                candidateExists = true;
-                candidateIndex = i;
-                break;
-            }
-        }
-        
-        // require(candidateExists, "Candidate does not exist");
-
-        for (uint256 j = 0; j < categories[_categoryId].events[eventIndex].candidates.length; j++) {
-            if (j != candidateIndex) {
-                require(
-                    _studentId != categories[_categoryId].events[eventIndex].candidates[j].studentId,
-                    "This student ID already exists"
-                );
-            }
-        }
-
-        // Update candidate details
-        Candidate storage candidateToUpdate = categories[_categoryId].events[eventIndex].candidates[candidateIndex];
-
-        candidateToUpdate.name = _name;
-        candidateToUpdate.description = _description;
-        candidateToUpdate.studentId = _studentId;
-
-        // Update image file name only if a new image file name is provided
-        if (bytes(_imageFileName).length > 0) {
-            // Mark the old image file name as not used
-            usedImageFileNames[candidateToUpdate.imageFileName] = false;
-
-            // Update the image file name
-            candidateToUpdate.imageFileName = _imageFileName;
-
-            // Mark the new image file name as used
-            usedImageFileNames[_imageFileName] = true;
         }
     }
 
-
     function deleteCandidate(uint256 _categoryId, uint256 _eventId, uint256 _candidateId) public {
-        require(categories[_categoryId].categoryId != 0, "Category does not exist");
-
-        // Find the event
-        bool eventExists = false;
-        uint256 eventIndex;
         for (uint256 i = 0; i < categories[_categoryId].events.length; i++) {
             if (categories[_categoryId].events[i].eventId == _eventId) {
-                eventExists = true;
-                eventIndex = i;
-                break;
+                Event storage myEvent = categories[_categoryId].events[i];
+
+                for (uint256 j = 0; j < myEvent.candidates.length; j++) {
+                    if (myEvent.candidates[j].id == _candidateId) {
+                        myEvent.candidateCount--;
+                        myEvent.candidates[j] = myEvent.candidates[myEvent.candidates.length - 1];
+                        myEvent.candidates.pop();
+                        return;
+                    }
+                }
             }
         }
-        require(eventExists, "Event does not exist");
-
-        Event storage eventToDeleteFrom = categories[_categoryId].events[eventIndex];
-
-        require(
-            !isEventStart(_categoryId, eventToDeleteFrom.eventName, block.timestamp),
-            "Cannot delete candidate after voting has started"
-        );
-
-        bool candidateFound = false;
-        uint256 candidateIndex;
-        for (uint256 i = 0; i < eventToDeleteFrom.candidates.length; i++) {
-            if (eventToDeleteFrom.candidates[i].id == _candidateId) {
-                candidateIndex = i;
-                candidateFound = true;
-                break;
-            }
-        }
-        require(candidateFound, "Candidate does not exist");
-
-        // Mark the image file name as not used
-        usedImageFileNames[eventToDeleteFrom.candidates[candidateIndex].imageFileName] = false;
-
-        // If the candidate was found, remove the candidate from the list
-        for (uint256 i = candidateIndex; i < eventToDeleteFrom.candidates.length - 1; i++) {
-            eventToDeleteFrom.candidates[i] = eventToDeleteFrom.candidates[i + 1];
-        }
-        eventToDeleteFrom.candidates.pop();
-    } 
+    }
 
     function isImageFileNameUsed(string memory _imageFileName)
         public
@@ -1071,7 +526,7 @@ contract VotingSystem {
         returns (bool)
     {
         return usedImageFileNames[_imageFileName];
-    }
+    } 
 
     function isCandidateExistsInEvent(
         uint256 _categoryId,
@@ -1099,7 +554,7 @@ contract VotingSystem {
 
         // Event not found in the specified category
         return false;
-    } 
+    }
 
     function isCandidateExistsInEventById(
         uint256 _categoryId,
@@ -1150,9 +605,9 @@ contract VotingSystem {
 
         // Event not found in the specified category
         return false;
-    } 
+    }
 
-    /* function getAllCategoryEvent(uint256 _categoryId)
+    function getAllCategoryEvent(uint256 _categoryId)
         public
         view
         returns (Event[] memory foundEvent)
@@ -1169,7 +624,7 @@ contract VotingSystem {
         }
 
         return (eventsFound);
-    } */
+    }
 
     function getAllCandidatesInEvent(uint256 _categoryId, uint256 _eventId)
         public
@@ -1195,7 +650,7 @@ contract VotingSystem {
                 return (candidatesFound);
             }
         }
-    } 
+    }
 
     function getAllCandidates() public view returns (Candidate[] memory) {
         Candidate[] memory candidatesFound = new Candidate[](candidateCount);
@@ -1213,7 +668,7 @@ contract VotingSystem {
         }
 
         return candidatesFound;
-    } 
+    }
 
     function getAllCategory() public view returns (Category[] memory) {
         //Candidate[] memory candidatesFound = new Candidate[](candidateCount);
@@ -1232,7 +687,7 @@ contract VotingSystem {
         returns (Category memory)
     {
         return categories[_categoryId];
-    } 
+    }
 
     function getAllEvent() public view returns (Event[] memory) {
         // Initialize the array with the correct size
@@ -1250,95 +705,50 @@ contract VotingSystem {
         return eventFound;
     }
 
-    
-    /* function getCandidateById(uint256 _categoryId, uint256 _eventId, uint256 _candidateId)
+    function getEventById(uint256 _categoryId, uint256 _eventId)
+        public
+        view
+        returns (Event memory)
+    {
+        Category memory categoriesFound = categories[_categoryId];
+        Event memory eventFound;
+        // Iterate through all stored structs
+        for (uint256 i = 0; i < categoriesFound.events.length; i++) {
+            if (categoriesFound.events[i].eventId == _eventId) {
+                eventFound = categoriesFound.events[i];
+            }
+        }
+
+        return eventFound;
+    }
+
+
+    function getCandidateById(uint256 _categoryId, uint256 _eventId, uint256 _candidateId)
         public
         view
         returns (Candidate memory)
     {
-        // Check if the category exists
-        require(categories[_categoryId].categoryId != 0, "Category does not exist");
+        Category memory categoryFound = categories[_categoryId];
+        Event memory eventFound;
+        Candidate memory candidateFound;
 
-        // Find the event
-        bool eventExists = false;
-        uint256 eventIndex;
-        for (uint256 i = 0; i < categories[_categoryId].events.length; i++) {
-            if (categories[_categoryId].events[i].eventId == _eventId) {
-                eventExists = true;
-                eventIndex = i;
-                break;
-            }
-        }
-        require(eventExists, "Event does not exist");
-
-        // Find the candidate in the specified event
-        bool candidateExists = false;
-        uint256 candidateIndex;
-        for (uint256 i = 0; i < categories[_categoryId].events[eventIndex].candidates.length; i++) {
-            if (categories[_categoryId].events[eventIndex].candidates[i].id == _candidateId) {
-                candidateExists = true;
-                candidateIndex = i;
-                break;
-            }
-        }
-        require(candidateExists, "Candidate does not exist");
-
-        // Return the candidate details
-        return categories[_categoryId].events[eventIndex].candidates[candidateIndex];
-    }
-
-    function getEventsByDateRange(uint256 _startDateTime, uint256 _endDateTime)
-        public
-        view
-        returns (Event[] memory)
-    {
-        // Declare a dynamic array to store events within the date range
-        Event[] memory eventsInRange;
-
-        // Counter to keep track of the number of events within the date range
-        uint256 count = 0;
-
-        // Loop through all categories and events
-        for (uint256 i = 1; i <= categoryCount; i++) {
-            for (uint256 j = 0; j < categories[i].events.length; j++) {
-                Event storage currentEvent = categories[i].events[j];
-
-                // Check if the event's start date is on or after the specified start date
-                // and the event's end date is on or before the specified end date
-                if (
-                    currentEvent.startDateTime >= _startDateTime &&
-                    currentEvent.endDateTime <= _endDateTime
-                ) {
-                    // Resize the array and add the event
-                    eventsInRange = resizeAndAddEvent(eventsInRange, currentEvent, count);
-                    count++;
+        for (uint256 i = 0; i < categoryFound.events.length; i++) {
+            if (categoryFound.events[i].eventId == _eventId) {
+                eventFound = categoryFound.events[i];
+                for (uint256 j = 0; j < eventFound.candidates.length; j++) {
+                    if (eventFound.candidates[j].id == _candidateId) {
+                        candidateFound = eventFound.candidates[j];
+                        break; // Candidate found, break from the inner loop
+                    }
                 }
+                break; // Event found, break from the outer loop
             }
         }
 
-        return eventsInRange;
+        return candidateFound;
     }
 
-    // Helper function to resize the array and add an event
-    function resizeAndAddEvent(
-        Event[] memory array,
-        Event memory newEvent,
-        uint256 count
-    ) internal pure returns (Event[] memory) {
-        Event[] memory newArray = new Event[](count + 1);
-
-        for (uint256 i = 0; i < count; i++) {
-            newArray[i] = array[i];
-        }
-
-        newArray[count] = newEvent;
-
-        return newArray;
-    } */
-
-    /* 
-    // for voting
-    function vote(
+    /* function vote(
         string memory _voterKey,
         uint256 _candidateId,
         uint256 _categoryId,
@@ -1384,7 +794,6 @@ contract VotingSystem {
             categoryId: _categoryId,
             eventId: _eventId,
             votedCandidateId : _candidateId,
-            votedCandidateId : _candidateId,
             voted: true
         });
 
@@ -1400,13 +809,30 @@ contract VotingSystem {
         emit VoteEvent(_voterKey, concatenatedValues, _candidateId);
     }
 
-     function getCandidateVoteCount(uint256 _candidateId)
-        public
-        view
-        returns (uint256 count)
-    {
-        return candidates[_candidateId].voteCount;
-    } 
+    function addVoteCountIn(
+        uint256 _categoryId,
+        uint256 _eventId,
+        uint256 _candidateId
+    ) internal {
+        // get the events inside the categories
+        Event[] storage eventsFound = categories[_categoryId].events;
+
+        // find the event with param
+        for (uint256 i = 0; i < eventsFound.length; i++) {
+            if (eventsFound[i].eventId == _eventId) {
+                // get the candidate inside the event
+                Candidate[] storage candidatesFound = eventsFound[i].candidates;
+                // find the candidate
+                for (uint256 j = 0; j < candidatesFound.length; j++) {
+                    if (candidatesFound[j].id == _candidateId) {
+                        // found the candidate and plus 1 at the voteCount
+                        candidatesFound[j].voteCount += 1;
+                        break;
+                    }
+                }
+            }
+        }
+    }
 
     function isVoted(
         uint256 _categoryId,
@@ -1502,58 +928,6 @@ contract VotingSystem {
         return false;
     }
 
-    function markWinner(uint256 _categoryId, uint256 _eventId) public {
-        categories[_categoryId].events;
-
-        for (uint256 i = 0; i < categories[_categoryId].events.length; i++) {
-            if (categories[_categoryId].events[i].eventId == _eventId) {
-                Candidate storage winner = categories[_categoryId]
-                    .events[i]
-                    .candidates[0];
-                for (
-                    uint256 j = 0;
-                    j < categories[_categoryId].events[i].candidates.length - 1;
-                    j++
-                ) {
-                    if (
-                        winner.voteCount <
-                        categories[_categoryId]
-                            .events[i]
-                            .candidates[j + 1]
-                            .voteCount
-                    ) {
-                        winner = categories[_categoryId].events[i].candidates[
-                            j + 1
-                        ];
-                    }
-                }
-                winner.win = true;
-            }
-        }
-    }
-
-    function isMarkWinner(uint256 _categoryId, uint256 _eventId)
-        public
-        view
-        returns (bool isMarket)
-    {
-        Event[] memory eventsFound = categories[_categoryId].events;
-        Candidate[] memory candidatesFound;
-
-        for (uint256 i = 0; i < eventsFound.length; i++) {
-            if (eventsFound[i].eventId == _eventId) {
-                candidatesFound = eventsFound[i].candidates;
-            }
-        }
-
-        for (uint256 i = 0; i < candidatesFound.length - 1; i++) {
-            if (candidatesFound[i].win == true) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     function whoIsTheWinner(uint256 _categoryId, uint256 _eventId)
         public
         view
@@ -1579,6 +953,5 @@ contract VotingSystem {
         winner.win = true;
 
         return winner;
-    } 
-    */
+    } */
 }
