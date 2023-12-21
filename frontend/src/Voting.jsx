@@ -14,6 +14,7 @@ function Voting() {
   const [candidates, setCandidates] = useState([]);
   const { categoryId, eventId } = useParams();
   const [eventName, setEventName] = useState(null);
+  const [eventDesc, setEventDesc] = useState(null);
   const [eventStatus, setEventStatus] = useState(null);
   const [categoryName, setCategoryName] = useState(null);
   const [selectedCandidateId, setSelectedCandidateId] = useState("");
@@ -89,6 +90,7 @@ function Voting() {
         console.log("category : ", category);
         setCategoryName(category.categoryName);
         setEventName(event.eventName);
+        setEventDesc(event.eventDesc);
         setEventStatus(event.status);
 
         setCandidates(candidatesList);
@@ -174,6 +176,12 @@ function Voting() {
             {categoryName} - {eventName}
           </h2>
         </div>
+        <h2
+          className="event-description"
+          style={{ textAlign: "center", wordBreak: "break-all" }}
+        >
+          {eventDesc}
+        </h2>
         <h4>{eventStatus == 5 ? "" : isVoted ? noticeVoted : instruction}</h4>
         <div className="radio-group row justify-content-between px-3 text-center a mt-4">
           {candidates.length === 0 ? (
