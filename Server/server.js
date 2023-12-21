@@ -38,7 +38,7 @@ const changeEventDateStatus = async () => {
   if (filteredEvents != null) {
     for (const event of filteredEvents) {
       try {
-        //change status after delete the candidates
+        //change status after delete the candidate
         if (event.status == 2 && event.candidates.length == 0) {
           console.log("No candidates for Upcoming event, changing status to 1");
           event.status = 1;
