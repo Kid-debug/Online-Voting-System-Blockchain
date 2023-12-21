@@ -36,7 +36,7 @@ const VoteTally = () => {
     const fetchPositions = async () => {
       if (!selectedCategory) return;
       const response = await contract.methods
-        .getEventsByCategory(selectedCategory)
+        .getAllCategoryEvent(selectedCategory)
         .call();
       // Filter positions that have candidates
       const filteredPositions = response.filter(
@@ -59,7 +59,7 @@ const VoteTally = () => {
     const fetchCandidatesAndVotes = async () => {
       if (!selectedPosition) return;
       const response = await contract.methods
-        .getCandidatesByEvent(selectedCategory, selectedPosition)
+        .getAllCandidatesInEvent(selectedCategory, selectedPosition)
         .call();
       const candidatesWithVotes = response.map((c) => ({
         ...c,
@@ -68,7 +68,12 @@ const VoteTally = () => {
       }));
       setCandidates(candidatesWithVotes);
       setVotesData({
-        series: [{ data: candidatesWithVotes.map((c) => Number(c.voteCount)) }],
+        series: [
+          {
+            name: "Vote Count",
+            data: candidatesWithVotes.map((c) => Number(c.voteCount)),
+          },
+        ],
         categories: candidatesWithVotes.map((c) => c.name),
       });
     };
@@ -104,18 +109,20 @@ const VoteTally = () => {
           fontSize: "20px", // Adjust the font size as needed
         },
       },
-      min: 0, // Start with zero
     },
     yaxis: {
       labels: {
         style: {
           fontSize: "15px", // Adjust the font size as needed
+          wordBreak: "break-word",
         },
       },
-      title: {
-        text: "Candidates",
-        style: {
-          fontSize: "20px", // Adjust the font size as needed
+      forceNiceScale: true, // This should force integer values
+    },
+    tooltip: {
+      y: {
+        formatter: function (value) {
+          return parseInt(value).toString(); // Format tooltip value as integer
         },
       },
     },

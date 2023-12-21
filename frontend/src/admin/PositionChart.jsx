@@ -6,133 +6,101 @@ import { contractAddress } from "../../../config";
 
 const CanvasJSChart = CanvasJSReact.CanvasJSChart;
 
-const EventVoteChart = () => {
+const PositionChart = () => {
   const [availableYears, setAvailableYears] = useState([]);
-  const [selectedYear, setSelectedYear] = useState(null);
+  const [selectedYear, setSelectedYear] = useState("");
   const [categories, setCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [events, setEvents] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState("");
   const [dataPoints, setDataPoints] = useState([]);
 
   useEffect(() => {
-    // Fetch Available Years
-    const fetchYears = async () => {
-      try {
-        const web3 = new Web3(window.ethereum);
-        const contract = new web3.eth.Contract(
-          votingContract.abi,
-          contractAddress
-        );
+    const fetchData = async () => {
+      const web3 = new Web3(window.ethereum);
+      await window.ethereum.request({ method: "eth_requestAccounts" });
+      const contract = new web3.eth.Contract(
+        votingContract.abi,
+        contractAddress
+      );
+      const fetchedCategories = await contract.methods.getAllCategory().call();
+      const fetchedEvents = await contract.methods.getAllEvent().call();
 
-        const years = await contract.methods.getAvailableYears().call();
-        if (years && years.length > 0) {
-          setAvailableYears(years.map((year) => year.toString()));
-          setSelectedYear(years[0].toString()); // Automatically select the first year
-        }
-      } catch (error) {
-        console.error("Error fetching years:", error);
+      const categoryOptions = fetchedCategories.map((category) => ({
+        label: category.categoryName,
+        value: Number(category.categoryId),
+      }));
+      setCategories(categoryOptions);
+
+      // Set the first category as the default selected category
+      if (categoryOptions.length > 0) {
+        setSelectedCategory(categoryOptions[0].value.toString());
+      }
+
+      const years = new Set(
+        fetchedEvents.map((event) => {
+          // Convert BigInt to Number before multiplying
+          const eventYear = new Date(Number(event.startDateTime) * 1000)
+            .getFullYear()
+            .toString();
+          return eventYear;
+        })
+      );
+      const yearsArray = Array.from(years).sort().reverse();
+      setAvailableYears(yearsArray);
+
+      // Set the first year as the default selected year
+      if (yearsArray.length > 0) {
+        setSelectedYear(yearsArray[0]);
       }
     };
 
-    fetchYears();
+    fetchData();
   }, []);
 
-  // Fetch Categories based on selected year
-  const fetchCategories = async () => {
-    try {
-      if (selectedYear) {
-        const web3 = new Web3(window.ethereum);
-        const contract = new web3.eth.Contract(
-          votingContract.abi,
-          contractAddress
-        );
-
-        const fetchedCategories = await contract.methods
-          .getCategoriesInYear(selectedYear)
-          .call();
-
-        // Map the categories and set the first one as the default selected category
-        const mappedCategories = fetchedCategories.map((cat) => ({
-          label: cat.categoryName,
-          value: Number(cat.categoryId),
-        }));
-
-        setCategories(mappedCategories);
-
-        // Set the default selected category to the first one
-        if (mappedCategories.length > 0) {
-          setSelectedCategory(mappedCategories[0].value);
-        }
-
-        console.log(fetchedCategories);
-      }
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-    }
-  };
-
   useEffect(() => {
-    fetchCategories();
-  }, [selectedYear]);
-
-  useEffect(() => {
-    // Update Data Points based on the selected category and year
-    const updateDataPoints = async () => {
+    const fetchDataPoints = async () => {
+      console.log(selectedCategory, selectedYear);
       if (selectedCategory && selectedYear) {
         try {
           const web3 = new Web3(window.ethereum);
+          await window.ethereum.enable(); // Ensure that the user has given permission
           const contract = new web3.eth.Contract(
             votingContract.abi,
             contractAddress
           );
 
-          // Fetch event IDs and vote counts using getPositionVotes
-          const result = await contract.methods
-            .getPositionVotes(selectedCategory, selectedYear)
+          const categoryEvents = await contract.methods
+            .getAllCategoryEvent(selectedCategory)
             .call();
 
-          console.log("getPositionVotes result:", result);
+          const filteredEvents = categoryEvents.filter((event) => {
+            const eventYear = new Date(
+              Number(event.startDateTime) * 1000
+            ).getFullYear();
+            return eventYear.toString() === selectedYear;
+          });
 
-          const eventIds = result[0];
-          const voteCounts = result[1];
+          let voteData = [];
+          for (let event of filteredEvents) {
+            const candidates = await contract.methods
+              .getAllCandidatesInEvent(selectedCategory, event.eventId)
+              .call();
+            const totalVotes = candidates.reduce(
+              (sum, candidate) => sum + Number(candidate.voteCount),
+              0
+            );
+            voteData.push({ label: event.eventName, y: totalVotes });
+          }
 
-          console.log("eventIds:", eventIds);
-          console.log("voteCounts:", voteCounts);
-
-          // Fetch event data for each event ID
-          const eventData = await Promise.all(
-            eventIds.map(async (eventId) => {
-              // Fetch event data for each event ID
-              const event = await contract.methods
-                .getEventById(selectedCategory, eventId)
-                .call();
-
-              // Map the event data to its corresponding vote count
-              const voteCount = parseInt(
-                voteCounts[eventIds.indexOf(eventId)],
-                10
-              );
-
-              return {
-                label: event.eventName,
-                y: voteCount,
-              };
-            })
-          );
-
-          console.log("eventData:", eventData);
-
-          // Update data points
-          setDataPoints(eventData);
+          setDataPoints(voteData);
         } catch (error) {
-          console.error("Error updating data points:", error);
+          console.error("Error fetching data points:", error);
         }
       } else {
         setDataPoints([]); // Clear the chart if no category or year is selected
       }
     };
 
-    updateDataPoints();
+    fetchDataPoints();
   }, [selectedYear, selectedCategory]);
 
   const handleCategoryChange = (e) => {
@@ -146,14 +114,16 @@ const EventVoteChart = () => {
   const options = {
     animationEnabled: true,
     title: {
-      text: `${selectedYear}  -  Total Vote Counts (Event)`,
+      text: `${selectedYear} - Total Vote Counts by Event`,
     },
     axisX: {
       title: "Events",
     },
     axisY: {
       title: "Number of Votes",
-      minimum: 0,
+      includeZero: true,
+      interval: 1, // Set interval as 1 for whole numbers
+      valueFormatString: "#0", // Format labels as integers
     },
     data: [
       {
@@ -165,39 +135,41 @@ const EventVoteChart = () => {
 
   return (
     <div>
-      <label htmlFor="year-select">Select Year: </label>
-      <select
-        id="year-select"
-        value={selectedYear || ""}
-        onChange={(e) => setSelectedYear(e.target.value)}
-      >
-        {availableYears.map((year) => (
-          <option key={year} value={year}>
-            {year}
-          </option>
-        ))}
-      </select>
+      <div>
+        <label htmlFor="year-select">Select Year: </label>
+        <select
+          id="year-select"
+          value={selectedYear || ""}
+          onChange={(e) => setSelectedYear(e.target.value)}
+        >
+          {availableYears.map((year) => (
+            <option key={year} value={year}>
+              {year}
+            </option>
+          ))}
+        </select>
 
-      <label htmlFor="category-select">Select Category: </label>
-      <select
-        id="category-select"
-        value={
-          selectedCategory ||
-          (categories.length > 0 && categories[0].value) ||
-          ""
-        }
-        onChange={handleCategoryChange}
-      >
-        {categories.map((category) => (
-          <option key={category.value} value={category.value}>
-            {category.label}
-          </option>
-        ))}
-      </select>
+        <label htmlFor="category-select">Select Category: </label>
+        <select
+          id="category-select"
+          value={
+            selectedCategory ||
+            (categories.length > 0 && categories[0].value) ||
+            ""
+          }
+          onChange={handleCategoryChange}
+        >
+          {categories.map((category) => (
+            <option key={category.value} value={category.value}>
+              {category.label}
+            </option>
+          ))}
+        </select>
+      </div>
 
-      {selectedCategory && <CanvasJSChart options={options} />}
+      <CanvasJSChart options={options} />
     </div>
   );
 };
 
-export default EventVoteChart;
+export default PositionChart;

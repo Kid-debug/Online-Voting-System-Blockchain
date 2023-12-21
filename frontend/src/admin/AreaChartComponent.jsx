@@ -48,7 +48,7 @@ const AreaChartComponent = () => {
         year,
         votes,
       }));
-      sortedYears.sort((a, b) => parseInt(a.year) - parseInt(b.year)); // Sort years
+      sortedYears.sort((a, b) => parseInt(b.year) - parseInt(a.year)); // Sort years
       setYearlyVoteCounts(sortedYears);
       if (sortedYears.length > 0) {
         setSelectedYear(sortedYears[0].year.toString()); // Set default selected year
@@ -89,11 +89,15 @@ const AreaChartComponent = () => {
     },
     axisY: {
       title: "Number of Votes",
-      minimum: 0,
+      includeZero: true,
+      interval: 1, // Set interval as 1 for whole numbers
+      valueFormatString: "#0", // Format labels as integers
+      gridThickness: 0, // This will remove the grid lines
+      tickLength: 0,
     },
     data: [
       {
-        type: "column",
+        type: "bar",
         dataPoints: filteredDataPoints.map((voteCount) => ({
           label: voteCount.year.toString(),
           y: voteCount.votes,

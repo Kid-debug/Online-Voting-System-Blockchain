@@ -62,8 +62,9 @@ function Home() {
         votingContract.abi,
         contractAddress
       );
-      const result = await contract.methods.getAllVoter().call();
-      const newVoterCount = result.length;
+      const allVoters = await contract.methods.getAllVoter().call();
+      const usersWithRoleU = allVoters.filter((voter) => voter.role === "U");
+      const newVoterCount = usersWithRoleU.length;
       setVoterCount(Number(newVoterCount));
     } catch (error) {
       console.error("Error fetching voter count:", error);

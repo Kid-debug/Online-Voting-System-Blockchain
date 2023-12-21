@@ -9,114 +9,79 @@ import jsPDF from "jspdf";
 const CanvasJSChart = CanvasJSReact.CanvasJSChart;
 
 const CategoryChart = () => {
+  const [selectedYear, setSelectedYear] = useState(
+    new Date().getFullYear().toString()
+  );
+  const [categoryVoteData, setCategoryVoteData] = useState([]);
   const [availableYears, setAvailableYears] = useState([]);
-  const [selectedYear, setSelectedYear] = useState(null);
-  const [categories, setCategories] = useState([]);
-  const [dataPoints, setDataPoints] = useState([]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const web3 = new Web3(window.ethereum);
-        const contract = new web3.eth.Contract(
-          votingContract.abi,
-          contractAddress
-        );
+    const fetchEventsAndExtractYears = async () => {
+      const web3 = new Web3(window.ethereum);
+      await window.ethereum.request({ method: "eth_requestAccounts" });
+      const contract = new web3.eth.Contract(
+        votingContract.abi,
+        contractAddress
+      );
 
-        const years = await contract.methods.getAvailableYears().call();
-        if (years && years.length > 0) {
-          setAvailableYears(years.map((year) => year.toString()));
-          setSelectedYear(years[0].toString()); // Automatically select the first year
-        }
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
+      const events = await contract.methods.getAllEvent().call();
+      const years = new Set(
+        events.map((event) =>
+          new Date(Number(event.startDateTime) * 1000).getFullYear()
+        )
+      );
+      setAvailableYears(Array.from(years).sort().reverse());
+
+      fetchCategoryVotes(selectedYear);
     };
 
-    fetchData();
+    fetchEventsAndExtractYears();
   }, []);
 
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        if (selectedYear) {
-          const web3 = new Web3(window.ethereum);
-          const contract = new web3.eth.Contract(
-            votingContract.abi,
-            contractAddress
-          );
-
-          const fetchedCategories = await contract.methods
-            .getCategoriesInYear(selectedYear)
-            .call();
-          console.log(fetchedCategories);
-          setCategories(
-            fetchedCategories.map((cat) => ({
-              label: cat.categoryName,
-              value: cat.categoryId,
-            }))
-          );
-        }
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-      }
-    };
-
-    fetchCategories();
+    fetchCategoryVotes(selectedYear);
   }, [selectedYear]);
 
-  useEffect(() => {
-    // This useEffect depends on the updated 'categories' state
-    const updateDataPoints = async () => {
-      try {
-        if (selectedYear && categories.length > 0) {
-          const web3 = new Web3(window.ethereum);
-          const contract = new web3.eth.Contract(
-            votingContract.abi,
-            contractAddress
-          );
+  const fetchCategoryVotes = async (year) => {
+    const web3 = new Web3(window.ethereum);
+    await window.ethereum.request({ method: "eth_requestAccounts" }); // This is the modern way to request access to accounts
+    const contract = new web3.eth.Contract(votingContract.abi, contractAddress);
 
-          const votes = await Promise.all(
-            categories.map((category) =>
-              contract.methods
-                .getCategoryYearlyVoteCount(category.value, selectedYear)
-                .call()
-            )
-          );
+    const categories = await contract.methods.getAllCategory().call();
+    let voteData = [];
 
-          setDataPoints(
-            categories.map((category, index) => ({
-              label: category.label,
-              y: parseInt(votes[index], 10),
-            }))
-          );
+    for (let category of categories) {
+      let totalVotesForCategory = 0;
+      const events = await contract.methods
+        .getAllCategoryEvent(category.categoryId)
+        .call();
+
+      for (let event of events) {
+        // Convert BigInt to Number, assuming the timestamp doesn't exceed the safe integer limit
+        const eventYear = new Date(
+          Number(event.startDateTime.toString()) * 1000
+        )
+          .getFullYear()
+          .toString();
+
+        if (eventYear === year) {
+          const candidates = await contract.methods
+            .getAllCandidatesInEvent(category.categoryId, event.eventId)
+            .call();
+          for (let candidate of candidates) {
+            totalVotesForCategory += parseInt(candidate.voteCount);
+          }
         }
-      } catch (error) {
-        console.error("Error updating data points:", error);
       }
-    };
 
-    updateDataPoints();
-  }, [selectedYear, categories]);
+      // Push the category with its total votes to the voteData array, even if it's zero
+      voteData.push({
+        label: category.categoryName,
+        y: totalVotesForCategory,
+      });
+    }
 
-  const options = {
-    animationEnabled: true,
-    title: {
-      text: `${selectedYear} - Total Vote Counts (Category) `,
-    },
-    axisX: {
-      title: "Categories",
-    },
-    axisY: {
-      title: "Number of Votes",
-      minimum: 0,
-    },
-    data: [
-      {
-        type: "column",
-        dataPoints: dataPoints,
-      },
-    ],
+    setCategoryVoteData(voteData);
   };
 
   const exportChart = async (type) => {
@@ -132,26 +97,44 @@ const CategoryChart = () => {
     document.body.removeChild(downloadLink);
   };
 
+  const options = {
+    animationEnabled: true,
+    title: {
+      text: `Vote Counts by Category for ${selectedYear}`,
+    },
+    axisX: {
+      title: "Categories",
+    },
+    axisY: {
+      title: "Vote Counts",
+      includeZero: true,
+      interval: 1, // Set interval as 1 for whole numbers
+      valueFormatString: "#0", // Format labels as integers
+    },
+    data: [
+      {
+        type: "column",
+        dataPoints: categoryVoteData,
+      },
+    ],
+  };
+
   return (
     <div>
       <label htmlFor="year-select">Select Year: </label>
       <select
         id="year-select"
-        value={selectedYear || ""}
+        value={selectedYear}
         onChange={(e) => setSelectedYear(e.target.value)}
       >
-        {availableYears.length > 0 ? (
-          availableYears.map((year) => (
-            <option key={year} value={year}>
-              {year}
-            </option>
-          ))
-        ) : (
-          <option value="">Loading years...</option>
-        )}
+        {availableYears.map((year) => (
+          <option key={year} value={year}>
+            {year}
+          </option>
+        ))}
       </select>
 
-      {selectedYear && <CanvasJSChart options={options} />}
+      <CanvasJSChart options={options} />
       <div>
         <button style={{ margin: "10px" }} onClick={() => exportChart("jpg")}>
           Export as JPG
