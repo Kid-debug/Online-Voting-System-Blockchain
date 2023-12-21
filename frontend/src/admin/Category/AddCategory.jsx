@@ -37,6 +37,17 @@ function AddCategory() {
         contractAddress
       );
 
+      //Check if the category name cannot be same with others when adding
+      // Fetch all categories
+      const categories = await contract.methods.getAllCategory().call();
+      const categoryNames = categories.map((category) => category.categoryName);
+
+      // Check if the category name already exists
+      if (categoryNames.includes(categoryName)) {
+        Swal("Error!", "This category name already exists.", "error");
+        return;
+      }
+
       //const account = web3.eth.accounts.privateKeyToAccount(privateKey);
       //web3.eth.accounts.wallet.add(account);
 

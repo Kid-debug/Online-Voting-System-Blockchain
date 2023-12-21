@@ -140,6 +140,34 @@ function AddPosition() {
       const startDateTime = new Date(startDateAndTime).getTime() / 1000;
       const endDateTime = new Date(endDateAndTime).getTime() / 1000;
 
+      
+      //Check if the category exists
+      const categoryExists = categories.some(
+        (category) => Number(category.categoryId) === Number(selectedCategoryId)
+      );
+      if (!categoryExists) {
+        Swal("Error!", "Selected category does not exist.", "error");
+        return;
+      }
+
+      //Check if the event name cannot be same with others when adding in the specified category
+      // Fetch all events in the selected category to check for unique event name
+      const categoryEvents = await contract.methods
+        .getAllCategoryEvent(selectedCategoryId)
+        .call();
+      const eventNameExists = categoryEvents.some(
+        (event) => event.eventName.toLowerCase() === positionName.toLowerCase()
+      );
+
+      if (eventNameExists) {
+        Swal(
+          "Error!",
+          "• This event name already existed in the selected category.",
+          "error"
+        );
+        return;
+      }
+
       // Perform the necessary action, e.g., sending a transaction
       const transaction = await contract.methods
         .addEvent(
@@ -153,7 +181,6 @@ function AddPosition() {
           from: accounts[0], // Assuming the user's account is the first account
         });
 
-        
       // prompt success message
       Swal({
         icon: "success",

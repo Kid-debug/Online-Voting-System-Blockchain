@@ -167,6 +167,62 @@ function EditPosition() {
       return;
     }
 
+    const web3 = new Web3(window.ethereum);
+    await window.ethereum.enable();
+    const accounts = await web3.eth.getAccounts();
+    const contract = new web3.eth.Contract(votingContract.abi, contractAddress);
+
+    const allEvents = await contract.methods.getAllEvent().call();
+    const events = allEvents.find(
+      (event) =>
+        Number(event.categoryId) === selectedCategoryId &&
+        String(event.eventId) === eventId
+    );
+
+    console.log(selectedCategoryId, eventId);
+    console.log(events);
+    console.log(events.status);
+
+    // Check if the event exists
+    if (!events) {
+      Swal({
+        icon: "error",
+        title: "Error Editing Event!",
+        text: "Event not found.",
+      });
+      return;
+    }
+
+    // Check if the event name cannot be the same with others except for itself
+    const isEventNameTaken = allEvents.some(
+      (evt) =>
+        evt.eventName === positionName &&
+        String(evt.eventId) !== eventId &&
+        Number(evt.categoryId) === Number(selectedCategoryId)
+    );
+
+    if (isEventNameTaken) {
+      Swal(
+        "Error!",
+        "Event name already taken in this category. Please choose a different name.",
+        "error"
+      );
+      return;
+    }
+
+    // Validate if the event can be edited
+    const isStatusValid =
+      Number(events.status) === 1 || Number(events.status) === 2;
+
+    if (!isStatusValid) {
+      Swal(
+        "Error!",
+        "Cannot edit event when the event is processing, marking winner or completed.",
+        "error"
+      );
+      return;
+    }
+
     // Check validation first
     const validationMessage = validationOnDateTime();
     if (validationMessage) {
@@ -188,7 +244,7 @@ function EditPosition() {
       const endDateTime = new Date(endDateAndTime).getTime() / 1000;
 
       await contract.methods
-        .updateEventName(
+        .updateEventDetails(
           selectedCategoryId,
           eventId,
           positionName,

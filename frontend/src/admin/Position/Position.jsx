@@ -82,7 +82,7 @@ function Position() {
 
       // Await all the promises and then filter the results
       const formattedEvents = await Promise.all(eventPromises);
-
+      formattedEvents.sort((a, b) => a.eventId - b.eventId);
       setEvents(formattedEvents);
     } catch (error) {
       console.error("Error fetching Event:", error);
@@ -142,17 +142,17 @@ function Position() {
     const status = election.eventStatus;
     if (status == 1) {
       return "No Candidates";
-    } 
+    }
     if (status == 2) {
       return "Up Comming";
-    } 
+    }
     if (status == 3) {
       return "Processing";
-    } 
+    }
     if (status == 4) {
       return "Marking Winner";
-    } 
-    if(status == 5) {
+    }
+    if (status == 5) {
       return "Complete";
     }
   };
@@ -239,6 +239,24 @@ function Position() {
     setEventToDelete(null);
   };
 
+  const canDeleteEvent = (event) => {
+    if (event.eventStatus === 1 || event.eventStatus === 2) {
+      if (event.candidatesCount === 0) {
+        return true; // Can be deleted
+      } else {
+        Swal("Error!", "Cannot delete event with candidates.", "error");
+        return false;
+      }
+    } else {
+      Swal(
+        "Error!",
+        "Cannot delete event with status other than 1 or 2.",
+        "error"
+      );
+      return false;
+    }
+  };
+
   const confirmDelete = async () => {
     if (!eventToDelete) return;
 
@@ -257,6 +275,44 @@ function Position() {
         votingContract.abi,
         contractAddress
       );
+
+      const allEvents = await contract.methods.getAllEvent().call();
+      const event = allEvents.find(
+        (event) =>
+          event.categoryId === categoryId && Number(event.eventId) === eventId
+      );
+
+      console.log(categoryId, eventId);
+      console.log(event.status);
+
+      // Check if the category exists
+      if (!event) {
+        Swal({
+          icon: "error",
+          title: "Error Deleting Event!",
+          text: "Event not found.",
+        });
+        return;
+      }
+
+      // Validate if the event can be deleted
+      const isStatusValid =
+        Number(event.status) === 1 || Number(event.status) === 2;
+      const hasNoCandidates = event.candidates.length === 0;
+
+      if (!isStatusValid) {
+        Swal(
+          "Error!",
+          "Cannot delete event when the event is processing, marking winner or completed.",
+          "error"
+        );
+        return;
+      }
+
+      if (Number(event.status) === 2 && !hasNoCandidates) {
+        Swal("Error!", "Cannot delete event with candidates.", "error");
+        return;
+      }
 
       // Call the deleteEvent function in your smart contract
       await contract.methods.deleteEvent(categoryId, eventId).send({
@@ -404,24 +460,24 @@ function Position() {
                         )}
                       </>
                     ) : column === "Action" ? (
-                
-                      row.eventStatus !== 5 &&  row.eventStatus !== 4 && (
-                      <>
-                        <Link
-                          to={`/admin/editPosition/${row.categoryId}/${row.eventId}`}
-                          className="btn btn-primary btn-sm"
-                        >
-                          <i className="fs-4 bi-pencil"></i>
-                        </Link>
-                        <button
-                          onClick={() =>
-                            handleDeleteEvent(row.categoryId, row.eventId)
-                          }
-                          className="btn btn-danger btn-sm"
-                        >
-                          <i className="fs-4 bi-trash"></i>
-                        </button>
-                      </>
+                      row.eventStatus !== 5 &&
+                      row.eventStatus !== 4 && (
+                        <>
+                          <Link
+                            to={`/admin/editPosition/${row.categoryId}/${row.eventId}`}
+                            className="btn btn-primary btn-sm"
+                          >
+                            <i className="fs-4 bi-pencil"></i>
+                          </Link>
+                          <button
+                            onClick={() =>
+                              handleDeleteEvent(row.categoryId, row.eventId)
+                            }
+                            className="btn btn-danger btn-sm"
+                          >
+                            <i className="fs-4 bi-trash"></i>
+                          </button>
+                        </>
                       )
                     ) : column === "eventStatus" ? (
                       getElectionStatus(row)

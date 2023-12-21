@@ -162,6 +162,31 @@ function Category() {
         votingContract.abi,
         contractAddress
       );
+      console.log(categoryToDelete);
+      const allCategories = await contract.methods.getAllCategory().call();
+      const category = allCategories.find(
+        (category) => Number(category.categoryId) === categoryToDelete
+      );
+
+      // Check if the category exists
+      if (!category) {
+        Swal({
+          icon: "error",
+          title: "Error Deleting Category!",
+          text: "Category not found.",
+        });
+        return;
+      }
+
+      // Check if there are any events associated with the category
+      if (category.events.length > 0) {
+        Swal({
+          icon: "error",
+          title: "Error Deleting Category!",
+          text: "Cannot delete category with events.",
+        });
+        return;
+      }
 
       // Call the deleteCategory function in your smart contract
       await contract.methods.deleteCategory(categoryToDelete).send({
@@ -260,10 +285,8 @@ function Category() {
               <tr key={rowIndex}>
                 {columns.map((column, colIndex) => (
                   <td key={colIndex} className="data-cell">
-                    {console.log(row[column])}
                     {column === "Action" ? (
                       <>
-                        {console.log(row[column])}
                         <Link
                           to={`/admin/editCategory/${row.categoryId}`}
                           className="btn btn-primary btn-sm"
