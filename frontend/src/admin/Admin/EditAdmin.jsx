@@ -15,8 +15,9 @@ function EditAdmin() {
   const navigate = useNavigate();
 
   //retrieve email and password function
-  const { id } = useParams();
   const { auth } = useAuth();
+  const key = auth.userKey;
+  const id = auth.userId;
   const role = auth.userRole;
 
   useEffect(() => {
@@ -31,10 +32,9 @@ function EditAdmin() {
           contractAddress
         );
 
-        const admin = await contract.methods.getAdminById(id).call();
-
-        // Update the state with the fetched category name
-        setEmail(admin.email);
+        const admin = await contract.methods.getVoterEmailById(id).call();
+        console.log(id);
+        setEmail(admin);
       } catch (error) {
         console.error("Error fetching admins:", error);
       }
@@ -47,63 +47,29 @@ function EditAdmin() {
   const handleEditAdmin = async (event) => {
     event.preventDefault();
 
-    const errors = validateSignUp();
+    const errors = validateEditPassword();
 
     // If there are no errors, proceed with form submission
     if (Object.keys(errors).length === 0) {
       try {
-        const emailLower = email.toLowerCase();
+        const web3 = new Web3(window.ethereum);
+        await window.ethereum.enable();
+        const accounts = await web3.eth.getAccounts();
+        const contract = new web3.eth.Contract(
+          votingContract.abi,
+          contractAddress
+        );
 
-        try {
-          const web3 = new Web3(window.ethereum);
-          await window.ethereum.enable();
-          const accounts = await web3.eth.getAccounts();
-          const contract = new web3.eth.Contract(
-            votingContract.abi,
-            contractAddress
-          );
+        await contract.methods
+          .updateVoterPassword(key, password)
+          .send({ from: accounts[0] });
 
-          // Fetch the admin's previous email using getVoterEmailById
-          const oldAdminEmail = await contract.methods
-            .getVoterEmailById(id)
-            .call();
-          const oldEmail = oldAdminEmail.toLowerCase();
+        // prompt success message
+        Swal("Success!", "Your password updated successfully.", "success");
 
-          // Send removal reminder email to the old email
-          sendEmailByRemoveAdminReminder(oldEmail);
-
-          await contract.methods
-            .editAdminEmailPassword(id, emailLower, password)
-            .send({ from: accounts[0] });
-
-          sendEmailByEditAdmin(emailLower);
-
-          // prompt success message
-          Swal("Success!", "Admin details updated successfully.", "success");
-
-          console.log("Form submitted successfully");
-        } catch (error) {
-          let errorMessage =
-            "An error occurred while updating the admin details.";
-          // Check if the error message includes a revert
-          if (error.message && error.message.includes("revert")) {
-            const matches = error.message.match(/revert (.+)/);
-            errorMessage =
-              matches && matches[1]
-                ? matches[1]
-                : "Transaction reverted without a reason.";
-          } else if (error.message) {
-            errorMessage = error.message;
-          }
-          Swal({
-            icon: "error",
-            title: "Error updating admin details!",
-            text: errorMessage,
-          });
-        }
+        console.log("Form submitted successfully");
       } catch (error) {
-        let errorMessage =
-          "An error occurred while updating the admin account.";
+        let errorMessage = "An error occurred while updating your password.";
         // Check if the error message includes a revert
         if (error.message && error.message.includes("revert")) {
           const matches = error.message.match(/revert (.+)/);
@@ -116,7 +82,7 @@ function EditAdmin() {
         }
         Swal({
           icon: "error",
-          title: "Error updating admin details!",
+          title: "Error updating your password!",
           text: errorMessage,
         });
       }
@@ -125,18 +91,14 @@ function EditAdmin() {
       console.log("Form contains errors:", errors);
       Swal({
         icon: "error",
-        title: "Failed to Update Admin!",
+        title: "Failed to Update Password!",
         text: Object.values(errors).join("\n"),
       });
     }
   };
-  const validateSignUp = () => {
-    const errors = {};
 
-    // Check if email is not empty
-    if (!email.trim()) {
-      errors.email = "•Email is required";
-    }
+  const validateEditPassword = () => {
+    const errors = {};
 
     // Check if password is not empty and meets requirements
     if (role == "A") {
@@ -155,18 +117,6 @@ function EditAdmin() {
     return errors;
   };
 
-  const sendEmailByRemoveAdminReminder = async (email) => {
-    await axios.post("/api/sendEmailByRemoveAdmin", {
-      email,
-    });
-  };
-
-  const sendEmailByEditAdmin = async (email) => {
-    await axios.post("/api/sendEmailByAddAdmin", {
-      email,
-    });
-  };
-
   return (
     <div className="d-flex flex-column align-items-center pt-4">
       <h2>{role === "A" ? "Change Password" : "Update Admin Email"}</h2>
@@ -182,32 +132,29 @@ function EditAdmin() {
             className="form-control"
             placeholder="Enter Email Address (eg: admin@gmail.com)"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
             disabled={role === "A"}
           />
         </div>
-        {role === "S" ? null : (
-          <div className="col-12">
-            <label htmlFor="inputPassword" className="form-label">
-              Password
-            </label>
-            <input
-              type={passwordVisible ? "text" : "password"}
-              id="inputPassword"
-              name="inputPassword"
-              className="form-control"
-              placeholder="Enter Password (eg: Abc!1234)"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <i
-              className="eye-icon"
-              onClick={() => setPasswordVisible(!passwordVisible)}
-            >
-              {passwordVisible ? <EyeOutlined /> : <EyeInvisibleOutlined />}
-            </i>
-          </div>
-        )}
+        <div className="col-12">
+          <label htmlFor="inputPassword" className="form-label">
+            Password
+          </label>
+          <input
+            type={passwordVisible ? "text" : "password"}
+            id="inputPassword"
+            name="inputPassword"
+            className="form-control"
+            placeholder="Enter Password (eg: Abc!1234)"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <i
+            className="eye-icon"
+            onClick={() => setPasswordVisible(!passwordVisible)}
+          >
+            {passwordVisible ? <EyeOutlined /> : <EyeInvisibleOutlined />}
+          </i>
+        </div>
         <div className="col-12">
           <button type="submit" className="btn btn-primary">
             Edit

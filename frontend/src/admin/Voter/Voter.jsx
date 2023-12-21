@@ -30,7 +30,7 @@ function Voter() {
 
       const voterList = await contract.methods.getAllVoter().call();
       const formattedVoters = voterList
-        .filter((voter) => Number(voter.id) !== 0)
+        .filter((voter) => Number(voter.id) !== 0 && voter.role === "U")
         .map((voter) => ({
           ID: Number(voter.id),
           Email: voter.email,

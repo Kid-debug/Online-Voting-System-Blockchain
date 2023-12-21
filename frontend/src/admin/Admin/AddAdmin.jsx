@@ -6,6 +6,7 @@ import Web3 from "web3";
 import { contractAddress } from "../../../../config";
 import Swal from "sweetalert";
 import axios from "../../api/axios";
+import cryptoRandomString from "crypto-random-string";
 
 function AddAdmin() {
   const [email, setEmail] = useState("");
@@ -22,6 +23,10 @@ function AddAdmin() {
     if (Object.keys(errors).length === 0) {
       try {
         const emailLower = email.toLowerCase();
+        // Generate a verification token
+        const randomToken = cryptoRandomString({ length: 16 });
+        // Insert the valid user in to the blockchain
+        const voterId = cryptoRandomString({ length: 16 });
 
         try {
           const web3 = new Web3(window.ethereum);
@@ -32,15 +37,19 @@ function AddAdmin() {
             contractAddress
           );
           await contract.methods
-            .addAdmin(emailLower, password, "A")
+            .addVoter(voterId, emailLower, password, "A", randomToken)
             .send({ from: accounts[0] });
 
-          sendEmailByAddAdmin(emailLower);
           // prompt success message
           Swal({
             icon: "success",
             title: "Admin Created!",
             text: "You've successfully added a new admin account.",
+          });
+
+          await axios.post("/api/verifyEmail", {
+            email,
+            randomToken,
           });
 
           console.log("Form submitted successfully");
@@ -114,12 +123,6 @@ function AddAdmin() {
     }
 
     return errors;
-  };
-
-  const sendEmailByAddAdmin = async (email) => {
-    await axios.post("/api/sendEmailByAddAdmin", {
-      email,
-    });
   };
 
   return (
