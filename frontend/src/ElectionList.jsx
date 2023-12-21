@@ -88,7 +88,7 @@ function ElectionList() {
             .call();
 
           let votetotal = 0;
-          for(let i=0; i<candidates.length;i++){
+          for (let i = 0; i < candidates.length; i++) {
             votetotal += Number(candidates[i].voteCount);
           }
 
@@ -100,7 +100,7 @@ function ElectionList() {
             eventStatus: Number(event.status),
             eventStartDate: Number(event.startDateTime),
             eventEndDate: Number(event.endDateTime),
-            eventVoteTotal : votetotal
+            eventVoteTotal: votetotal,
           };
         });
 
@@ -225,7 +225,7 @@ function ElectionList() {
                   <td>{election.eventVoteTotal}</td>
                   <td>
                     <Link
-                      to={`/electionDetails/${categoryId}/${election.eventId}`}
+                      to={`/voting/${categoryId}/${election.eventId}`}
                       style={{
                         border: "none",
                         padding: "7px 20px",
