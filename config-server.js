@@ -1,4 +1,4 @@
-const contractAddress = "0x7Bbc5b6155D39bFB76Db9644DfF4EEDE3227B73B";
+const contractAddress = "0x761D8C0C2F86f458508e2e7c2Ecd305336fC7300";
 
 module.exports = {
   contractAddress: contractAddress,

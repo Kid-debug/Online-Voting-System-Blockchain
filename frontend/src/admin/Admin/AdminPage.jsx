@@ -238,7 +238,7 @@ function AdminPage() {
         <tbody>
           {currentItems.length === 0 ? (
             <tr>
-              <td colSpan={columns.length} className="text-center">
+              <td colSpan={columns.length} className="text-center data-cell">
                 No matching records found
               </td>
             </tr>
@@ -347,6 +347,9 @@ function AdminPage() {
           </label>
         </div>
       )}
+      <Link to="/admin/home" className="btn btn-secondary mt-5">
+        Back To Dashboard
+      </Link>
     </div>
   );
 }

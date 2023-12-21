@@ -356,79 +356,87 @@ function Candidate() {
           </tr>
         </thead>
         <tbody>
-          {currentItems.map((row, rowIndex) => (
-            <tr key={rowIndex}>
-              {columns.map((column, colIndex) => (
-                <td key={colIndex} className="data-cell">
-                  {column === "imageFileName" && row.imageFileName ? (
-                    <img
-                      src={`${IMAGE_BASE_URL}${row.imageFileName}`}
-                      alt={row.imageFileName}
-                      className="image"
-                    />
-                  ) : column === "candidateDesc" ? (
-                    <>
-                      {row[column].length > 50 &&
-                      expandedCategory !== row.ID ? (
-                        <>
-                          {`${row[column].substring(0, 50)}... `}
-                          <button
-                            onClick={() => toggleExpand(row.ID)}
-                            className="btn btn-link p-0"
-                          >
-                            Read More
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <span
-                            style={{
-                              wordBreak: "break-all",
-                            }}
-                          >
-                            {row[column]}
-                          </span>
-                          {row[column].length > 50 && (
+          {currentItems.length === 0 ? (
+            <tr>
+              <td colSpan={columns.length} className="text-center data-cell">
+                No matching records found
+              </td>
+            </tr>
+          ) : (
+            currentItems.map((row, rowIndex) => (
+              <tr key={rowIndex}>
+                {columns.map((column, colIndex) => (
+                  <td key={colIndex} className="data-cell">
+                    {column === "imageFileName" && row.imageFileName ? (
+                      <img
+                        src={`${IMAGE_BASE_URL}${row.imageFileName}`}
+                        alt={row.imageFileName}
+                        className="image"
+                      />
+                    ) : column === "candidateDesc" ? (
+                      <>
+                        {row[column].length > 50 &&
+                        expandedCategory !== row.ID ? (
+                          <>
+                            {`${row[column].substring(0, 50)}... `}
                             <button
                               onClick={() => toggleExpand(row.ID)}
                               className="btn btn-link p-0"
                             >
-                              Read Less
+                              Read More
                             </button>
-                          )}
-                        </>
-                      )}
-                    </>
-                  ) : column === "Action" ? (
-                    <>
-                      <Link
-                        to={`/admin/editCandidate/${row.categoryId}/${row.eventId}/${row.candidateId}`}
-                        className="btn btn-primary btn-sm"
-                      >
-                        <i className="fs-4 bi-pencil"></i>
-                      </Link>
+                          </>
+                        ) : (
+                          <>
+                            <span
+                              style={{
+                                wordBreak: "break-all",
+                              }}
+                            >
+                              {row[column]}
+                            </span>
+                            {row[column].length > 50 && (
+                              <button
+                                onClick={() => toggleExpand(row.ID)}
+                                className="btn btn-link p-0"
+                              >
+                                Read Less
+                              </button>
+                            )}
+                          </>
+                        )}
+                      </>
+                    ) : column === "Action" ? (
+                      <>
+                        <Link
+                          to={`/admin/editCandidate/${row.categoryId}/${row.eventId}/${row.candidateId}`}
+                          className="btn btn-primary btn-sm"
+                        >
+                          <i className="fs-4 bi-pencil"></i>
+                        </Link>
 
-                      <button
-                        onClick={() =>
-                          handleDeleteCandidate(
-                            row.categoryId,
-                            row.eventId,
-                            row.candidateId,
-                            row.imageFileName
-                          )
-                        }
-                        className="btn btn-danger btn-sm"
-                      >
-                        <i className="fs-4 bi-trash"></i>
-                      </button>
-                    </>
-                  ) : (
-                    row[column]
-                  )}
-                </td>
-              ))}
-            </tr>
-          ))}
+                        <button
+                          onClick={() =>
+                            handleDeleteCandidate(
+                              row.categoryId,
+                              row.eventId,
+                              row.candidateId,
+                              row.imageFileName
+                            )
+                          }
+                          className="btn btn-danger btn-sm"
+                        >
+                          <i className="fs-4 bi-trash"></i>
+                        </button>
+                      </>
+                    ) : (
+                      row[column]
+                    )}
+                  </td>
+                ))}
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
       {showDeleteConfirmation && (
@@ -507,6 +515,9 @@ function Candidate() {
           </label>
         </div>
       )}
+      <Link to="/admin/home" className="btn btn-secondary mt-5">
+        Back To Dashboard
+      </Link>
     </div>
   );
 }

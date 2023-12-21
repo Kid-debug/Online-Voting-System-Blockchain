@@ -17,6 +17,7 @@ h2 {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 20px;
+  overflow-x: auto; /* Allows table to scroll horizontally */
 }
 
 .data-table th,
@@ -120,7 +121,6 @@ h2 {
   background-color: #ffffff;
 }
 
-
 .block {
   margin: 0px 10px 0 0 !important;
   padding: 4px 15px 4px 8px !important;
@@ -148,4 +148,23 @@ h2 {
   color: #44b478;
   cursor: pointer;
   background-color: #ffffff;
+}
+
+@media (max-width: 300px) {
+  .container-fluid {
+    flex-direction: column;
+  }
+  .col-auto,
+  .col-md-3,
+  .col-xl-2 {
+    width: 100%;
+    min-width: 200px; /* Adjust the minimum width as needed */
+  }
+  .col {
+    width: 100%;
+  }
+  .data-table {
+    width: auto;
+    overflow-x: auto; /* Allows table to scroll horizontally on small screens */
+  }
 }

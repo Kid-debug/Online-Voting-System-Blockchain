@@ -16,7 +16,7 @@ const votingContract = require("../build/contracts/VotingSystem.json");
 const { Web3 } = require("web3");
 const ganacheUrl = "HTTP://127.0.0.1:7545";
 const privateKey =
-  "0x3e672843aff5d678b129f8c15cbc268b9b693f495d388493e00b42706b3fa30a";
+  "0x5e5b24fd28d04f63350139a24111274e05f7a4859b05986752d6407a67923a10";
 const { contractAddress } = require("../config-server");
 
 const web3 = new Web3(new Web3.providers.HttpProvider(ganacheUrl));

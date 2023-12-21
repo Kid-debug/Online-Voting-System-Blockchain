@@ -1,5 +1,6 @@
 import React from "react";
 import PositionChart from "./PositionChart";
+import { Link } from "react-router-dom";
 
 function PositionReport() {
   return (
@@ -8,6 +9,11 @@ function PositionReport() {
         {" "}
         {/* Add some margin at the top for spacing */}
         <PositionChart />
+      </div>
+      <div className="d-flex justify-content-center mt-5">
+        <Link to="/admin/home" className="btn btn-secondary">
+          Back To Dashboard
+        </Link>
       </div>
     </div>
   );

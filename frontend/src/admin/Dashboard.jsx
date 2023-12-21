@@ -187,7 +187,7 @@ function Dashboard() {
                 >
                   <i className="fs-4 bi-person"></i>{" "}
                   <span className="ms-1 d-none d-sm-inline">
-                    Manage Candidates
+                    Manage Candidate
                   </span>
                 </button>
                 {isCandidatesOpen && (
@@ -197,7 +197,7 @@ function Dashboard() {
                         to="/admin/candidate"
                         className="nav-link px-0 align-middle text-white"
                       >
-                        Display Candidates
+                        Display Candidate
                       </Link>
                     </li>
                     <li>
@@ -218,7 +218,7 @@ function Dashboard() {
                   style={{ background: "none", border: "none" }}
                 >
                   <i className="fs-4 bi-people"></i>{" "}
-                  <span className="ms-1 d-none d-sm-inline">Manage Voters</span>
+                  <span className="ms-1 d-none d-sm-inline">Manage Voter</span>
                 </button>
                 {isVotersOpen && (
                   <ul>
@@ -227,7 +227,7 @@ function Dashboard() {
                         to="/admin/voter"
                         className="nav-link px-0 align-middle text-white"
                       >
-                        Display Voters
+                        Display Voter
                       </Link>
                     </li>
                   </ul>
@@ -242,7 +242,7 @@ function Dashboard() {
                   >
                     <i className="fs-4 bi-people"></i>{" "}
                     <span className="ms-1 d-none d-sm-inline">
-                      Manage Admins
+                      Manage Admin
                     </span>
                   </button>
                   {isAdminsOpen && (

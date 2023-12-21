@@ -236,11 +236,11 @@ contract VotingSystem {
         return allVoters;
     }
 
-    function editUserStatus(uint256 _id, uint256 _status) public {
+    /* function editUserStatus(uint256 _id, uint256 _status) public {
         require(_id > 0 && _id <= voterCount, "User does not exist.");
 
         voters[_id].status = _status;
-    } 
+    } */
 
     // Function to update the token of a voter based on their email
     function updateVoterTokenByEmail(string memory _email, string memory _newToken) public {
