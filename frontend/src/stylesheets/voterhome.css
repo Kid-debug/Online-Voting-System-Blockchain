@@ -11,6 +11,9 @@ html {
   font-family: "Open Sans", sans-serif;
 }
 
+.voterhome {
+  background-color: #f5faff;
+}
 .container {
   max-width: 800px;
   margin: auto;

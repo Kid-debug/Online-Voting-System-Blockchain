@@ -87,7 +87,7 @@ function VoterDashboard() {
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
-    <div>
+    <div className="voterhome">
       <Header />
       <h2 className="mt-4">VOTER PORTAL</h2>
       <div className="container">

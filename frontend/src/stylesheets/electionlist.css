@@ -13,6 +13,10 @@
   border: 1px solid #dddddd;
 }
 
+.voterhome {
+  background-color: rgb(181, 218, 255);
+}
+
 .header_fixed thead th {
   position: sticky;
   top: 0;

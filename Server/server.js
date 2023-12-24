@@ -17,13 +17,10 @@ const { Web3 } = require("web3");
 const ganacheUrl = "HTTP://127.0.0.1:7545";
 const privateKey =
   "0x7e714a5c55233c1adc7400de839ece13c124d433b1266178211e948ffa1f7a5d";
-const { contractAddress } = require('../config-server');
+const { contractAddress } = require("../config-server");
 
 const web3 = new Web3(new Web3.providers.HttpProvider(ganacheUrl));
-const contract = new web3.eth.Contract(
-  votingContract.abi,
-  contractAddress
-);
+const contract = new web3.eth.Contract(votingContract.abi, contractAddress);
 const account = web3.eth.accounts.privateKeyToAccount(privateKey);
 web3.eth.accounts.wallet.add(account);
 
@@ -32,19 +29,35 @@ const changeEventDateStatus = async () => {
 
   // Call the getAllEvent function in smart contract
   const eventList = await contract.methods.getAllEvent().call();
+  const filteredEvents = eventList.filter(
+    (event) => Number(event.eventId) !== 0
+  );
 
   const currentTime = getCurrentDateTimeInMalaysia();
   const unixCurrentTime = new Date(currentTime).getTime() / 1000;
-  if (eventList != null) {
-    for (const event of eventList) {
+  if (filteredEvents != null) {
+    for (const event of filteredEvents) {
       try {
+ 
+        if(event.status == 1 && event.candidates.length !=0){
+          console.log("change status to Up Comming");
+          event.status = 2;
+          await contract.methods.updateEvent(event).send({
+            from: account.address,
+            gas: 200000,
+          });
+          break;          
+        }
+
         if (
           unixCurrentTime >= event.startDateTime &&
           unixCurrentTime <= event.endDateTime &&
-          event.status != 2
+          event.status != 3 &&
+          event.status != 1
         ) {
+          // 1- no candidates, 2- Upcomming, 3- Processing, 4- Marking Winner, 5 Completed
           console.log("change status to processing");
-          event.status = 2; // 1: Upcoming, 2: In Progress, 3: Completed, 4: Cancel
+          event.status = 3;
           await contract.methods.updateEvent(event).send({
             from: account.address,
             gas: 200000,
@@ -52,11 +65,12 @@ const changeEventDateStatus = async () => {
           break;
         } else if (
           unixCurrentTime > event.endDateTime &&
-          event.status != 3 &&
-          event.status != 4
+          event.status != 4 &&
+          event.status != 5 &&
+          event.status !=1
         ) {
-          console.log("change status to completed!");
-          event.status = 3; // 1: Upcoming, 2: In Progress, 3: Marking Wiiner, 4: Completed, 5: H   as no candidate
+          console.log("change status to Marking Winner!");
+          event.status = 4;
           await contract.methods.updateEvent(event).send({
             from: account.address,
             gas: 200000,
@@ -78,36 +92,27 @@ const markingWinner = async () => {
   const eventList = await contract.methods.getAllEvent().call();
   if (eventList != null) {
     for (const event of eventList) {
-      if (event.status == 3 && event.candidates!=null) {
-        const isMarkedWinner = await contract.methods
-          .isMarkWinner(event.categoryId, event.eventId)
-          .call();
-
-        if (!isMarkedWinner) {
-          console.log("Marking Winner");
-          try {
-            await contract.methods
-              .markWinner(event.categoryId, event.eventId)
-              .send({
-                from: account.address,
-                gas: 200000,
-              });
-
-            event.status = 4; // 1: Upcoming, 2: In Progress, 3: Marking Wiiner, 4: Completed
-            await contract.methods.updateEvent(event).send({
+      // 1- no candidates, 2- Upcomming, 3- Processing, 4- Marking Winner, 5 Completed
+      if (event.status == 4 && event.candidates.length != 0) {
+        console.log("Marking Winner");
+        try {
+          await contract.methods
+            .markWinner(event.categoryId, event.eventId)
+            .send({
               from: account.address,
               gas: 200000,
             });
-            console.log("Marking End");
-          } catch (error) {
-            console.error("Error counting winner : ", error.message);
-          }
-          event.status = 4; // 1: Upcoming, 2: In Progress, 3: Marking Wiiner, 4: Completed
+
+          event.status = 5; // update to complete status
           await contract.methods.updateEvent(event).send({
             from: account.address,
             gas: 200000,
           });
+
           console.log("Marking End");
+          console.log("postion completed");
+        } catch (error) {
+          console.error("Error counting winner : ", error.message);
         }
       }
     }

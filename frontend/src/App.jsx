@@ -72,9 +72,9 @@ function App() {
           <Route path="/reset-password/:token" element={<ResetPassword />} />
 
           <Route
-            element={
-              <RequireAuth allowedRoles={[ROLES.Admin, ROLES.SuperAdmin]} />
-            }
+            // element={
+            //   <RequireAuth allowedRoles={[ROLES.Admin, ROLES.SuperAdmin]} />
+            // }
           >
             <Route path="/admin" element={<Dashboard />}>
               {/* The "index" route represents the default child route */}

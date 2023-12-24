@@ -10,6 +10,7 @@ import { contractAddress } from "../../config";
 import "./stylesheets/votehistory.css";
 import Swal from "sweetalert";
 import Select from "react-select";
+import "./stylesheets/voterhome.css";
 
 function ElectionResult() {
   const [startDate, setStartDate] = useState(null);
@@ -180,7 +181,7 @@ function ElectionResult() {
   };
 
   return (
-    <div>
+    <div className="voterhome">
       <Header />
       <div style={{ margin: "20px" }}>
         <h1>Elecetion Result</h1>

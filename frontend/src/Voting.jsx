@@ -9,6 +9,7 @@ import votingContract from "../../build/contracts/VotingSystem.json";
 import { useParams } from "react-router-dom";
 import Swal from "sweetalert";
 import winnerIcon from "./images/winner-icon.png";
+import "./stylesheets/voterhome.css";
 
 function Voting() {
   const [candidates, setCandidates] = useState([]);
@@ -164,10 +165,10 @@ function Voting() {
   const navigate = useNavigate();
 
   return (
-    <div>
+    <div className="voterhome">
       <Header />
 
-      <div className="container mt-5 pt-5">
+      <div className="container mt-5 pt-5" >
         {/* President */}
         <div className="grey-container">
           <h2 style={{ textAlign: "center" }}>
@@ -194,11 +195,11 @@ function Voting() {
                   name="candidatePresident"
                   value={Number(candidate.id)}
                   checked={selectedCandidateId === candidate.id}
-                  disabled={eventStatus !== 3}
+                  disabled={isClose}
                   onChange={() => handleRadioClickPresident(candidate.id)}
                   style={{ display: "none" }}
                 />
-                <div className="flex-row">
+                <div className="flex-row" style={{  width:"500px" }}>
                   <div className="col">
                     {isEnd && (
                       <p style={{ fontSize: "19px" }}>
@@ -235,7 +236,7 @@ function Voting() {
                       <strong>{candidate.name}</strong>
                     </h4>
                     <h5>{Number(candidate.studentId)}</h5>
-                    <p className="description" style={{ fontSize: "17px" }}>
+                    <p className="description" style={{ fontSize: "17px", textAlign: "center", width:"100%"}}>
                       {expandedDescriptionPresident[candidate.name] ||
                       candidate.description.length <= 50
                         ? candidate.description

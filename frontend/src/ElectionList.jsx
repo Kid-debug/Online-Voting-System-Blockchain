@@ -177,11 +177,11 @@ function ElectionList() {
   };
 
   return (
-    <div>
+    <div className="voterhome">
       <Header />
       <div className="election-container">
         <h2 className="mt-5 mb-4">Election List : {categoryName}</h2>
-        <div className="input-group mb-3">
+        <div className="input-group mb-3" style={{margin:"auto", width:"90%" }}>
           <div className="input-group-prepend">
             <span className="input-group-text">
               <i className="bi bi-search"></i>
@@ -195,7 +195,7 @@ function ElectionList() {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <table className="data-table election-table mt-4">
+        <table className="data-table election-table mt-4" style={{margin:"auto", width:"90%" }}>
           <thead>
             <tr>
               <th>No.</th>
