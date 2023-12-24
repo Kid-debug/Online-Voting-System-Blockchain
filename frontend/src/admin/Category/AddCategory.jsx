@@ -25,7 +25,7 @@ function AddCategory() {
 
       console.log("Attempting to add category...");
 
-    //  const web3 = new Web3(new Web3.providers.HttpProvider(ganacheUrl));
+      //  const web3 = new Web3(new Web3.providers.HttpProvider(ganacheUrl));
 
       const web3 = new Web3(window.ethereum);
       await window.ethereum.enable();
@@ -36,6 +36,17 @@ function AddCategory() {
         votingContract.abi,
         contractAddress
       );
+
+      //Check if the category name cannot be same with others when adding
+      // Fetch all categories
+      const categories = await contract.methods.getAllCategory().call();
+      const categoryNames = categories.map((category) => category.categoryName);
+
+      // Check if the category name already exists
+      if (categoryNames.includes(categoryName)) {
+        Swal("Error!", "This category name already exists.", "error");
+        return;
+      }
 
       //const account = web3.eth.accounts.privateKeyToAccount(privateKey);
       //web3.eth.accounts.wallet.add(account);
@@ -69,7 +80,7 @@ function AddCategory() {
       } else if (error.message) {
         errorMessage = error.message;
       }
-      Swal({
+      Swal.fire({
         icon: "error",
         title: "Error creating category!",
         text: errorMessage,

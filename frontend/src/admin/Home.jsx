@@ -1,59 +1,127 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Row, Col, Button, Dropdown, DropdownButton } from "react-bootstrap"; // Import Dropdown and DropdownButton
 import { FaBriefcase, FaUsers, FaUser, FaVoteYea } from "react-icons/fa"; // Import icons
 import "../stylesheets/home.css";
 import { Link } from "react-router-dom";
-import ApexChart from "./VoteTally"; // Import the ApexChart component
+import ApexChart from "./VoteTally";
+import Web3 from "web3";
+import votingContract from "../../../build/contracts/VotingSystem.json";
+import { contractAddress } from "../../../config";
 
 function Home() {
-  // State initialization
-  const [selectedCategory, setSelectedCategory] = useState(
-    "Computer Science Society"
-  );
-  const [selectedElection, setSelectedElection] =
-    useState("2023 FOCS Election");
-  const [selectedPosition, setSelectedPosition] = useState("President");
+  const [categoryCount, setCategoryCount] = useState(0);
+  const [candidateCount, setCandidateCount] = useState(0);
+  const [voterCount, setVoterCount] = useState(0);
+  const [positionCount, setPositionCount] = useState(0);
+
+  // Function to fetch category count from the smart contract
+  const fetchCategoryCount = async () => {
+    try {
+      const web3 = new Web3(window.ethereum);
+      const contract = new web3.eth.Contract(
+        votingContract.abi,
+        contractAddress
+      );
+      const result = await contract.methods.getAllCategory().call();
+      const newCategoryCount = result.length;
+      setCategoryCount(Number(newCategoryCount));
+    } catch (error) {
+      console.error("Error fetching category count:", error);
+    }
+  };
+
+  // useEffect to fetch category count when the component mounts
+  useEffect(() => {
+    fetchCategoryCount();
+  }, []);
+
+  const fetchCandidateCount = async () => {
+    try {
+      const web3 = new Web3(window.ethereum);
+      const contract = new web3.eth.Contract(
+        votingContract.abi,
+        contractAddress
+      );
+      const result = await contract.methods.getAllCandidates().call();
+      const newCandidateCount = result.length;
+      setCandidateCount(Number(newCandidateCount));
+    } catch (error) {
+      console.error("Error fetching candidate count:", error);
+    }
+  };
+
+  // useEffect to fetch candidate count when the component mounts
+  useEffect(() => {
+    fetchCandidateCount();
+  }, []);
+
+  const fetchVoterCount = async () => {
+    try {
+      const web3 = new Web3(window.ethereum);
+      const contract = new web3.eth.Contract(
+        votingContract.abi,
+        contractAddress
+      );
+      const allVoters = await contract.methods.getAllVoter().call();
+      const usersWithRoleU = allVoters.filter((voter) => voter.role === "U");
+      const newVoterCount = usersWithRoleU.length;
+      setVoterCount(Number(newVoterCount));
+    } catch (error) {
+      console.error("Error fetching voter count:", error);
+    }
+  };
+
+  // useEffect to fetch voter count when the component mounts
+  useEffect(() => {
+    fetchVoterCount();
+  }, []);
+
+  const fetchPositionCount = async () => {
+    try {
+      const web3 = new Web3(window.ethereum);
+      const contract = new web3.eth.Contract(
+        votingContract.abi,
+        contractAddress
+      );
+      const result = await contract.methods.getAllEvent().call();
+      const newPositionCount = result.length;
+      setPositionCount(Number(newPositionCount));
+    } catch (error) {
+      console.error("Error fetching position count:", error);
+    }
+  };
+
+  // useEffect to fetch position count when the component mounts
+  useEffect(() => {
+    fetchPositionCount();
+  }, []);
 
   // Define mock data (replace with your actual data fetching)
   const data = [
     {
       label: "No. of Categories",
-      value: 5,
+      value: categoryCount,
       icon: <FaBriefcase size={30} />,
-      route: "/position",
+      route: "/admin/category",
     },
     {
       label: "No. of Candidates",
-      value: 10,
+      value: candidateCount,
       icon: <FaUsers size={35} />,
-      route: "/candidate",
+      route: "/admin/candidate",
     },
     {
-      label: "Total Voters",
-      value: 5,
+      label: "No. of Voters",
+      value: voterCount,
       icon: <FaUser size={30} />,
-      route: "/voter",
+      route: "/admin/voter",
     },
     {
-      label: "Active Elections",
-      value: 1,
+      label: "No. of Position",
+      value: positionCount,
       icon: <FaVoteYea size={35} />,
-      route: "/election",
+      route: "/admin/position",
     },
-  ];
-
-  const categories = [
-    "President",
-    "Vice President",
-    "Secretary",
-    "Treasurer",
-    "Committee Member",
-  ];
-
-  const elections = [
-    "2023 SRC Election",
-    "2023 FOCS Election",
-    "2023 FAFB Election",
   ];
 
   // Function to render the circle tiles
@@ -117,52 +185,6 @@ function Home() {
               {/* Category Dropdown */}
               <h3>Votes Tally</h3>
               <div className="bordered-div">
-                <div>
-                  <label>Select Category: </label>
-                  <select
-                    value={selectedCategory}
-                    onChange={(e) => setSelectedCategory(e.target.value)}
-                  >
-                    <option value="">--Select Category--</option>
-                    {/* Example categories - you can populate these based on your actual data */}
-                    <option value="category1">Category 1</option>
-                    <option value="category2">Category 2</option>
-                    <option value="category3">Category 3</option>
-                  </select>
-                </div>
-
-                {/* Election Dropdown */}
-                <div>
-                  <label>Select Election: </label>
-                  <select
-                    value={selectedElection}
-                    onChange={(e) => setSelectedElection(e.target.value)}
-                  >
-                    <option value="">--Select Election--</option>
-                    {/* Example elections - you can populate these based on your actual data */}
-                    <option value="election1">Election 1</option>
-                    <option value="election2">Election 2</option>
-                    <option value="election3">Election 3</option>
-                  </select>
-                </div>
-
-                {/* Position Dropdown */}
-                <div>
-                  <label>Select Position: </label>
-                  <select
-                    value={selectedPosition}
-                    onChange={(e) => setSelectedPosition(e.target.value)}
-                  >
-                    <option value="">--Select Position--</option>
-                    {/* Example positions - you can populate these based on your actual data */}
-                    <option value="position1">Position 1</option>
-                    <option value="position2">Position 2</option>
-                    <option value="position3">Position 3</option>
-                  </select>
-                </div>
-                <h3>
-                  {selectedCategory} - {selectedElection} - {selectedPosition}
-                </h3>
                 <div className="d-flex justify-content"></div>
                 <ApexChart />
               </div>

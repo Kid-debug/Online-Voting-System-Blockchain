@@ -28,23 +28,27 @@ function AdminPage() {
         contractAddress
       );
 
-      const adminList = await contract.methods.getAllAdmin().call();
+      const adminList = await contract.methods.getAllVoter().call();
       const formattedAdmins = adminList
-        .filter((admin) => Number(admin.id) !== 0)
+        .filter(
+          (admin) =>
+            Number(admin.id) !== 0 && (admin.role === "A" || admin.role === "S")
+        )
         .map((admin) => ({
           ID: Number(admin.id),
           Email: admin.email,
-          Status: admin.status,
+          Status: admin.role === "S" ? "1" : admin.status,
           Role: admin.role === "A" ? "Admin" : "Super Admin",
         }));
 
       setAdmins(formattedAdmins);
+      console.log(formattedAdmins);
     } catch (error) {
       console.error("Error fetching admins:", error);
     }
   };
 
-  const columns = ["ID", "Email", "Role", "Status", "Action"];
+  const columns = ["ID", "Email", "Role", "Status"];
 
   // Function to handle sorting
   const handleSort = (column) => {
@@ -118,16 +122,16 @@ function AdminPage() {
     setCurrentPage(1); // Reset to the first page when changing items per page
   };
 
-  const handleBlockClick = () => {
-    // Call to SweetAlert to show the modal
-    Swal({
-      title: "Blocked",
-      text: "Super Admin account is restricted from updating details!",
-      icon: "warning",
-      buttons: "OK",
-      dangerMode: true,
-    });
-  };
+  // const handleBlockClick = () => {
+  //   // Call to SweetAlert to show the modal
+  //   Swal({
+  //     title: "Blocked",
+  //     text: "Super Admin account is restricted from updating details!",
+  //     icon: "warning",
+  //     buttons: "OK",
+  //     dangerMode: true,
+  //   });
+  // };
 
   const updateAdminStatus = async (adminId, newStatus) => {
     try {
@@ -234,7 +238,7 @@ function AdminPage() {
         <tbody>
           {currentItems.length === 0 ? (
             <tr>
-              <td colSpan={columns.length} className="text-center">
+              <td colSpan={columns.length} className="text-center data-cell">
                 No matching records found
               </td>
             </tr>
@@ -254,33 +258,36 @@ function AdminPage() {
                           }
                           disabled={admin.Role !== "Admin"}
                         >
+                          <option value="0" disabled>
+                            No Verified
+                          </option>
                           <option value="1">Verified</option>
                           <option value="2">Banned</option>
                         </select>
                       </td>
                     );
-                  } else if (column === "Action") {
-                    // Provide action buttons based on role
-                    return (
-                      <td key={colIndex} className="data-cell">
-                        {admin.Role === "Admin" && (
-                          <Link
-                            to={`/admin/editAdmin/${admin.ID}`}
-                            className="btn btn-primary btn-lg block"
-                          >
-                            <i className="bi bi-pencil"></i>
-                          </Link>
-                        )}
-                        {admin.Role === "Super Admin" && (
-                          <button
-                            onClick={handleBlockClick}
-                            className="btn btn-danger btn-lg block"
-                          >
-                            <i className="bi bi-pencil"></i>
-                          </button>
-                        )}
-                      </td>
-                    );
+                    // } else if (column === "Action") {
+                    //   // Provide action buttons based on role
+                    //   return (
+                    //     <td key={colIndex} className="data-cell">
+                    //       {admin.Role === "Admin" && (
+                    //         <Link
+                    //           to={`/admin/editAdmin/${admin.ID}`}
+                    //           className="btn btn-primary btn-lg block"
+                    //         >
+                    //           <i className="bi bi-pencil"></i>
+                    //         </Link>
+                    //       )}
+                    //       {admin.Role === "Super Admin" && (
+                    //         <button
+                    //           onClick={handleBlockClick}
+                    //           className="btn btn-danger btn-lg block"
+                    //         >
+                    //           <i className="bi bi-pencil"></i>
+                    //         </button>
+                    //       )}
+                    //     </td>
+                    //   );
                   } else {
                     // For all other columns, just display the value
                     return (
@@ -340,6 +347,9 @@ function AdminPage() {
           </label>
         </div>
       )}
+      <Link to="/admin/home" className="btn btn-secondary mt-5">
+        Back To Dashboard
+      </Link>
     </div>
   );
 }

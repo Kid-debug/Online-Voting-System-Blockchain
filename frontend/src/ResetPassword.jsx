@@ -7,7 +7,6 @@ import votingContract from "../../build/contracts/VotingSystem.json";
 import { contractAddress } from "../../config";
 
 function ResetPassword() {
-  const [verificationCode, setVerificationCode] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [backendErrors, setBackendErrors] = useState([]);
@@ -15,12 +14,14 @@ function ResetPassword() {
   const [errorMessage, setErrorMessage] = useState("");
   const [visible, setVisible] = useState(false);
   const { token } = useParams();
+  const [isTokenValid, setIsTokenValid] = useState(false);
 
   useEffect(() => {
-    checkResetPasswordToken();
+    // When component mounts, check for token validity
+    checkTokenValidity();
   }, [token]);
 
-  const checkResetPasswordToken = async () => {
+  const checkTokenValidity = async () => {
     try {
       const web3 = new Web3(window.ethereum);
       await window.ethereum.enable();
@@ -28,45 +29,26 @@ function ResetPassword() {
         votingContract.abi,
         contractAddress
       );
+      const allVoters = await contract.methods.getAllVoter().call();
 
-      const response = await contract.methods
-        .isResetPasswordTokenValid(token)
-        .call();
-      const isValid = response[0];
-      console.log(isValid);
-      const email = response[1];
-      console.log(email);
+      const tokenExists = allVoters.some((voter) => voter.token === token);
+      setIsTokenValid(tokenExists);
 
-      if (!isValid) {
-        setErrorMessage(
-          "The link has expired or invalid token. Please try again."
-        );
-      } else {
-        const emailExists = await contract.methods
-          .checkUserExistByEmail(email)
-          .call();
-        if (!emailExists) {
-          setErrorMessage("This account is not found.");
-        }
+      if (!tokenExists) {
+        setErrorMessage("The token is invalid or token has been used.");
       }
     } catch (error) {
-      let errorMessage = "An error occurred while adding the reset password.";
-      // Check if the error message includes a revert
-      if (error.message && error.message.includes("revert")) {
-        const matches = error.message.match(/revert (.+)/);
-        errorMessage =
-          matches && matches[1]
-            ? matches[1]
-            : "Transaction reverted without a reason.";
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-
-      setErrorMessage(errorMessage);
+      console.error("Error fetching all voters:", error);
+      setErrorMessage("An error occurred while checking the token validity.");
     }
   };
 
   const handleResetPassword = async (event) => {
+    if (!isTokenValid) {
+      setErrorMessage("The token is invalid or has expired.");
+      return;
+    }
+
     event.preventDefault();
 
     const errors = validateResetPassword();
@@ -86,40 +68,18 @@ function ResetPassword() {
           contractAddress
         );
 
-        const response = await contract.methods
-          .isResetPasswordTokenValid(token)
-          .call();
-        const isValid = response[0];
-        console.log(isValid);
-        const email = response[1];
-        console.log(email);
+        //before update, i need to get the key
+        const allVoters = await contract.methods.getAllVoter().call();
 
-        // Check if reset password token is valid
-        if (!isValid) {
-          throw new Error(
-            "The link has expired or the token is invalid. Please try again."
-          );
-        }
-
-        // Check if the email from the token exists
-        const emailExists = await contract.methods
-          .checkUserExistByEmail(email)
-          .call();
-        if (!emailExists) {
-          throw new Error("This account is not found.");
-        }
-
-        // Check if the verification code is valid
-        const isCodeValid = await contract.methods
-          .isVerificationCodeValid(verificationCode)
-          .call();
-        if (!isCodeValid) {
-          throw new Error("The verification code is incorrect.");
+        const voter = allVoters.find((v) => v.token === token);
+        if (!voter) {
+          setErrorMessage("Invalid token or token has been used.");
+          return;
         }
 
         // Update the password in the smart contract
         await contract.methods
-          .updateUserPassword(email, password)
+          .updateVoterPassword(voter.key, password)
           .send({ from: accounts[0] });
 
         setSuccessMessage("You have successfully changed your password.");
@@ -148,14 +108,6 @@ function ResetPassword() {
 
   const validateResetPassword = () => {
     const errors = {};
-
-    // Check if verification code is not empty
-    if (!verificationCode) {
-      errors.verificationCode = "• Verification Code is required";
-    } else if (!/^\d{6}$/.test(verificationCode)) {
-      // Check if verification code is exactly 6 digits
-      errors.verificationCode = "• Verification Code must be exactly 6 digits";
-    }
 
     // Check if password is not empty and meets requirements
     if (!password.trim()) {
@@ -252,21 +204,6 @@ function ResetPassword() {
               </div>
             )}
             <form onSubmit={handleResetPassword}>
-              <div className="mb-4">
-                <label htmlFor="verification-code">
-                  <strong>Verification Code</strong>
-                </label>
-                <input
-                  type="text"
-                  placeholder="Enter 6-digit Verification Code"
-                  name="password-confirm"
-                  className="form-control rounded-0"
-                  value={verificationCode}
-                  onChange={(e) => setVerificationCode(e.target.value)}
-                  maxLength={6}
-                />
-              </div>
-
               <div className="mb-4 position-relative">
                 <label htmlFor="password">
                   <strong>Password</strong>

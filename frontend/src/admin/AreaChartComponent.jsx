@@ -1,54 +1,139 @@
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
 import CanvasJSReact from "@canvasjs/react-charts";
+import Web3 from "web3";
+import votingContract from "../../../build/contracts/VotingSystem.json";
+import { contractAddress } from "../../../config";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 const CanvasJSChart = CanvasJSReact.CanvasJSChart;
 
-class AreaChartComponent extends Component {
-  render() {
-    const options = {
-      theme: "light2",
-      animationEnabled: true,
-      exportEnabled: true,
-      title: {
-        text: "Number of Voters Voted in 2023",
-      },
-      axisX: {
-        valueFormatString: "MMMM", // Formatting the x-axis to display months
-      },
-      axisY: {
-        title: "Number of Voter",
-        minimum: 0, // Setting minimum value for y-axis
-        maximum: 1000, // Setting maximum value for y-axis
-      },
-      data: [
-        {
-          type: "area",
-          xValueFormatString: "MMMM YYYY",
-          yValueFormatString: "#,##0",
-          dataPoints: [
-            { x: new Date(2023, 0), y: 76 },
-            { x: new Date(2023, 1), y: 78 },
-            { x: new Date(2023, 2), y: 73 },
-            { x: new Date(2023, 3), y: 75 },
-            { x: new Date(2023, 4), y: 74 },
-            { x: new Date(2023, 5), y: 79 },
-            { x: new Date(2023, 6), y: 80 },
-            { x: new Date(2023, 7), y: 81 },
-            { x: new Date(2023, 8), y: 77 },
-            { x: new Date(2023, 9), y: 70 },
-            { x: new Date(2023, 10), y: 200 },
-            { x: new Date(2023, 11), y: 500 },
-          ],
-        },
-      ],
+const AreaChartComponent = () => {
+  const [yearlyVoteCounts, setYearlyVoteCounts] = useState([]);
+  const [selectedYear, setSelectedYear] = useState(null);
+
+  useEffect(() => {
+    const fetchVoteCountByYear = async () => {
+      const web3 = new Web3(window.ethereum);
+      await window.ethereum.enable();
+      const contract = new web3.eth.Contract(
+        votingContract.abi,
+        contractAddress
+      );
+
+      const categories = await contract.methods.getAllCategory().call();
+      let votesByYear = {};
+
+      for (let category of categories) {
+        const events = await contract.methods
+          .getAllCategoryEvent(category.categoryId)
+          .call();
+        for (let event of events) {
+          const year = new Date(
+            parseInt(event.endDateTime) * 1000
+          ).getFullYear();
+          votesByYear[year] = votesByYear[year] || 0;
+
+          const candidates = await contract.methods
+            .getAllCandidatesInEvent(category.categoryId, event.eventId)
+            .call();
+          console.log(candidates);
+          for (let candidate of candidates) {
+            votesByYear[year] += parseInt(candidate.voteCount);
+          }
+        }
+      }
+      console.log("Total votes by year:", votesByYear);
+      const sortedYears = Object.entries(votesByYear).map(([year, votes]) => ({
+        year,
+        votes,
+      }));
+      sortedYears.sort((a, b) => parseInt(b.year) - parseInt(a.year)); // Sort years
+      setYearlyVoteCounts(sortedYears);
+      if (sortedYears.length > 0) {
+        setSelectedYear(sortedYears[0].year.toString()); // Set default selected year
+      }
     };
 
-    return (
-      <div>
-        <CanvasJSChart options={options} />
-      </div>
+    fetchVoteCountByYear();
+  }, []);
+
+  const handleYearChange = (event) => {
+    setSelectedYear(event.target.value);
+  };
+
+  const exportChart = async (type) => {
+    const canvas = await html2canvas(
+      document.querySelector(".canvasjs-chart-canvas")
     );
-  }
-}
+    const image = canvas.toDataURL(`image/${type}`);
+    const downloadLink = document.createElement("a");
+    downloadLink.href = image;
+    downloadLink.download = `chart.${type}`;
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+  };
+
+  const filteredDataPoints = selectedYear
+    ? yearlyVoteCounts.filter((data) => data.year.toString() === selectedYear)
+    : yearlyVoteCounts;
+
+  const options = {
+    animationEnabled: true,
+    title: {
+      text: `Total Vote Counts - ${selectedYear}`,
+    },
+    axisX: {
+      title: "Year",
+    },
+    axisY: {
+      title: "Number of Votes",
+      includeZero: true,
+      interval: 1, // Set interval as 1 for whole numbers
+      valueFormatString: "#0", // Format labels as integers
+      gridThickness: 0, // This will remove the grid lines
+      tickLength: 0,
+    },
+    data: [
+      {
+        type: "bar",
+        dataPoints: filteredDataPoints.map((voteCount) => ({
+          label: voteCount.year.toString(),
+          y: voteCount.votes,
+        })),
+      },
+    ],
+  };
+
+  return (
+    <div>
+      <label htmlFor="year-select">Select Year: </label>
+      <select
+        id="year-select"
+        onChange={handleYearChange}
+        value={selectedYear || "All Years"}
+      >
+        {yearlyVoteCounts.map((voteCount) => (
+          <option key={voteCount.year} value={voteCount.year.toString()}>
+            {voteCount.year}
+          </option>
+        ))}
+      </select>
+      <CanvasJSChart options={options} />
+      <div>
+        <button style={{ margin: "10px" }} onClick={() => exportChart("jpg")}>
+          Export as JPG
+        </button>
+        <button style={{ margin: "10px" }} onClick={() => exportChart("png")}>
+          Export as PNG
+        </button>
+        <button style={{ margin: "10px" }} onClick={() => exportChart("pdf")}>
+          Export as PDF
+        </button>
+      </div>
+    </div>
+  );
+};
 
 export default AreaChartComponent;

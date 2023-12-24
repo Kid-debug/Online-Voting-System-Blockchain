@@ -88,7 +88,7 @@ function ElectionList() {
             .call();
 
           let votetotal = 0;
-          for(let i=0; i<candidates.length;i++){
+          for (let i = 0; i < candidates.length; i++) {
             votetotal += Number(candidates[i].voteCount);
           }
 
@@ -100,7 +100,7 @@ function ElectionList() {
             eventStatus: Number(event.status),
             eventStartDate: Number(event.startDateTime),
             eventEndDate: Number(event.endDateTime),
-            eventVoteTotal : votetotal
+            eventVoteTotal: votetotal,
           };
         });
 
@@ -179,7 +179,7 @@ function ElectionList() {
   return (
     <div className="voterhome">
       <Header />
-      <div className="election-container">
+      <div className="election-container mb-5">
         <h2 className="mt-5 mb-4">Election List : {categoryName}</h2>
         <div className="input-group mb-3" style={{margin:"auto", width:"90%" }}>
           <div className="input-group-prepend">

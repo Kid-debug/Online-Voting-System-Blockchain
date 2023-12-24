@@ -15,7 +15,7 @@ function Position() {
   const [sortColumn, setSortColumn] = useState(null);
   const [sortDirection, setSortDirection] = useState(null);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
-  const [categoryToDelete, setCategoryToDelete] = useState(null);
+  const [eventToDelete, setEventToDelete] = useState(null);
   const [currentDateTime, setCurrentDatetTime] = useState();
 
   useEffect(() => {
@@ -70,6 +70,7 @@ function Position() {
         return {
           eventId: Number(event.eventId),
           eventName: event.eventName,
+          eventDesc: event.eventDesc,
           categoryId: event.categoryId,
           categoryName: categoryName.categoryName,
           candidatesCount: Number(event.candidateCount),
@@ -81,7 +82,7 @@ function Position() {
 
       // Await all the promises and then filter the results
       const formattedEvents = await Promise.all(eventPromises);
-
+      formattedEvents.sort((a, b) => a.eventId - b.eventId);
       setEvents(formattedEvents);
     } catch (error) {
       console.error("Error fetching Event:", error);
@@ -92,6 +93,7 @@ function Position() {
   const columnMapping = {
     eventId: "ID",
     eventName: "Event Name",
+    eventDesc: "Event Description",
     categoryName: "Category Name",
     candidatesCount: "Candidates",
     eventStatus: "Status",
@@ -104,6 +106,7 @@ function Position() {
   const columns = [
     "eventId",
     "eventName",
+    "eventDesc",
     "categoryName",
     "candidatesCount",
     "eventStatus",
@@ -111,6 +114,16 @@ function Position() {
     "eventEndDate",
     "Action",
   ];
+
+  const [expandedCategory, setExpandedCategory] = useState(null);
+
+  const toggleExpand = (categoryID) => {
+    if (expandedCategory === categoryID) {
+      setExpandedCategory(null);
+    } else {
+      setExpandedCategory(categoryID);
+    }
+  };
 
   // Function to handle sorting
   const handleSort = (column) => {
@@ -129,17 +142,17 @@ function Position() {
     const status = election.eventStatus;
     if (status == 1) {
       return "No Candidates";
-    } 
+    }
     if (status == 2) {
       return "Up Comming";
-    } 
+    }
     if (status == 3) {
       return "Processing";
-    } 
+    }
     if (status == 4) {
       return "Marking Winner";
-    } 
-    if(status == 5) {
+    }
+    if (status == 5) {
       return "Complete";
     }
   };
@@ -226,6 +239,24 @@ function Position() {
     setEventToDelete(null);
   };
 
+  const canDeleteEvent = (event) => {
+    if (event.eventStatus === 1 || event.eventStatus === 2) {
+      if (event.candidatesCount === 0) {
+        return true; // Can be deleted
+      } else {
+        Swal("Error!", "Cannot delete event with candidates.", "error");
+        return false;
+      }
+    } else {
+      Swal(
+        "Error!",
+        "Cannot delete event with status other than 1 or 2.",
+        "error"
+      );
+      return false;
+    }
+  };
+
   const confirmDelete = async () => {
     if (!eventToDelete) return;
 
@@ -244,6 +275,44 @@ function Position() {
         votingContract.abi,
         contractAddress
       );
+
+      const allEvents = await contract.methods.getAllEvent().call();
+      const event = allEvents.find(
+        (event) =>
+          event.categoryId === categoryId && Number(event.eventId) === eventId
+      );
+
+      console.log(categoryId, eventId);
+      console.log(event.status);
+
+      // Check if the category exists
+      if (!event) {
+        Swal({
+          icon: "error",
+          title: "Error Deleting Event!",
+          text: "Event not found.",
+        });
+        return;
+      }
+
+      // Validate if the event can be deleted
+      const isStatusValid =
+        Number(event.status) === 1 || Number(event.status) === 2;
+      const hasNoCandidates = event.candidates.length === 0;
+
+      if (!isStatusValid) {
+        Swal(
+          "Error!",
+          "Cannot delete event when the event is processing, marking winner or completed.",
+          "error"
+        );
+        return;
+      }
+
+      if (Number(event.status) === 2 && !hasNoCandidates) {
+        Swal("Error!", "Cannot delete event with candidates.", "error");
+        return;
+      }
 
       // Call the deleteEvent function in your smart contract
       await contract.methods.deleteEvent(categoryId, eventId).send({
@@ -348,7 +417,7 @@ function Position() {
         <tbody>
           {currentItems.length === 0 ? (
             <tr>
-              <td colSpan={columns.length} className="text-center">
+              <td colSpan={columns.length} className="text-center data-cell">
                 No matching records found
               </td>
             </tr>
@@ -357,25 +426,58 @@ function Position() {
               <tr key={rowIndex}>
                 {columns.map((column, colIndex) => (
                   <td key={colIndex} className="data-cell">
-                    {column === "Action" ? (
-                
-                      row.eventStatus !== 5 &&  row.eventStatus !== 4 && (
+                    {column === "eventDesc" ? (
                       <>
-                        <Link
-                          to={`/admin/editPosition/${row.categoryId}/${row.eventId}`}
-                          className="btn btn-primary btn-sm"
-                        >
-                          <i className="fs-4 bi-pencil"></i>
-                        </Link>
-                        <button
-                          onClick={() =>
-                            handleDeleteEvent(row.categoryId, row.eventId)
-                          }
-                          className="btn btn-danger btn-sm"
-                        >
-                          <i className="fs-4 bi-trash"></i>
-                        </button>
+                        {row[column].length > 50 &&
+                        expandedCategory !== row.ID ? (
+                          <>
+                            {`${row[column].substring(0, 50)}... `}
+                            <button
+                              onClick={() => toggleExpand(row.ID)}
+                              className="btn btn-link p-0"
+                            >
+                              Read More
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <span
+                              style={{
+                                wordBreak: "break-all",
+                              }}
+                            >
+                              {row[column]}
+                            </span>
+                            {row[column].length > 50 && (
+                              <button
+                                onClick={() => toggleExpand(row.ID)}
+                                className="btn btn-link p-0"
+                              >
+                                Read Less
+                              </button>
+                            )}
+                          </>
+                        )}
                       </>
+                    ) : column === "Action" ? (
+                      row.eventStatus !== 5 &&
+                      row.eventStatus !== 4 && (
+                        <>
+                          <Link
+                            to={`/admin/editPosition/${row.categoryId}/${row.eventId}`}
+                            className="btn btn-primary btn-sm"
+                          >
+                            <i className="fs-4 bi-pencil"></i>
+                          </Link>
+                          <button
+                            onClick={() =>
+                              handleDeleteEvent(row.categoryId, row.eventId)
+                            }
+                            className="btn btn-danger btn-sm"
+                          >
+                            <i className="fs-4 bi-trash"></i>
+                          </button>
+                        </>
                       )
                     ) : column === "eventStatus" ? (
                       getElectionStatus(row)
@@ -469,6 +571,9 @@ function Position() {
           </label>
         </div>
       )}
+      <Link to="/admin/home" className="btn btn-secondary mt-5">
+        Back To Dashboard
+      </Link>
     </div>
   );
 }

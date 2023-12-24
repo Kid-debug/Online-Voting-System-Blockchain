@@ -183,8 +183,74 @@ function EditCandidate() {
         contractAddress
       );
 
+      const allCandidates = await contract.methods.getAllCandidates().call();
+      const candidates = allCandidates.find(
+        (candidate) =>
+          Number(candidate.categoryId) === selectedCategoryId &&
+          Number(candidate.eventId) === selectedEventId &&
+          String(candidate.id) === candidateId
+      );
+
+      console.log(selectedCategoryId, selectedEventId, candidateId);
+      console.log(candidates);
+
+      const allEvents = await contract.methods.getAllEvent().call();
+      const events = allEvents.find(
+        (event) =>
+          Number(event.categoryId) === selectedCategoryId &&
+          Number(event.eventId) === selectedEventId
+      );
+
+      console.log(events.status);
+
+      // Check if the event exists
+      if (!candidates) {
+        Swal({
+          icon: "error",
+          title: "Error Editing Candidate!",
+          text: "Candidate not found.",
+        });
+        await deleteImageFile(imageFileNameToUse);
+        return;
+      }
+
+      //Check if the student id cannot be same with others except for itself
+      const isStudentIdTaken = allCandidates.some(
+        (otherCandidate) =>
+          Number(otherCandidate.studentId) === Number(candidateStdId) &&
+          String(otherCandidate.id) !== candidateId &&
+          Number(otherCandidate.categoryId) === Number(selectedCategoryId) &&
+          Number(otherCandidate.eventId) === Number(selectedEventId)
+      );
+
+      if (isStudentIdTaken) {
+        Swal(
+          "Error!",
+          "This student ID is already taken by another candidate.",
+          "error"
+        );
+
+        await deleteImageFile(imageFileNameToUse);
+        return; // Exit the function if the student ID is taken
+      }
+
+      // Validate if the event can be edited
+      const isStatusValid =
+        Number(events.status) === 1 || Number(events.status) === 2;
+
+      if (!isStatusValid) {
+        Swal(
+          "Error!",
+          "Cannot edit event when the event is processing, marking winner or completed.",
+          "error"
+        );
+
+        await deleteImageFile(imageFileNameToUse);
+        return;
+      }
+
       await contract.methods
-        .updateCandidate(
+        .updateCandidateDetails(
           candidateId,
           candidateName,
           candidateDesc,
@@ -248,6 +314,29 @@ function EditCandidate() {
       }
     }
   };
+
+  // Define the function to delete the file
+  async function deleteImageFile(imageFileName) {
+    // Check if the image file name is used by any candidate
+    const web3 = new Web3(window.ethereum);
+    await window.ethereum.enable();
+    const accounts = await web3.eth.getAccounts();
+    const contract = new web3.eth.Contract(votingContract.abi, contractAddress);
+    const imageInUse = await contract.methods
+      .isImageFileNameUsed(imageFileName)
+      .call();
+
+    // If the image file name is not in use, delete the file
+    if (!imageInUse) {
+      try {
+        await axios.delete("/deleteFile", {
+          data: { filename: imageFileName },
+        });
+      } catch (deleteError) {
+        console.error("Error deleting the file:", deleteError);
+      }
+    }
+  }
 
   return (
     <div className="d-flex flex-column align-items-center pt-4">

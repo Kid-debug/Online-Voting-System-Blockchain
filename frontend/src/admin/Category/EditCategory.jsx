@@ -40,7 +40,7 @@ function EditCategory() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!categoryName) {
+    if (!categoryName.trim()) {
       Swal("Error!", "Category input fields must be filled in.", "error");
       return;
     }
@@ -55,7 +55,29 @@ function EditCategory() {
       );
       const category = await contract.methods.getCategoryById(categoryId).call();
 
+<<<<<<< HEAD
       category.categoryName = categoryName;
+=======
+      // Fetch all categories
+      const allCategories = await contract.methods.getAllCategory().call();
+
+      // Check if another category with the same name exists (excluding the current category)
+      const isCategoryNameTaken = allCategories.some(
+        (cat) =>
+          cat.categoryName === categoryName &&
+          String(cat.categoryId) !== categoryId
+      );
+
+      if (isCategoryNameTaken) {
+        Swal(
+          "Error!",
+          "Category name already taken. Please choose a different name.",
+          "error"
+        );
+        return;
+      }
+
+>>>>>>> d1445e04e38b3f6a0df4176b260abc31a897e4cd
       await contract.methods
         .updateCategory(category)
         .send({ from: accounts[0] });

@@ -68,6 +68,7 @@ form.d-flex {
   overflow: hidden;
   margin-bottom: 20px; /* Space below each card */
   transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 10px 10px 15px #6d8dad;
 }
 
 /* Card interaction effects */

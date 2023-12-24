@@ -7,6 +7,7 @@ import Swal from "sweetalert";
 
 function AddPosition() {
   const [positionName, setPositionName] = useState("");
+  const [positionDesc, setPositionDesc] = useState("");
   const [selectedCategoryId, setSelectedCategoryId] = useState("");
   const [startDateAndTime, setStartDateAndTime] = useState("");
   const [endDateAndTime, setEndDateAndTime] = useState("");
@@ -75,6 +76,10 @@ function AddPosition() {
     setSelectedCategoryId(event.target.value);
   };
 
+  const handlePositonDescChange = (event) => {
+    setPositionDesc(event.target.value);
+  };
+
   const handleStartDateAndTimeChange = (event) => {
     setStartDateAndTime(event.target.value);
   };
@@ -108,12 +113,8 @@ function AddPosition() {
     console.log("Selected Category ID:", selectedCategoryId);
     try {
       // Ensure that positionName and selectedCategoryId are not empty
-      if (!positionName || !selectedCategoryId) {
-        Swal(
-          "Error!",
-          "Position name and category must be specified.",
-          "error"
-        );
+      if (!positionName || !positionDesc || !selectedCategoryId) {
+        Swal("Error!", "All input fields must be filled in.", "error");
         return;
       }
 
@@ -139,14 +140,47 @@ function AddPosition() {
       const startDateTime = new Date(startDateAndTime).getTime() / 1000;
       const endDateTime = new Date(endDateAndTime).getTime() / 1000;
 
+      
+      //Check if the category exists
+      const categoryExists = categories.some(
+        (category) => Number(category.categoryId) === Number(selectedCategoryId)
+      );
+      if (!categoryExists) {
+        Swal("Error!", "Selected category does not exist.", "error");
+        return;
+      }
+
+      //Check if the event name cannot be same with others when adding in the specified category
+      // Fetch all events in the selected category to check for unique event name
+      const categoryEvents = await contract.methods
+        .getAllCategoryEvent(selectedCategoryId)
+        .call();
+      const eventNameExists = categoryEvents.some(
+        (event) => event.eventName.toLowerCase() === positionName.toLowerCase()
+      );
+
+      if (eventNameExists) {
+        Swal(
+          "Error!",
+          "• This event name already existed in the selected category.",
+          "error"
+        );
+        return;
+      }
+
       // Perform the necessary action, e.g., sending a transaction
       const transaction = await contract.methods
-        .addEvent(selectedCategoryId, positionName, startDateTime, endDateTime)
+        .addEvent(
+          selectedCategoryId,
+          positionName,
+          positionDesc,
+          startDateTime,
+          endDateTime
+        )
         .send({
           from: accounts[0], // Assuming the user's account is the first account
         });
 
-        
       // prompt success message
       Swal({
         icon: "success",
@@ -213,6 +247,19 @@ function AddPosition() {
             placeholder="Enter your position name (e.g., President)"
             value={positionName}
             onChange={handlePositionChange}
+          />
+        </div>
+        <div className="col-12">
+          <label htmlFor="inputDescription4" className="form-label">
+            Position Description
+          </label>
+          <input
+            type="text"
+            className="form-control"
+            id="inputDescription4"
+            placeholder="Enter your position description"
+            value={positionDesc}
+            onChange={handlePositonDescChange}
           />
         </div>
         <div className="col-12">

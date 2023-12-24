@@ -7,6 +7,7 @@ import Swal from "sweetalert";
 
 function EditPosition() {
   const [positionName, setPositionName] = useState("");
+  const [positionDesc, setPositionDesc] = useState("");
   const [selectedCategoryId, setSelectedCategory] = useState("");
   const [categories, setCategories] = useState([]);
   const [startDateAndTime, setStartDateAndTime] = useState("");
@@ -49,6 +50,10 @@ function EditPosition() {
 
   const handlePositionChange = (event) => {
     setPositionName(event.target.value);
+  };
+
+  const handlePositonDescChange = (event) => {
+    setPositionDesc(event.target.value);
   };
 
   const handleStartDateAndTimeChange = (event) => {
@@ -95,6 +100,7 @@ function EditPosition() {
 
       setSelectedCategory(Number(event.categoryId));
       setPositionName(event.eventName);
+      setPositionDesc(event.eventDesc);
       // Convert BigInt timestamps to ISO format for datetime-local input
       if (!isNaN(Number(event.startDateTime))) {
         setStartDateAndTime(
@@ -152,11 +158,68 @@ function EditPosition() {
     // Ensure that positionName and selectedCategoryId are not empty
     if (
       !positionName ||
+      !positionDesc ||
       !selectedCategoryId ||
       !startDateAndTime ||
       !endDateAndTime
     ) {
       Swal("Error!", "All input fields must be filled in.", "error");
+      return;
+    }
+
+    const web3 = new Web3(window.ethereum);
+    await window.ethereum.enable();
+    const accounts = await web3.eth.getAccounts();
+    const contract = new web3.eth.Contract(votingContract.abi, contractAddress);
+
+    const allEvents = await contract.methods.getAllEvent().call();
+    const events = allEvents.find(
+      (event) =>
+        Number(event.categoryId) === selectedCategoryId &&
+        String(event.eventId) === eventId
+    );
+
+    console.log(selectedCategoryId, eventId);
+    console.log(events);
+    console.log(events.status);
+
+    // Check if the event exists
+    if (!events) {
+      Swal({
+        icon: "error",
+        title: "Error Editing Event!",
+        text: "Event not found.",
+      });
+      return;
+    }
+
+    // Check if the event name cannot be the same with others except for itself
+    const isEventNameTaken = allEvents.some(
+      (evt) =>
+        evt.eventName === positionName &&
+        String(evt.eventId) !== eventId &&
+        Number(evt.categoryId) === Number(selectedCategoryId)
+    );
+
+    if (isEventNameTaken) {
+      Swal(
+        "Error!",
+        "Event name already taken in this category. Please choose a different name.",
+        "error"
+      );
+      return;
+    }
+
+    // Validate if the event can be edited
+    const isStatusValid =
+      Number(events.status) === 1 || Number(events.status) === 2;
+
+    if (!isStatusValid) {
+      Swal(
+        "Error!",
+        "Cannot edit event when the event is processing, marking winner or completed.",
+        "error"
+      );
       return;
     }
 
@@ -179,14 +242,17 @@ function EditPosition() {
 
       const startDateTime = new Date(startDateAndTime).getTime() / 1000;
       const endDateTime = new Date(endDateAndTime).getTime() / 1000;
-      const event = await contract.methods
-        .getEventById(selectedCategoryId, eventId)
-        .call();
-      event.eventName = positionName;
-      event.startDateTime = startDateTime;
-      event.endDateTime = endDateTime;
 
-      await contract.methods.updateEvent(event).send({ from: accounts[0] });
+      await contract.methods
+        .updateEventDetails(
+          selectedCategoryId,
+          eventId,
+          positionName,
+          positionDesc,
+          startDateTime,
+          endDateTime
+        )
+        .send({ from: accounts[0] });
 
       Swal("Success!", "Position updated successfully.", "success");
     } catch (error) {
@@ -272,6 +338,19 @@ function EditPosition() {
             placeholder="Enter your position name (e.g., President)"
             value={positionName}
             onChange={handlePositionChange}
+          />
+        </div>
+        <div className="col-12">
+          <label htmlFor="inputDescription4" className="form-label">
+            Position Description
+          </label>
+          <input
+            type="text"
+            className="form-control"
+            id="inputDescription4"
+            placeholder="Enter your position description"
+            value={positionDesc}
+            onChange={handlePositonDescChange}
           />
         </div>
         <div className="col-12">

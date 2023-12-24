@@ -18,11 +18,11 @@
 }
 .bg-1 {
   flex: 1;
-  background-color: rgb(180, 243, 175);
+  background-color: #f5faff;
 }
 .bg-2 {
   flex: 1;
-  background-color: rgb(163, 236, 240);
+  background-color: #f5faff;
 }
 .about-container {
   width: 85%;

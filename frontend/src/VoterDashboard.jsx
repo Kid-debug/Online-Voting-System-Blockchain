@@ -89,8 +89,8 @@ function VoterDashboard() {
   return (
     <div className="voterhome">
       <Header />
-      <h2 className="mt-4">VOTER PORTAL</h2>
-      <div className="container">
+      <h2 className="mt-5 mb-5">VOTER PORTAL</h2>
+      <div className="container boxesss">
         <div id="categorybox" className="mt-4">
           <input
             className="search"
@@ -149,7 +149,7 @@ function VoterDashboard() {
         </nav>
       </div>
 
-      <div className="container container_instruction mb-4">
+      <div className="container container_instruction boxesss mb-4">
         <h3 id="round-corner">Voting Guidelines</h3>
         <p>
           Welcome to the online Voting Portal. This system is designed to
@@ -157,24 +157,23 @@ function VoterDashboard() {
           this manual, we will explain how to use the system as a user.
           <h5>1. Accessing Your Account</h5>
           To begin the voting process, log in to your account using your
-          registered user ID or email and your password. Ensure you have
-          completed the registration process as described in the previous
-          section.
+          registered email and your password.
           <h5>2. Selecting an Category</h5>
-          From your dashboard, you will see a list of categories. Click on the
-          category you wish to participate in to access the election list.
-          <h5>3. Selecting an Election</h5>
-          From your election list page, you will see a list of elections. Click
-          on the election you wish to participate in to access more election
+          From your view, you will see a list of categories in the home page.
+          Click on the category you wish to participate in to access the
+          position list.
+          <h5>3. Selecting an Position</h5>
+          From your position list page, you will see a list of positiona. Click
+          on the position you wish to participate in to access more position
           details.
-          <h5>3. Viewing the election details</h5>
-          From your election details page, you will see a the details such as
-          date and time. Click on the vote button if you want to continue the
-          voting process.
+          <h5>3. Viewing the Position Details</h5>
+          From your position details page, you will see a the details such as
+          position description. Click on the proceed to vote button if you want
+          to continue the voting process.
           <h5>4. Reviewing Candidates</h5>
-          Before casting your vote, take the time to review the candidates
-          running in the election. You can typically find candidate profiles and
-          their platforms to make an informed choice.
+          Before casting your vote, please review the candidates running in the
+          position. You can typically view candidate description to make an
+          informed choice.
           <h5>5. Casting Your Vote</h5>
           When you are ready to vote, select your preferred candidate by
           clicking on their name or designated area. Review your choice
@@ -183,13 +182,9 @@ function VoterDashboard() {
           After making your selection, you will be prompted to confirm your
           vote. Double-check that your chosen candidate is correct, and confirm
           your vote to complete the process.
-          <h5>7. Verify Your Vote</h5>
-          After confirming your vote, you will be prompted to enter your
-          verification code that we sent to your email to verify you vote.
-          <h5>8. Completed Your Vote</h5>
-          When you enter the correct verification code, your vote will be
-          counted and cannot make changes anymore. You can view the election
-          result after your voting.
+          <h5>7. Completed Your Vote</h5>
+          When you click the submit, your vote will be counted and cannot make
+          changes anymore. You can view the election result after your voting.
         </p>
       </div>
 

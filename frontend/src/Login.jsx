@@ -44,35 +44,53 @@ function Login() {
           .call();
 
         if (accountFound) {
-          const userStatus = await contract.methods
-            .getVoterStatus(values.email, values.password)
-            .call();
-          // user status; 0: no verify, 1: verified, 2:banned
-          if (userStatus == 1) {
-            // Login
-            const user = await contract.methods
-              .loginVoter(values.email, values.password)
-              .call();
-            sessionStorage.setItem("userKey", user.key);
-            console.log("user : ", user);
+          //check role whether is S or not
+          const voterList = await contract.methods.getAllVoter().call();
+          const superAdminVoter = voterList.find(
+            (voter) => voter.email === values.email && voter.role === "S"
+          );
 
+          console.log(superAdminVoter);
+
+          if (superAdminVoter) {
             setAuthData({
-              userKey: user.key,
-              userId: Number(user.id),
-              userRole: user.role,
-              email: user.email,
+              userKey: superAdminVoter.key,
+              userId: Number(superAdminVoter.id),
+              userRole: superAdminVoter.role,
+              email: superAdminVoter.email,
             });
-            console.log(user.role);
-            // navigate to home
-            if (user.role === "U") {
-              navigate(`/voterdashboard`);
-            } else {
-              navigate(`/admin/home`);
-            }
-          } else if (userStatus == 0) {
-            errors.wrongPassord = "• Account haven't verify.";
+            navigate(`/admin/home`);
           } else {
-            errors.wrongPassord = "• Account has been banned.";
+            const userStatus = await contract.methods
+              .getVoterStatus(values.email, values.password)
+              .call();
+            // user status; 0: no verify, 1: verified, 2:banned
+            if (userStatus == 1) {
+              // Login
+              const user = await contract.methods
+                .loginVoter(values.email, values.password)
+                .call();
+              sessionStorage.setItem("userKey", user.key);
+              console.log("user : ", user);
+
+              setAuthData({
+                userKey: user.key,
+                userId: Number(user.id),
+                userRole: user.role,
+                email: user.email,
+              });
+              console.log(user.role);
+              // navigate to home
+              if (user.role === "U") {
+                navigate(`/voterdashboard`);
+              } else {
+                navigate(`/admin/home`);
+              }
+            } else if (userStatus == 0) {
+              errors.wrongPassord = "• Account haven't verify.";
+            } else {
+              errors.wrongPassord = "• Account has been banned.";
+            }
           }
         } else {
           errors.wrongPassord = "• Email or password is incorrect.";
@@ -90,12 +108,12 @@ function Login() {
 
   //   const handleSubmit = async (event) => {
 
-//     setAuthData({
-//       userKey: "asdf123asdfasdcsdfweryfb",
-//       userId: 1,
-//       userRole: 'A',
-//       email: "admin@email.com",
-//     });
+  //     setAuthData({
+  //       userKey: "asdf123asdfasdcsdfweryfb",
+  //       userId: 1,
+  //       userRole: 'A',
+  //       email: "admin@email.com",
+  //     });
 
   //       navigate(`/voterdashboard`);
 

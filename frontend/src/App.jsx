@@ -43,6 +43,9 @@ import SessionHandler from "./component/SessionHandler";
 import MailVerification from "./MailVerification";
 import ResetPassword from "./ResetPassword";
 import VoteHistoryList from "./VoteHistoryList";
+import YearlyReport from "./admin/YearlyReport";
+import CategoryReport from "./admin/CategoryReport";
+import PositionReport from "./admin/PositionReport";
 import ElectionResult from "./ElectionResult";
 
 const ROLES = {
@@ -87,6 +90,9 @@ function App() {
               <Route path="voter" element={<Voter />} />
               <Route path="adminfeedback" element={<AdminFeedback />} />
               <Route path="reportsummary" element={<ReportSummary />} />
+              <Route path="yearlyreport" element={<YearlyReport />} />
+              <Route path="categoryreport" element={<CategoryReport />} />
+              <Route path="positionreport" element={<PositionReport />} />
               <Route
                 path="editfeedback/:feedbackId"
                 element={<EditFeedback />}
@@ -125,7 +131,10 @@ function App() {
               path="/electionList/:categoryId"
               element={<ElectionList />}
             />
-            <Route path="/electionDetails" element={<ElectionDetails />} />
+            <Route
+              path="/electionDetails/:categoryId/:eventId"
+              element={<ElectionDetails />}
+            />
             <Route path="/voting/:categoryId/:eventId" element={<Voting />} />
 
             <Route path="/verification" element={<Verification />} />

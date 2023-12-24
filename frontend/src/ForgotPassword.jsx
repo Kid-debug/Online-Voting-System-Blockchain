@@ -34,30 +34,28 @@ function ForgotPassword() {
         contractAddress
       );
 
-      // Check if the email exists in the smart contract
-      const emailExists = await contract.methods
-        .checkUserExistByEmail(emailLower)
-        .call();
-      if (!emailExists) {
+      // Find the voter by email and check their status
+      const allVoters = await contract.methods.getAllVoter().call();
+      const voter = allVoters.find((v) => v.email.toLowerCase() === emailLower);
+      if (!voter) {
         setErrorMessage("Email does not exist.");
         return;
       }
 
-      // Check if a recent reset password request exists
-      const recentRequestExists = await contract.methods
-        .isRecentResetRequest(emailLower)
-        .call();
-      if (recentRequestExists) {
-        setErrorMessage(
-          `You have previously requested to reset your password. Please check your email: ${emailLower}`
-        );
+      // Check if the account is verified
+      if (Number(voter.status) !== 1) {
+        setErrorMessage("Your account is not in verified status.");
+        return;
+      }
+
+      // Check if the voter already has a reset token
+      if (voter.token) {
+        setErrorMessage("Please check your email to reset your password.");
         return;
       }
 
       // Generate a verification token
       const randomToken = cryptoRandomString({ length: 16 });
-      //Generate a 6-digit verification code
-      const code = generateVerificationCode();
 
       try {
         const web3 = new Web3(window.ethereum);
@@ -67,8 +65,10 @@ function ForgotPassword() {
           votingContract.abi,
           contractAddress
         );
+
+        //find the email and update the token
         await contract.methods
-          .addResetPasswordRequest(emailLower, randomToken, code)
+          .updateVoterTokenByEmail(emailLower, randomToken)
           .send({ from: accounts[0] });
 
         // setSuccessMessage("Email Sent Successfully for Reset Password");
@@ -77,7 +77,6 @@ function ForgotPassword() {
         const response = await axios.post("/api/forget-password", {
           email,
           randomToken,
-          code,
         });
 
         // Check if the response indicates a successful email send
@@ -123,12 +122,6 @@ function ForgotPassword() {
       setErrorMessage(errorMessage);
     }
   };
-
-  function generateVerificationCode() {
-    const min = 100000;
-    const max = 999999;
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  }
 
   return (
     <div className="loginPage">

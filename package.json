@@ -28,6 +28,7 @@
     "semantic-ui-react": "^2.1.4",
     "slick-carousel": "^1.8.1",
     "sweetalert": "^2.1.2",
+    "sweetalert2": "^11.10.1",
     "web3": "^4.3.0"
   },
   "devDependencies": {

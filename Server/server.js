@@ -79,6 +79,7 @@ const changeEventDateStatus = async () => {
         }
       } catch (error) {
         console.error("Error change event status : ", error.message);
+        console.error("Error details: ", error);
       }
     }
   }
