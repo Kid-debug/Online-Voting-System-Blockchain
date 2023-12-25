@@ -16,7 +16,7 @@ const votingContract = require("../build/contracts/VotingSystem.json");
 const { Web3 } = require("web3");
 const ganacheUrl = "HTTP://127.0.0.1:7545";
 const privateKey =
-  "0x7e714a5c55233c1adc7400de839ece13c124d433b1266178211e948ffa1f7a5d";
+  "0xcb71bdb9cc02160a426cd386c3af404a5750ec7128853330e851ea74f026c83c";
 const { contractAddress } = require("../config-server");
 
 const web3 = new Web3(new Web3.providers.HttpProvider(ganacheUrl));
@@ -25,8 +25,6 @@ const account = web3.eth.accounts.privateKeyToAccount(privateKey);
 web3.eth.accounts.wallet.add(account);
 
 const changeEventDateStatus = async () => {
-  // Add your code logic here
-
   // Call the getAllEvent function in smart contract
   const eventList = await contract.methods.getAllEvent().call();
   const filteredEvents = eventList.filter(
@@ -38,7 +36,20 @@ const changeEventDateStatus = async () => {
   if (filteredEvents != null) {
     for (const event of filteredEvents) {
       try {
-        if (event.status == 1 && event.candidates.length != 0) {
+        //change status after delete the candidate
+        if (event.status == 2 && event.candidates.length < 2) {
+          console.log(
+            "No enough candidates for Upcoming event, changing status to 1"
+          );
+          event.status = 1;
+          await contract.methods.updateEvent(event).send({
+            from: account.address,
+            gas: 200000,
+          });
+          break;
+        }
+
+        if (event.status == 1 && event.candidates.length >= 2) {
           console.log("change status to Up Comming");
           event.status = 2;
           await contract.methods.updateEvent(event).send({
@@ -149,16 +160,19 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 1000000 }, // 1MB file size limit
   fileFilter: function (req, file, cb) {
-    // Check file extension
     const ext = path.extname(file.originalname).toLowerCase();
-    if (ext !== ".png" && ext !== ".jpg" && ext !== ".jpeg" && ext !== ".gif") {
-      return cb(
-        new Error("Only .png, .jpg, .jpeg, and .gif files are allowed")
-      );
+    const allowedExtensions = [".png", ".jpg", ".jpeg", ".gif"];
+    console.log("Detected file extension:", ext);
+    console.log("Detected MIME type:", file.mimetype);
+
+    if (allowedExtensions.includes(ext)) {
+      cb(null, true);
+      console.log("hi");
+    } else {
+      console.log("hi");
+      cb(new Error("Unsupported file type"));
     }
-    cb(null, true);
   },
 });
 
@@ -204,15 +218,37 @@ const webRouter = require("./routes/webRoute");
 app.use("/api", userRouter);
 app.use("/", webRouter);
 
-app.post("/upload", upload.single("file"), async (req, res) => {
-  try {
+app.post(
+  "/upload",
+  upload.single("file"),
+  (req, res) => {
+    // File type is checked by Multer
+    if (!req.file) {
+      return res.status(400).json({
+        message:
+          "Invalid file type. Only .png, .jpg, .jpeg, and .gif files are allowed.",
+      });
+    }
+
+    // Manually check file size after file type is validated
+    // const fileSizeLimit = 1000000; // 1MB in bytes
+    // if (req.file.size > fileSizeLimit) {
+    //   return res.status(400).json({
+    //     message: "File size limit is 1MB",
+    //   });
+    // }
+
+    // Proceed if file type and size are valid
     const filename = req.file.filename;
     res.status(200).json({ imageFileName: filename });
-  } catch (error) {
-    console.error("Error Msg : ", error.message);
-    res.status(500).send("Internal Server Error");
+  },
+  (error, req, res, next) => {
+    // Error handling for file upload
+    if (error) {
+      res.status(400).json({ message: error.message });
+    }
   }
-});
+);
 
 app.delete("/deleteFile", async (req, res) => {
   const { filename } = req.body;
@@ -248,11 +284,6 @@ sequelize
 
 // Error handling for file upload issues
 app.use((err, req, res, next) => {
-  if (err instanceof multer.MulterError && err.code === "LIMIT_FILE_SIZE") {
-    return res.status(400).json({ message: "File size limit is 1MB" });
-  } else if (err.message === "Only images are allowed") {
-    return res.status(400).json({ message: "Only images are allowed" });
-  }
   err.statusCode = err.statusCode || 500;
   err.message = err.message || "Internal Server Error";
   res.status(err.statusCode).json({ message: err.message });

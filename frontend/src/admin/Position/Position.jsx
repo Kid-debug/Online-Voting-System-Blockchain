@@ -141,7 +141,7 @@ function Position() {
     // 1: Upcoming, 2: In Progress, 3: Completed, 4： Cancel
     const status = election.eventStatus;
     if (status == 1) {
-      return "No Candidates";
+      return "Not Enough Candidates";
     }
     if (status == 2) {
       return "Up Comming";
@@ -376,13 +376,13 @@ function Position() {
 
   return (
     <div className="container mt-5">
-      <h2>Event List</h2>
+      <h2>Position List</h2>
       <Link
         to="/admin/createPosition"
         className="btn btn-success mb-3"
         style={{ marginLeft: "auto" }}
       >
-        Add New Event
+        Add New Position
       </Link>
       <div className="mt-3"></div>
       <div className="input-group mb-3">

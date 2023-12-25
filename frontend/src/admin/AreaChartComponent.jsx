@@ -10,7 +10,6 @@ const CanvasJSChart = CanvasJSReact.CanvasJSChart;
 
 const AreaChartComponent = () => {
   const [yearlyVoteCounts, setYearlyVoteCounts] = useState([]);
-  const [selectedYear, setSelectedYear] = useState(null);
 
   useEffect(() => {
     const fetchVoteCountByYear = async () => {
@@ -37,30 +36,22 @@ const AreaChartComponent = () => {
           const candidates = await contract.methods
             .getAllCandidatesInEvent(category.categoryId, event.eventId)
             .call();
-          console.log(candidates);
           for (let candidate of candidates) {
             votesByYear[year] += parseInt(candidate.voteCount);
           }
         }
       }
-      console.log("Total votes by year:", votesByYear);
+
       const sortedYears = Object.entries(votesByYear).map(([year, votes]) => ({
         year,
         votes,
       }));
-      sortedYears.sort((a, b) => parseInt(b.year) - parseInt(a.year)); // Sort years
+      sortedYears.sort((a, b) => parseInt(b.year) - parseInt(a.year));
       setYearlyVoteCounts(sortedYears);
-      if (sortedYears.length > 0) {
-        setSelectedYear(sortedYears[0].year.toString()); // Set default selected year
-      }
     };
 
     fetchVoteCountByYear();
   }, []);
-
-  const handleYearChange = (event) => {
-    setSelectedYear(event.target.value);
-  };
 
   const exportChart = async (type) => {
     const canvas = await html2canvas(
@@ -75,14 +66,10 @@ const AreaChartComponent = () => {
     document.body.removeChild(downloadLink);
   };
 
-  const filteredDataPoints = selectedYear
-    ? yearlyVoteCounts.filter((data) => data.year.toString() === selectedYear)
-    : yearlyVoteCounts;
-
   const options = {
     animationEnabled: true,
     title: {
-      text: `Total Vote Counts - ${selectedYear}`,
+      text: "Total Vote Counts by Year",
     },
     axisX: {
       title: "Year",
@@ -90,15 +77,15 @@ const AreaChartComponent = () => {
     axisY: {
       title: "Number of Votes",
       includeZero: true,
-      interval: 1, // Set interval as 1 for whole numbers
-      valueFormatString: "#0", // Format labels as integers
-      gridThickness: 0, // This will remove the grid lines
+      interval: 1,
+      valueFormatString: "#0",
+      gridThickness: 0,
       tickLength: 0,
     },
     data: [
       {
-        type: "bar",
-        dataPoints: filteredDataPoints.map((voteCount) => ({
+        type: "column",
+        dataPoints: yearlyVoteCounts.map((voteCount) => ({
           label: voteCount.year.toString(),
           y: voteCount.votes,
         })),
@@ -108,18 +95,6 @@ const AreaChartComponent = () => {
 
   return (
     <div>
-      <label htmlFor="year-select">Select Year: </label>
-      <select
-        id="year-select"
-        onChange={handleYearChange}
-        value={selectedYear || "All Years"}
-      >
-        {yearlyVoteCounts.map((voteCount) => (
-          <option key={voteCount.year} value={voteCount.year.toString()}>
-            {voteCount.year}
-          </option>
-        ))}
-      </select>
       <CanvasJSChart options={options} />
       <div>
         <button style={{ margin: "10px" }} onClick={() => exportChart("jpg")}>

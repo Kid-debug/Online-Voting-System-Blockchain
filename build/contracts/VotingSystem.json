@@ -1784,7 +1784,7 @@
           {
             "body": {
               "nodeType": "YulBlock",
-              "src": "69:325:3",
+              "src": "62:174:3",
               "statements": [
                 {
                   "nodeType": "YulAssignment",
@@ -7273,6 +7273,11 @@
                   "value": {
                     "arguments": [
                       {
+                        "name": "pos_1",
+                        "nodeType": "YulIdentifier",
+                        "src": "1885:5:3"
+                      },
+                      {
                         "arguments": [
                           {
                             "name": "pos_1",
@@ -7304,7 +7309,7 @@
                           }
                         ],
                         "functionName": {
-                          "name": "add",
+                          "name": "shl",
                           "nodeType": "YulIdentifier",
                           "src": "1838:3:3"
                         },
@@ -7442,7 +7447,7 @@
                                 }
                               ],
                               "functionName": {
-                                "name": "add",
+                                "name": "sub",
                                 "nodeType": "YulIdentifier",
                                 "src": "2009:3:3"
                               },
@@ -23507,7 +23512,7 @@
                     "functionName": {
                       "name": "mstore",
                       "nodeType": "YulIdentifier",
-                      "src": "22531:6:3"
+                      "src": "19615:6:3"
                     },
                     "nodeType": "YulFunctionCall",
                     "src": "22531:35:3"
@@ -23516,8 +23521,15 @@
                   "src": "22531:35:3"
                 },
                 {
-                  "expression": {
+                  "nodeType": "YulAssignment",
+                  "src": "19645:59:3",
+                  "value": {
                     "arguments": [
+                      {
+                        "name": "value0",
+                        "nodeType": "YulIdentifier",
+                        "src": "19677:6:3"
+                      },
                       {
                         "arguments": [
                           {
@@ -29387,7 +29399,7 @@
                 }
               ]
             },
-            "name": "abi_encode_tuple_t_stringliteral_61b6b189a342b1e87bac8c8ee3adfe7698064ef2e1849bbc154d0c66b2036186__to_t_string_memory_ptr__fromStack_reversed",
+            "name": "abi_encode_tuple_t_stringliteral_45af4e006b2e8a2ee5e9f88bbad638c061222f1ecd8db30b4b1a304f33b0ddb5__to_t_string_memory_ptr__fromStack_reversed",
             "nodeType": "YulFunctionDefinition",
             "parameters": [
               {
@@ -35387,14 +35399,14 @@
                 },
                 {
                   "expression": {
-                    "id": 359,
+                    "id": 345,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "expression": {
-                        "id": 355,
+                        "id": 341,
                         "name": "voter",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
@@ -35405,7 +35417,7 @@
                           "typeString": "struct VotingSystem.Voter storage pointer"
                         }
                       },
-                      "id": 357,
+                      "id": 343,
                       "isConstant": false,
                       "isLValue": true,
                       "isPure": false,
@@ -35440,20 +35452,20 @@
                       "typeString": "uint256"
                     }
                   },
-                  "id": 360,
+                  "id": 346,
                   "nodeType": "ExpressionStatement",
                   "src": "3097:21:2"
                 },
                 {
                   "expression": {
-                    "id": 365,
+                    "id": 351,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "expression": {
-                        "id": 361,
+                        "id": 347,
                         "name": "voter",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
@@ -35464,7 +35476,7 @@
                           "typeString": "struct VotingSystem.Voter storage pointer"
                         }
                       },
-                      "id": 363,
+                      "id": 349,
                       "isConstant": false,
                       "isLValue": true,
                       "isPure": false,
@@ -35499,20 +35511,20 @@
                       "typeString": "string storage ref"
                     }
                   },
-                  "id": 366,
+                  "id": 352,
                   "nodeType": "ExpressionStatement",
                   "src": "3129:16:2"
                 },
                 {
                   "expression": {
-                    "id": 371,
+                    "id": 357,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "expression": {
-                        "id": 367,
+                        "id": 353,
                         "name": "voter",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
@@ -35523,7 +35535,7 @@
                           "typeString": "struct VotingSystem.Voter storage pointer"
                         }
                       },
-                      "id": 369,
+                      "id": 355,
                       "isConstant": false,
                       "isLValue": true,
                       "isPure": false,
@@ -35558,20 +35570,20 @@
                       "typeString": "string storage ref"
                     }
                   },
-                  "id": 372,
+                  "id": 358,
                   "nodeType": "ExpressionStatement",
                   "src": "3156:20:2"
                 },
                 {
                   "expression": {
-                    "id": 377,
+                    "id": 363,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "expression": {
-                        "id": 373,
+                        "id": 359,
                         "name": "voter",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
@@ -35582,7 +35594,7 @@
                           "typeString": "struct VotingSystem.Voter storage pointer"
                         }
                       },
-                      "id": 375,
+                      "id": 361,
                       "isConstant": false,
                       "isLValue": true,
                       "isPure": false,
@@ -37872,7 +37884,7 @@
                         "typeString": "function (bool,string memory) pure"
                       }
                     },
-                    "id": 546,
+                    "id": 494,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -39523,6 +39535,141 @@
               "nodeType": "Block",
               "src": "6549:218:2",
               "statements": [
+                {
+                  "assignments": [
+                    687
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 687,
+                      "mutability": "mutable",
+                      "name": "allVoters",
+                      "nameLocation": "6626:9:2",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 719,
+                      "src": "6611:24:2",
+                      "stateVariable": false,
+                      "storageLocation": "memory",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_array$_t_struct$_Voter_$130_memory_ptr_$dyn_memory_ptr",
+                        "typeString": "struct VotingSystem.Voter[]"
+                      },
+                      "typeName": {
+                        "baseType": {
+                          "id": 685,
+                          "nodeType": "UserDefinedTypeName",
+                          "pathNode": {
+                            "id": 684,
+                            "name": "Voter",
+                            "nameLocations": [
+                              "6611:5:2"
+                            ],
+                            "nodeType": "IdentifierPath",
+                            "referencedDeclaration": 130,
+                            "src": "6611:5:2"
+                          },
+                          "referencedDeclaration": 130,
+                          "src": "6611:5:2",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_struct$_Voter_$130_storage_ptr",
+                            "typeString": "struct VotingSystem.Voter"
+                          }
+                        },
+                        "id": 686,
+                        "nodeType": "ArrayTypeName",
+                        "src": "6611:7:2",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_array$_t_struct$_Voter_$130_storage_$dyn_storage_ptr",
+                          "typeString": "struct VotingSystem.Voter[]"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 694,
+                  "initialValue": {
+                    "arguments": [
+                      {
+                        "id": 692,
+                        "name": "voterCount",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 265,
+                        "src": "6650:10:2",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      ],
+                      "id": 691,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "lValueRequested": false,
+                      "nodeType": "NewExpression",
+                      "src": "6638:11:2",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_objectcreation_pure$_t_uint256_$returns$_t_array$_t_struct$_Voter_$130_memory_ptr_$dyn_memory_ptr_$",
+                        "typeString": "function (uint256) pure returns (struct VotingSystem.Voter memory[] memory)"
+                      },
+                      "typeName": {
+                        "baseType": {
+                          "id": 689,
+                          "nodeType": "UserDefinedTypeName",
+                          "pathNode": {
+                            "id": 688,
+                            "name": "Voter",
+                            "nameLocations": [
+                              "6642:5:2"
+                            ],
+                            "nodeType": "IdentifierPath",
+                            "referencedDeclaration": 130,
+                            "src": "6642:5:2"
+                          },
+                          "referencedDeclaration": 130,
+                          "src": "6642:5:2",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_struct$_Voter_$130_storage_ptr",
+                            "typeString": "struct VotingSystem.Voter"
+                          }
+                        },
+                        "id": 690,
+                        "nodeType": "ArrayTypeName",
+                        "src": "6642:7:2",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_array$_t_struct$_Voter_$130_storage_$dyn_storage_ptr",
+                          "typeString": "struct VotingSystem.Voter[]"
+                        }
+                      }
+                    },
+                    "id": 693,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "nameLocations": [],
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "6638:23:2",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_struct$_Voter_$130_memory_ptr_$dyn_memory_ptr",
+                      "typeString": "struct VotingSystem.Voter memory[] memory"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "6611:50:2"
+                },
                 {
                   "body": {
                     "id": 703,
@@ -47548,7 +47695,7 @@
                             }
                           },
                           "nodeType": "BinaryOperation",
-                          "operator": "==",
+                          "operator": "<",
                           "rightExpression": {
                             "id": 1363,
                             "name": "_eventId",
@@ -47972,20 +48119,269 @@
               "src": "15750:556:2",
               "statements": [
                 {
-                  "expression": {
+                  "assignments": [
+                    1269
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 1269,
+                      "mutability": "mutable",
+                      "name": "category",
+                      "nameLocation": "14752:8:2",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 1314,
+                      "src": "14735:25:2",
+                      "stateVariable": false,
+                      "storageLocation": "storage",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_struct$_Category_$162_storage_ptr",
+                        "typeString": "struct VotingSystem.Category"
+                      },
+                      "typeName": {
+                        "id": 1268,
+                        "nodeType": "UserDefinedTypeName",
+                        "pathNode": {
+                          "id": 1267,
+                          "name": "Category",
+                          "nameLocations": [
+                            "14735:8:2"
+                          ],
+                          "nodeType": "IdentifierPath",
+                          "referencedDeclaration": 162,
+                          "src": "14735:8:2"
+                        },
+                        "referencedDeclaration": 162,
+                        "src": "14735:8:2",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_struct$_Category_$162_storage_ptr",
+                          "typeString": "struct VotingSystem.Category"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 1273,
+                  "initialValue": {
+                    "baseExpression": {
+                      "id": 1270,
+                      "name": "categories",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 231,
+                      "src": "14763:10:2",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_mapping$_t_uint256_$_t_struct$_Category_$162_storage_$",
+                        "typeString": "mapping(uint256 => struct VotingSystem.Category storage ref)"
+                      }
+                    },
+                    "id": 1272,
+                    "indexExpression": {
+                      "id": 1271,
+                      "name": "_categoryId",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 1260,
+                      "src": "14774:11:2",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "isConstant": false,
+                    "isLValue": true,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "nodeType": "IndexAccess",
+                    "src": "14763:23:2",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Category_$162_storage",
+                      "typeString": "struct VotingSystem.Category storage ref"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "14735:51:2"
+                },
+                {
+                  "assignments": [
+                    1278
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 1278,
+                      "mutability": "mutable",
+                      "name": "eventsFound",
+                      "nameLocation": "14871:11:2",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 1314,
+                      "src": "14856:26:2",
+                      "stateVariable": false,
+                      "storageLocation": "memory",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_array$_t_struct$_Event_$151_memory_ptr_$dyn_memory_ptr",
+                        "typeString": "struct VotingSystem.Event[]"
+                      },
+                      "typeName": {
+                        "baseType": {
+                          "id": 1276,
+                          "nodeType": "UserDefinedTypeName",
+                          "pathNode": {
+                            "id": 1275,
+                            "name": "Event",
+                            "nameLocations": [
+                              "14856:5:2"
+                            ],
+                            "nodeType": "IdentifierPath",
+                            "referencedDeclaration": 151,
+                            "src": "14856:5:2"
+                          },
+                          "referencedDeclaration": 151,
+                          "src": "14856:5:2",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_struct$_Event_$151_storage_ptr",
+                            "typeString": "struct VotingSystem.Event"
+                          }
+                        },
+                        "id": 1277,
+                        "nodeType": "ArrayTypeName",
+                        "src": "14856:7:2",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_array$_t_struct$_Event_$151_storage_$dyn_storage_ptr",
+                          "typeString": "struct VotingSystem.Event[]"
+                        }
+                      },
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 1287,
+                  "initialValue": {
                     "arguments": [
                       {
-                        "commonType": {
-                          "typeIdentifier": "t_uint256",
-                          "typeString": "uint256"
+                        "expression": {
+                          "expression": {
+                            "id": 1283,
+                            "name": "category",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 1269,
+                            "src": "14897:8:2",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_struct$_Category_$162_storage_ptr",
+                              "typeString": "struct VotingSystem.Category storage pointer"
+                            }
+                          },
+                          "id": 1284,
+                          "isConstant": false,
+                          "isLValue": true,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberLocation": "14906:6:2",
+                          "memberName": "events",
+                          "nodeType": "MemberAccess",
+                          "referencedDeclaration": 159,
+                          "src": "14897:15:2",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_array$_t_struct$_Event_$151_storage_$dyn_storage",
+                            "typeString": "struct VotingSystem.Event storage ref[] storage ref"
+                          }
                         },
                         "id": 1394,
                         "isConstant": false,
                         "isLValue": false,
                         "isPure": false,
                         "lValueRequested": false,
-                        "leftExpression": {
-                          "expression": {
+                        "memberLocation": "14913:6:2",
+                        "memberName": "length",
+                        "nodeType": "MemberAccess",
+                        "src": "14897:22:2",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      ],
+                      "id": 1282,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "lValueRequested": false,
+                      "nodeType": "NewExpression",
+                      "src": "14885:11:2",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_objectcreation_pure$_t_uint256_$returns$_t_array$_t_struct$_Event_$151_memory_ptr_$dyn_memory_ptr_$",
+                        "typeString": "function (uint256) pure returns (struct VotingSystem.Event memory[] memory)"
+                      },
+                      "typeName": {
+                        "baseType": {
+                          "id": 1280,
+                          "nodeType": "UserDefinedTypeName",
+                          "pathNode": {
+                            "id": 1279,
+                            "name": "Event",
+                            "nameLocations": [
+                              "14889:5:2"
+                            ],
+                            "nodeType": "IdentifierPath",
+                            "referencedDeclaration": 151,
+                            "src": "14889:5:2"
+                          },
+                          "referencedDeclaration": 151,
+                          "src": "14889:5:2",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_struct$_Event_$151_storage_ptr",
+                            "typeString": "struct VotingSystem.Event"
+                          }
+                        },
+                        "id": 1281,
+                        "nodeType": "ArrayTypeName",
+                        "src": "14889:7:2",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_array$_t_struct$_Event_$151_storage_$dyn_storage_ptr",
+                          "typeString": "struct VotingSystem.Event[]"
+                        }
+                      }
+                    },
+                    "id": 1286,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "nameLocations": [],
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "14885:35:2",
+                    "tryCall": false,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_struct$_Event_$151_memory_ptr_$dyn_memory_ptr",
+                      "typeString": "struct VotingSystem.Event memory[] memory"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "14856:64:2"
+                },
+                {
+                  "body": {
+                    "id": 1309,
+                    "nodeType": "Block",
+                    "src": "15052:62:2",
+                    "statements": [
+                      {
+                        "expression": {
+                          "id": 1307,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "leftHandSide": {
                             "baseExpression": {
                               "id": 1389,
                               "name": "categories",

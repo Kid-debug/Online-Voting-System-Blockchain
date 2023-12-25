@@ -223,7 +223,7 @@ function EditPosition() {
     if (isEventNameTaken) {
       Swal(
         "Error!",
-        "Event name already taken in this category. Please choose a different name.",
+        "Position name already taken in this category. Please choose a different name.",
         "error"
       );
       return;
@@ -236,7 +236,7 @@ function EditPosition() {
     if (!isStatusValid) {
       Swal(
         "Error!",
-        "Cannot edit event when the event is processing, marking winner or completed.",
+        "Cannot edit position when the position is processing, marking winner or completed.",
         "error"
       );
       return;

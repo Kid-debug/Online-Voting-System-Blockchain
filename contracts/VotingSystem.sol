@@ -92,13 +92,6 @@ contract VotingSystem {
         string memory _role,
         string memory _token
     ) public {
-        for (uint256 i = 1; i <= voterCount; i++) {
-            require(
-                keccak256(bytes(_email)) != keccak256(bytes(voters[i].email)),
-                "User already exists"
-            );
-        }
-
         // total category plus 1, use it as the category's id
         voterCount += 1;
 
@@ -132,11 +125,10 @@ contract VotingSystem {
     //     return voterFound;
     // }
 
-    function compareHashesPassword(bytes32 inputPassword, bytes32 password)
-        internal
-        pure
-        returns (bool)
-    {
+    function compareHashesPassword(
+        bytes32 inputPassword,
+        bytes32 password
+    ) internal pure returns (bool) {
         for (uint256 i = 0; i < 32; i++) {
             if (inputPassword[i] != password[i]) {
                 return false;
@@ -163,18 +155,17 @@ contract VotingSystem {
         return Voter(0, "", "", "", "", 0, "");
     }
 
-    function getVoterEmailById(uint256 _voterId)
-        public
-        view
-        returns (string memory)
-    {
+    function getVoterEmailById(
+        uint256 _voterId
+    ) public view returns (string memory) {
         require(_voterId > 0 && _voterId <= voterCount, "Invalid voter ID");
         return voters[_voterId].email;
     }
 
-    function updateVoterPassword(string memory _key, string memory _password)
-        public
-    {
+    function updateVoterPassword(
+        string memory _key,
+        string memory _password
+    ) public {
         require(isVoterExist(_key), "User does not exists");
 
         bytes32 hashedPassword = keccak256(abi.encodePacked(_password));
@@ -226,11 +217,11 @@ contract VotingSystem {
         return allVoters;
     }
 
-    /* function editUserStatus(uint256 _id, uint256 _status) public {
-        require(_id > 0 && _id <= voterCount, "User does not exist.");
+    function editUserStatus(uint256 _id, uint256 _status) public {
+        // require(_id > 0 && _id <= voterCount, "User does not exist.");
 
         voters[_id].status = _status;
-    } */
+    }
 
     // Function to update the token of a voter based on their email
     function updateVoterTokenByEmail(
@@ -260,9 +251,10 @@ contract VotingSystem {
         emit CategoryAdded(categoryCount, _categoryName);
     }
 
-    function updateCategory(uint256 _categoryId, string memory _categoryName)
-        public
-    {
+    function updateCategory(
+        uint256 _categoryId,
+        string memory _categoryName
+    ) public {
         categories[_categoryId].categoryName = _categoryName;
     }
 
@@ -282,11 +274,9 @@ contract VotingSystem {
         return categoriesFound;
     }
 
-    function getCategoryById(uint256 _categoryId)
-        public
-        view
-        returns (Category memory)
-    {
+    function getCategoryById(
+        uint256 _categoryId
+    ) public view returns (Category memory) {
         return categories[_categoryId];
     }
 
@@ -422,7 +412,7 @@ contract VotingSystem {
     }
 
     function updateEvent(Event memory _event) public {
-        // check if the category is exist
+        //check if the category is exist
         require(
             categories[_event.categoryId].categoryId != 0,
             "Category does not exists"
@@ -431,20 +421,29 @@ contract VotingSystem {
             isEventExists(_event.categoryId, _event.eventId),
             "Event does not exist!"
         );
-        // add the category details in the category list
-        Event storage eventToUpdate = categories[_event.categoryId].events[
-            _event.eventId - 1
-        ];
 
-        eventToUpdate.eventName = _event.eventName;
-        eventToUpdate.status = _event.status;
+        for (
+            uint256 i = 0;
+            i < categories[_event.categoryId].events.length;
+            i++
+        ) {
+            if (
+                categories[_event.categoryId].events[i].eventId ==
+                _event.eventId
+            ) {
+                Event storage eventToUpdate = categories[_event.categoryId]
+                    .events[i];
+                // Update the event details
+                eventToUpdate.eventName = _event.eventName;
+                eventToUpdate.status = _event.status;
+                break;
+            }
+        }
     }
 
-    function getAllCategoryEvent(uint256 _categoryId)
-        public
-        view
-        returns (Event[] memory foundEvent)
-    {
+    function getAllCategoryEvent(
+        uint256 _categoryId
+    ) public view returns (Event[] memory foundEvent) {
         // find the certain category
         Category storage category = categories[_categoryId];
 
@@ -459,11 +458,10 @@ contract VotingSystem {
         return (eventsFound);
     }
 
-    function getEventById(uint256 _categoryId, uint256 _eventId)
-        public
-        view
-        returns (Event memory)
-    {
+    function getEventById(
+        uint256 _categoryId,
+        uint256 _eventId
+    ) public view returns (Event memory) {
         Category storage categoriesFound = categories[_categoryId];
         Event memory eventFound;
         // Iterate through all stored structs
@@ -476,11 +474,10 @@ contract VotingSystem {
         return eventFound;
     }
 
-    function isEventExists(uint256 _categoryId, uint256 _eventId)
-        public
-        view
-        returns (bool)
-    {
+    function isEventExists(
+        uint256 _categoryId,
+        uint256 _eventId
+    ) public view returns (bool) {
         // Check if the category exists
         require(
             categories[_categoryId].categoryId != 0,
@@ -668,11 +665,10 @@ contract VotingSystem {
         return false;
     }
 
-    function getAllCandidatesInEvent(uint256 _categoryId, uint256 _eventId)
-        public
-        view
-        returns (Candidate[] memory foundCandidates)
-    {
+    function getAllCandidatesInEvent(
+        uint256 _categoryId,
+        uint256 _eventId
+    ) public view returns (Candidate[] memory foundCandidates) {
         // find the certain category
         Category storage category = categories[_categoryId];
         // find the certain event in certain category
@@ -798,15 +794,19 @@ contract VotingSystem {
         }
     }
 
-      
-    function getAllVotedHistory() public view returns (voteEventStruct[] memory) {
-        voteEventStruct[] memory allVoteEvent = new voteEventStruct[](voteEventCount);
+    function getAllVotedHistory()
+        public
+        view
+        returns (voteEventStruct[] memory)
+    {
+        voteEventStruct[] memory allVoteEvent = new voteEventStruct[](
+            voteEventCount
+        );
         for (uint256 i = 1; i <= voteEventCount; i++) {
             allVoteEvent[i - 1] = voteEvents[i];
         }
         return allVoteEvent;
     }
-    
 
     // function isVoted(
     //     uint256 _categoryId,

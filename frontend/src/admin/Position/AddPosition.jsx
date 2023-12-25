@@ -182,7 +182,7 @@ function AddPosition() {
       if (eventNameExists) {
         Swal(
           "Error!",
-          "• This event name already existed in the selected category.",
+          "• This position name already existed in the selected category.",
           "error"
         );
         return;

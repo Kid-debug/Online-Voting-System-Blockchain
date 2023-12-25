@@ -50,39 +50,43 @@ function AddCandidate() {
   // Handle category change events
   const handleCategoryChange = (event) => {
     setSelectedCategory(event.target.value);
+    setSelectedEvent(""); // Reset selected event when the category changes
   };
 
-  // Fetch events when the component mounts or when selectedCategory changes
   useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        if (!selectedCategoryId) {
-          // If selectedCategory is empty, exit early
-          return;
-        }
-
-        const web3 = new Web3(window.ethereum);
-        await window.ethereum.enable();
-
-        const contract = new web3.eth.Contract(
-          votingContract.abi,
-          contractAddress
-        );
-
-        // Call the getAllCategoryEvent function in your smart contract
-        const eventList = await contract.methods
-          .getAllCategoryEvent(selectedCategoryId)
-          .call();
-
-        setEvents(eventList);
-      } catch (error) {
-        console.error("Error fetching Event:", error);
-      }
-    };
+    console.log("Inside useEffect - Selected Event ID:", selectedEventId);
 
     // Fetch events when the component mounts or when selectedCategory changes
     fetchEvents();
-  }, [selectedCategoryId]);
+  }, [selectedCategoryId, selectedEventId]);
+
+  const fetchEvents = async () => {
+    try {
+      if (!selectedCategoryId) {
+        // If selectedCategory is empty, exit early
+        return;
+      }
+
+      const web3 = new Web3(window.ethereum);
+      await window.ethereum.enable();
+
+      const contract = new web3.eth.Contract(
+        votingContract.abi,
+        contractAddress
+      );
+
+      // Call the getAllCategoryEvent function in your smart contract
+      const eventList = await contract.methods
+        .getAllCategoryEvent(selectedCategoryId)
+        .call();
+
+      console.log("Event list: ", eventList);
+
+      setEvents(eventList);
+    } catch (error) {
+      console.error("Error fetching Event:", error);
+    }
+  };
 
   const handleEventChanged = (event) => {
     setSelectedEvent(event.target.value);
@@ -152,7 +156,7 @@ function AddCandidate() {
 
       const response = await axios.post("/upload", formData);
       imageFileName = response.data.imageFileName;
-
+      console.log(imageFileName);
       const web3 = new Web3(window.ethereum);
       await window.ethereum.enable();
       const accounts = await web3.eth.getAccounts();
@@ -161,6 +165,25 @@ function AddCandidate() {
         contractAddress
       );
 
+      //Check the status first
+      const eventFound = await contract.methods
+        .getEventById(selectedCategoryId, selectedEventId)
+        .call();
+
+      // Validate if the candidates can add
+      const isStatusValid =
+        Number(eventFound.status) === 1 || Number(eventFound.status) === 2;
+
+      if (!isStatusValid) {
+        Swal(
+          "Error!",
+          "Cannot add candidates when the event is processing, marking winner or completed.",
+          "error"
+        );
+
+        return;
+      }
+
       // Check if category exists
       const categoryExists = categories.some(
         (category) => Number(category.categoryId) === Number(selectedCategoryId)
@@ -168,19 +191,21 @@ function AddCandidate() {
       console.log("eventExists", categoryExists);
       if (!categoryExists) {
         Swal("Error!", "Selected category does not exist.", "error");
-        await deleteImageFile(imageFileName);
         return;
       }
+
+      console.log(categoryExists);
 
       //Check if event exists
       const eventExists = events.some(
         (event) => Number(event.eventId) === Number(selectedEventId)
       );
+      console.log(eventExists);
       if (!eventExists) {
-        Swal("Error!", "Selected event does not exist.", "error");
-        await deleteImageFile(imageFileName);
+        Swal("Error!", "Selected position does not exist.", "error");
         return;
       }
+      console.log(eventExists);
 
       // Check if the student ID is unique
       const candidates = await contract.methods
@@ -196,28 +221,6 @@ function AddCandidate() {
           "error"
         );
 
-        await deleteImageFile(imageFileName);
-
-        return;
-      }
-
-      const eventFound = await contract.methods
-        .getEventById(selectedCategoryId, selectedEventId)
-        .call();
-
-      // Validate if the candidates can add
-      const isStatusValid =
-        Number(eventFound.status) === 1 || Number(eventFound.status) === 2;
-      console.log("eventExists", eventFound);
-
-      if (!isStatusValid) {
-        Swal(
-          "Error!",
-          "Cannot edit event when the event is processing, marking winner or completed.",
-          "error"
-        );
-
-        await deleteImageFile(imageFileName);
         return;
       }
 
@@ -264,17 +267,6 @@ function AddCandidate() {
     }
   };
 
-  // Define the function to delete the file
-  async function deleteImageFile(imageFileName) {
-    try {
-      await axios.delete("/deleteFile", {
-        data: { filename: imageFileName },
-      });
-    } catch (deleteError) {
-      console.error("Error deleting the file:", deleteError);
-    }
-  }
-
   return (
     <div className="d-flex flex-column align-items-center pt-4">
       <h2>Add Candidate</h2>
@@ -313,7 +305,7 @@ function AddCandidate() {
             onChange={handleEventChanged}
           >
             <option value="" disabled>
-              Select a event
+              Select a position
             </option>
             {events.map((event) => (
               <option key={Number(event.eventId)} value={Number(event.eventId)}>

@@ -3,6 +3,8 @@ import CanvasJSReact from "@canvasjs/react-charts";
 import Web3 from "web3";
 import votingContract from "../../../build/contracts/VotingSystem.json";
 import { contractAddress } from "../../../config";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 const CanvasJSChart = CanvasJSReact.CanvasJSChart;
 
@@ -21,35 +23,21 @@ const PositionChart = () => {
         votingContract.abi,
         contractAddress
       );
-      const fetchedCategories = await contract.methods.getAllCategory().call();
       const fetchedEvents = await contract.methods.getAllEvent().call();
 
-      const categoryOptions = fetchedCategories.map((category) => ({
-        label: category.categoryName,
-        value: Number(category.categoryId),
-      }));
-      setCategories(categoryOptions);
-
-      // Set the first category as the default selected category
-      if (categoryOptions.length > 0) {
-        setSelectedCategory(categoryOptions[0].value.toString());
-      }
-
+      const validEvents = fetchedEvents.filter(
+        (event) => Number(event.startDateTime) !== 0
+      ); // Filter out events with a timestamp of 0
       const years = new Set(
-        fetchedEvents.map((event) => {
-          // Convert BigInt to Number before multiplying
-          const eventYear = new Date(Number(event.startDateTime) * 1000)
-            .getFullYear()
-            .toString();
-          return eventYear;
-        })
+        validEvents.map((event) =>
+          new Date(Number(event.startDateTime) * 1000).getFullYear()
+        )
       );
-      const yearsArray = Array.from(years).sort().reverse();
-      setAvailableYears(yearsArray);
+      const sortedYears = Array.from(years).sort((a, b) => b - a);
+      setAvailableYears(sortedYears);
 
-      // Set the first year as the default selected year
-      if (yearsArray.length > 0) {
-        setSelectedYear(yearsArray[0]);
+      if (sortedYears.length > 0) {
+        setSelectedYear(sortedYears[0].toString());
       }
     };
 
@@ -57,30 +45,71 @@ const PositionChart = () => {
   }, []);
 
   useEffect(() => {
+    const updateCategories = async () => {
+      if (selectedYear) {
+        const web3 = new Web3(window.ethereum);
+        await window.ethereum.enable();
+        const contract = new web3.eth.Contract(
+          votingContract.abi,
+          contractAddress
+        );
+
+        const fetchedEvents = await contract.methods.getAllEvent().call();
+        const categoryIds = new Set(
+          fetchedEvents
+            .filter(
+              (event) =>
+                new Date(Number(event.startDateTime) * 1000)
+                  .getFullYear()
+                  .toString() === selectedYear
+            )
+            .map((event) => Number(event.categoryId))
+        );
+
+        const categoryOptions = await Promise.all(
+          Array.from(categoryIds).map(async (categoryId) => {
+            const category = await contract.methods
+              .getCategoryById(categoryId)
+              .call();
+            return { label: category.categoryName, value: categoryId };
+          })
+        );
+
+        setCategories(categoryOptions);
+
+        if (categoryOptions.length > 0) {
+          setSelectedCategory(categoryOptions[0].value.toString());
+        } else {
+          setSelectedCategory("");
+        }
+      }
+    };
+
+    updateCategories();
+  }, [selectedYear]);
+
+  useEffect(() => {
     const fetchDataPoints = async () => {
-      console.log(selectedCategory, selectedYear);
       if (selectedCategory && selectedYear) {
-        try {
-          const web3 = new Web3(window.ethereum);
-          await window.ethereum.enable(); // Ensure that the user has given permission
-          const contract = new web3.eth.Contract(
-            votingContract.abi,
-            contractAddress
-          );
+        const web3 = new Web3(window.ethereum);
+        await window.ethereum.enable();
+        const contract = new web3.eth.Contract(
+          votingContract.abi,
+          contractAddress
+        );
 
-          const categoryEvents = await contract.methods
-            .getAllCategoryEvent(selectedCategory)
-            .call();
+        const categoryEvents = await contract.methods
+          .getAllCategoryEvent(selectedCategory)
+          .call();
+        const filteredEvents = categoryEvents.filter(
+          (event) =>
+            new Date(Number(event.startDateTime) * 1000)
+              .getFullYear()
+              .toString() === selectedYear
+        );
 
-          const filteredEvents = categoryEvents.filter((event) => {
-            const eventYear = new Date(
-              Number(event.startDateTime) * 1000
-            ).getFullYear();
-            return eventYear.toString() === selectedYear;
-          });
-
-          let voteData = [];
-          for (let event of filteredEvents) {
+        const voteData = await Promise.all(
+          filteredEvents.map(async (event) => {
             const candidates = await contract.methods
               .getAllCandidatesInEvent(selectedCategory, event.eventId)
               .call();
@@ -88,15 +117,11 @@ const PositionChart = () => {
               (sum, candidate) => sum + Number(candidate.voteCount),
               0
             );
-            voteData.push({ label: event.eventName, y: totalVotes });
-          }
+            return { label: event.eventName, y: totalVotes };
+          })
+        );
 
-          setDataPoints(voteData);
-        } catch (error) {
-          console.error("Error fetching data points:", error);
-        }
-      } else {
-        setDataPoints([]); // Clear the chart if no category or year is selected
+        setDataPoints(voteData);
       }
     };
 
@@ -104,17 +129,34 @@ const PositionChart = () => {
   }, [selectedYear, selectedCategory]);
 
   const handleCategoryChange = (e) => {
-    console.log("Changing category to:", e.target.value);
     setSelectedCategory(e.target.value);
-    // Immediately call updateDataPoints to reflect changes
-    // This is not typically recommended; instead rely on useEffect to handle updates
-    // updateDataPoints();
+  };
+
+  const exportChart = async (type) => {
+    const canvas = await html2canvas(
+      document.querySelector(".canvasjs-chart-canvas")
+    );
+    const image = canvas.toDataURL(`image/${type}`);
+    const downloadLink = document.createElement("a");
+    downloadLink.href = image;
+    downloadLink.download = `chart.${type}`;
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+  };
+
+  // Function to find the label of the selected category
+  const getSelectedCategoryLabel = () => {
+    const selectedCat = categories.find(
+      (cat) => cat.value.toString() === selectedCategory
+    );
+    return selectedCat ? selectedCat.label : "Unknown Category";
   };
 
   const options = {
     animationEnabled: true,
     title: {
-      text: `${selectedYear} - Total Vote Counts by Event`,
+      text: `${selectedYear} - Total Vote Counts of Positions (${getSelectedCategoryLabel()})`,
     },
     axisX: {
       title: "Events",
@@ -168,6 +210,17 @@ const PositionChart = () => {
       </div>
 
       <CanvasJSChart options={options} />
+      <div>
+        <button style={{ margin: "10px" }} onClick={() => exportChart("jpg")}>
+          Export as JPG
+        </button>
+        <button style={{ margin: "10px" }} onClick={() => exportChart("png")}>
+          Export as PNG
+        </button>
+        <button style={{ margin: "10px" }} onClick={() => exportChart("pdf")}>
+          Export as PDF
+        </button>
+      </div>
     </div>
   );
 };

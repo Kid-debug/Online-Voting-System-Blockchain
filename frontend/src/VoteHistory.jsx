@@ -76,9 +76,15 @@ function VoteHistory() {
           }
         );
 
+        // Inside the useEffect block
         const formattedCandidates = await Promise.all(votedHistoriesPromises);
 
-        setCandidates(formattedCandidates);
+        // Sort the candidates based on the timestamp in descending order (latest)
+        const sortedCandidates = formattedCandidates.sort(
+          (a, b) => b.eventEndDate - a.eventEndDate
+        );
+
+        setCandidates(sortedCandidates);
 
         //based on vote count to assign the index number, who vote count the highest be the first one then assigned sequentially
         //if the candidate vote count is the same, then depend on the time who get the higher vote count firstthen give the rank
@@ -123,7 +129,7 @@ function VoteHistory() {
   const visibleCandidates = candidates.slice(0, maxCandidatesToShow);
   console.log("visibleCanm ", visibleCandidates);
   return (
-    <div>
+    <div className="voterhome">
       <Header />
       <div className="container mt-5">
         <div className="text-center">
@@ -140,7 +146,7 @@ function VoteHistory() {
                 <tbody>
                   {visibleCandidates.map((candidate, index) => (
                     <tr key={index} className={index === 0 ? "text-white" : ""}>
-                      <td className="number">{index + 1}</td>               
+                      <td className="number">{index + 1}</td>
                       {index === 0 ? (
                         <td className="image">
                           <img

@@ -224,7 +224,11 @@ function Voting() {
                   type="radio"
                   name="candidatePresident"
                   value={Number(candidate.id)}
-                  checked={isClose || isVoted?false:selectedCandidateId === candidate.id}
+                  checked={
+                    isClose || isVoted
+                      ? false
+                      : selectedCandidateId === candidate.id
+                  }
                   disabled={isClose || isVoted}
                   hidden={isClose || isVoted}
                   onChange={() => handleRadioClickPresident(candidate.id)}

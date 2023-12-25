@@ -183,7 +183,7 @@ function ElectionList() {
   return (
     <div className="voterhome">
       <Header />
-      <div className="election-container mb-5">
+      <div className="election-container">
         <h2 className="mt-5 mb-4">Election List : {categoryName}</h2>
         <div
           className="input-group mb-3"

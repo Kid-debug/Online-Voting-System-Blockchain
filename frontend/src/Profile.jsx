@@ -59,42 +59,43 @@ function Profile() {
 
   // Reset the form fields to initial state
   const handleResetPassword = async () => {
-    validatePassword();
-    try {
-      const web3 = new Web3(window.ethereum);
-      await window.ethereum.enable();
-      const accounts = await web3.eth.getAccounts();
-      const contract = new web3.eth.Contract(
-        votingContract.abi,
-        contractAddress
-      );
+    if (validatePassword()) {
+      try {
+        const web3 = new Web3(window.ethereum);
+        await window.ethereum.enable();
+        const accounts = await web3.eth.getAccounts();
+        const contract = new web3.eth.Contract(
+          votingContract.abi,
+          contractAddress
+        );
 
-      const user = await contract.methods
-        .getVoterByEmailPassword(auth.email, values.currentPassword)
-        .call();
-      if (user.id == 0) {
-        Swal("Error!", "Current Password is wrong!", "error");
-        return;
+        const user = await contract.methods
+          .getVoterByEmailPassword(auth.email, values.currentPassword)
+          .call();
+        if (user.id == 0) {
+          Swal("Error!", "Current Password is wrong!", "error");
+          return;
+        }
+
+        console.log("user  : ", user);
+        console.log("email  : ", auth.email);
+        console.log("currentPassword  : ", values.currentPassword);
+
+        await contract.methods
+          .updateVoterPassword(auth.userKey, values.newPassword)
+          .send({ from: accounts[0] });
+
+        Swal({
+          icon: "success",
+          title: "Password Updated!",
+          text: "You've successfully change your password.",
+        });
+      } catch (error) {
+        // Check if the image file name is used by any candidate
+        console.error("Error change password : ", error.message);
       }
-
-      console.log("user  : ", user);
-      console.log("email  : ", auth.email);
-      console.log("currentPassword  : ", values.currentPassword);
-
-      await contract.methods
-        .updateVoterPassword(auth.userKey, values.newPassword)
-        .send({ from: accounts[0] });
-
-      Swal({
-        icon: "success",
-        title: "Password Updated!",
-        text: "You've successfully change your password.",
-      });
-    } catch (error) {
-      // Check if the image file name is used by any candidate
-      console.error("Error change password : ", error.message);
+      handleResetInput();
     }
-    handleResetInput();
   };
 
   const handleResetInput = () => {
