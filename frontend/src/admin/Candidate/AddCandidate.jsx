@@ -94,7 +94,7 @@ function AddCandidate() {
 
   // Handle category change events
   const handleCandidateNameChange = (event) => {
-    setCandidateName(event.target.value);
+    setCandidateName(event.target.value.toUpperCase());
   };
 
   // Handle category change events
@@ -126,6 +126,30 @@ function AddCandidate() {
       Swal("Error!", "Please select an image file.", "error");
       return;
     }
+
+    if (candidateName.length > 50) {
+      Swal("Error!", "Candidate name cannot more than 50 characters.", "error");
+      return;
+    }
+
+    if (candidateDesc.length > 400) {
+      Swal(
+        "Error!",
+        "Candidate description cannot more than 400 characters.",
+        "error"
+      );
+      return;
+    }
+
+    if (!/^\d{7}$/.test(candidateStdId)) {
+      Swal(
+        "Error!",
+        "Candidate's Student ID must be a numeric value with exactly 7 digits.",
+        "error"
+      );
+      return;
+    }
+
     try {
       const formData = new FormData();
       formData.append("file", file);
@@ -141,31 +165,19 @@ function AddCandidate() {
         contractAddress
       );
 
-      console.log(selectedCategoryId);
-      console.log(selectedEventId);
-
-      await fetchEvents();
       //Check the status first
-      const allEvents = await contract.methods.getAllEvent().call();
-      const filterEvents = allEvents.find(
-        (event) =>
-          Number(event.categoryId) === Number(selectedCategoryId) &&
-          Number(event.eventId) === Number(selectedEventId)
-      );
+      const eventFound = await contract.methods
+        .getEventById(selectedCategoryId, selectedEventId)
+        .call();
 
-      console.log(filterEvents);
-      console.log(filterEvents.status);
-
-      // Validate if the event can be added
+      // Validate if the candidates can add
       const isStatusValid =
-        filterEvents &&
-        (Number(filterEvents.status) === 1 ||
-          Number(filterEvents.status) === 2);
+        Number(eventFound.status) === 1 || Number(eventFound.status) === 2;
 
       if (!isStatusValid) {
         Swal(
           "Error!",
-          "Cannot add candidates when the position is processing, marking winner or completed.",
+          "Cannot add candidates when the event is processing, marking winner or completed.",
           "error"
         );
 
@@ -176,6 +188,7 @@ function AddCandidate() {
       const categoryExists = categories.some(
         (category) => Number(category.categoryId) === Number(selectedCategoryId)
       );
+      console.log("eventExists", categoryExists);
       if (!categoryExists) {
         Swal("Error!", "Selected category does not exist.", "error");
         return;

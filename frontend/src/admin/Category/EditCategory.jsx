@@ -45,6 +45,11 @@ function EditCategory() {
       return;
     }
 
+    if (categoryName.length > 20) {
+      Swal("Error!", "Category name cannot more than 20 character.", "error");
+      return;
+    }
+
     try {
       const web3 = new Web3(window.ethereum);
       await window.ethereum.enable();
@@ -118,7 +123,7 @@ function EditCategory() {
             id="inputCategoryname"
             placeholder="Enter Category Name"
             value={categoryName}
-            onChange={(e) => setCategoryName(e.target.value)}
+            onChange={(e) => setCategoryName(e.target.value.toUpperCase())}
           />
         </div>
         <div className="col-12">

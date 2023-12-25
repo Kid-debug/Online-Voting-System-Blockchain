@@ -79,7 +79,11 @@ function ElectionList() {
           .getAllCategoryEvent(categoryId)
           .call();
 
-        const eventPromises = eventList.map(async (event) => {
+        const availableEventList = eventList.filter(
+          (event) => Number(event.status) !== 1
+        );
+
+        const eventPromises = availableEventList.map(async (event) => {
           const category = await contract.methods
             .getCategoryById(event.categoryId)
             .call();

@@ -49,7 +49,7 @@ function EditPosition() {
   };
 
   const handlePositionChange = (event) => {
-    setPositionName(event.target.value);
+    setPositionName(event.target.value.toUpperCase());
   };
 
   const handlePositonDescChange = (event) => {
@@ -154,6 +154,11 @@ function EditPosition() {
 
   const handleEditPosition = async (event) => {
     event.preventDefault();
+    // check the event status
+
+    const eventFound = await contract.methods
+      .getEventById(categoryId, eventId)
+      .call();
 
     // Ensure that positionName and selectedCategoryId are not empty
     if (
@@ -164,6 +169,20 @@ function EditPosition() {
       !endDateAndTime
     ) {
       Swal("Error!", "All input fields must be filled in.", "error");
+      return;
+    }
+
+    if (positionName.length > 20) {
+      Swal("Error!", "Position name cannot more than 20 characters.", "error");
+      return;
+    }
+
+    if (positionDesc.length > 100) {
+      Swal(
+        "Error!",
+        "Position description cannot more than 100 characters.",
+        "error"
+      );
       return;
     }
 

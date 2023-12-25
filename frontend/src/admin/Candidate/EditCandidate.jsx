@@ -34,7 +34,7 @@ function EditCandidate() {
 
   // Handle category change events
   const handleCandidateNameChange = (event) => {
-    setCandidateName(event.target.value);
+    setCandidateName(event.target.value.toUpperCase());
   };
 
   // Handle category change events
@@ -173,6 +173,33 @@ function EditCandidate() {
       } else {
         // If no new file is uploaded, use the existing imageFileName
         imageFileNameToUse = imageFileName;
+      }
+
+      if (candidateName.length > 50) {
+        Swal(
+          "Error!",
+          "Candidate name cannot more than 50 characters.",
+          "error"
+        );
+        return;
+      }
+
+      if (candidateDesc.length > 400) {
+        Swal(
+          "Error!",
+          "Candidate description cannot more than 400 characters.",
+          "error"
+        );
+        return;
+      }
+
+      if (!/^\d{7}$/.test(candidateStdId)) {
+        Swal(
+          "Error!",
+          "Candidate's Student ID must be a numeric value with exactly 7 digits.",
+          "error"
+        );
+        return;
       }
 
       const web3 = new Web3(window.ethereum);

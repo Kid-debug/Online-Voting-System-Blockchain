@@ -9,7 +9,7 @@ function AddCategory() {
   const [categoryName, setCategoryName] = useState("");
 
   const handleCategoryChange = (event) => {
-    setCategoryName(event.target.value);
+    setCategoryName(event.target.value.toUpperCase());
   };
 
   const handleAddCategory = async (event) => {
@@ -18,6 +18,12 @@ function AddCategory() {
       Swal("Error!", "Category input fields must be filled in.", "error");
       return;
     }
+    if (categoryName.length > 20) {
+      Swal("Error!", "Category name cannot more than 20 character.", "error");
+      return;
+    }
+ 
+    console.log("Length : ", categoryName.length);
 
     try {
       // const ganacheUrl = "HTTP://127.0.0.1:7545"; // Replace with your Ganache URL
