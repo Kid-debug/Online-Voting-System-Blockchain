@@ -133,8 +133,15 @@ function ElectionResult() {
                 ? false
                 : vote.categoryId === Number(selectedCategory);
 
-            const matchyear = selectedYear===null? true:getYearFromUnixTimestamp(vote.startDateTime) === selectedYear.getFullYear();
-            console.log("selectedYear",getYearFromUnixTimestamp(vote.startDateTime));
+            const matchyear =
+              selectedYear === null
+                ? true
+                : getYearFromUnixTimestamp(vote.startDateTime) ===
+                  selectedYear.getFullYear();
+            console.log(
+              "selectedYear",
+              getYearFromUnixTimestamp(vote.startDateTime)
+            );
             return matchesCategory && vote.status == 5 && matchyear;
           })
           .map(async (vote) => {
@@ -188,7 +195,7 @@ function ElectionResult() {
       </div>
       <div className="col-md-12 filter-container">
         <form className="d-flex mb-3">
-          <lable>Select Category : </lable>
+          <h3>Select Category : </h3>
           <Select
             options={optionsCategory}
             onChange={handleOnChangeCategory}
@@ -198,25 +205,27 @@ function ElectionResult() {
             placeholder="Filter by all categories"
             style={{ width: "200%" }}
           />
-    
         </form>
-        <lable>Select Year : </lable>
-        <DatePicker
-            selected={selectedYear}
-            className="text-primary text-center"
-            onChange={(date) => setSelectedYear(date)}
-            showYearPicker
-            dateFormat="yyyy"
-          />
+        <div className="date-picker-container">
+          <h3>
+            Select Year :
+            <DatePicker
+              className="form-control"
+              selected={selectedYear}
+              onChange={(date) => setSelectedYear(date)}
+              placeholderText="Click to select year"
+              showYearPicker
+              dateFormat="yyyy"
+            />
+          </h3>
+        </div>
       </div>
 
       <div className="card-container mt-3">
         {filteredVoteData.length === 0 ? (
           <div className="card mt-5 mb-5">
             <div className="card-body">
-              <p className="no-matching-records">
-                Does not found the record.
-              </p>
+              <p className="no-matching-records">Does not found the record.</p>
             </div>
           </div>
         ) : (
