@@ -7,6 +7,7 @@ import useAuth from "./hooks/useAuth";
 import Web3 from "web3";
 import votingContract from "../../build/contracts/VotingSystem.json";
 import { contractAddress } from "../../config";
+import Swal from "sweetalert";
 
 // Set axios defaults just once, not in a function
 axios.defaults.withCredentials = true;
@@ -26,6 +27,24 @@ function Login() {
     event.preventDefault();
     setBackendErrors([]); // Reset backend errors on new submission
     const errors = validateLogin();
+    
+    if (values.email.length > 40) {
+      Swal(
+        "Error!",
+        "Email cannot more than 40 characters.",
+        "error"
+      );
+      return;
+    }
+
+    if (values.password.length > 40) {
+      Swal(
+        "Error!",
+        "Password cannot more than 40 characters.",
+        "error"
+      );
+      return;
+    }
 
     // If there are no errors, proceed with form submission
     if (Object.keys(errors).length === 0) {

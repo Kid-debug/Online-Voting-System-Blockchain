@@ -74,8 +74,6 @@ function AddCandidate() {
           .getAllCategoryEvent(selectedCategoryId)
           .call();
 
-        console.log("Event list: ", eventList);
-
         setEvents(eventList);
       } catch (error) {
         console.error("Error fetching Event:", error);
@@ -92,7 +90,7 @@ function AddCandidate() {
 
   // Handle category change events
   const handleCandidateNameChange = (event) => {
-    setCandidateName(event.target.value);
+    setCandidateName(event.target.value.toUpperCase());
   };
 
   // Handle category change events
@@ -124,6 +122,30 @@ function AddCandidate() {
       Swal("Error!", "Please select an image file.", "error");
       return;
     }
+
+    if (candidateName.length > 50) {
+      Swal("Error!", "Candidate name cannot more than 50 characters.", "error");
+      return;
+    }
+
+    if (candidateDesc.length > 400) {
+      Swal(
+        "Error!",
+        "Candidate description cannot more than 400 characters.",
+        "error"
+      );
+      return;
+    }
+
+    if (!/^\d{7}$/.test(candidateStdId)) {
+      Swal(
+        "Error!",
+        "Candidate's Student ID must be a numeric value with exactly 7 digits.",
+        "error"
+      );
+      return;
+    }
+
     try {
       const formData = new FormData();
       formData.append("file", file);
@@ -143,6 +165,7 @@ function AddCandidate() {
       const categoryExists = categories.some(
         (category) => Number(category.categoryId) === Number(selectedCategoryId)
       );
+      console.log("eventExists", categoryExists);
       if (!categoryExists) {
         Swal("Error!", "Selected category does not exist.", "error");
         await deleteImageFile(imageFileName);
@@ -175,6 +198,26 @@ function AddCandidate() {
 
         await deleteImageFile(imageFileName);
 
+        return;
+      }
+
+      const eventFound = await contract.methods
+        .getEventById(selectedCategoryId, selectedEventId)
+        .call();
+
+      // Validate if the candidates can add
+      const isStatusValid =
+        Number(eventFound.status) === 1 || Number(eventFound.status) === 2;
+      console.log("eventExists", eventFound);
+
+      if (!isStatusValid) {
+        Swal(
+          "Error!",
+          "Cannot edit event when the event is processing, marking winner or completed.",
+          "error"
+        );
+
+        await deleteImageFile(imageFileName);
         return;
       }
 
@@ -218,52 +261,17 @@ function AddCandidate() {
         title: "Error creating candidate!",
         text: errorMessage,
       });
-
-      // Check if the image file name is used by any candidate
-      const web3 = new Web3(window.ethereum);
-      await window.ethereum.enable();
-      const accounts = await web3.eth.getAccounts();
-      const contract = new web3.eth.Contract(
-        votingContract.abi,
-        contractAddress
-      );
-      const imageInUse = await contract.methods
-        .isImageFileNameUsed(imageFileName)
-        .call();
-
-      // If the image file name is not in use, delete the file
-      if (!imageInUse && error.message) {
-        try {
-          await axios.delete("/deleteFile", {
-            data: { filename: imageFileName },
-          });
-        } catch (deleteError) {
-          console.error("Error deleting the file:", deleteError);
-        }
-      }
     }
   };
 
   // Define the function to delete the file
   async function deleteImageFile(imageFileName) {
-    // Check if the image file name is used by any candidate
-    const web3 = new Web3(window.ethereum);
-    await window.ethereum.enable();
-    const accounts = await web3.eth.getAccounts();
-    const contract = new web3.eth.Contract(votingContract.abi, contractAddress);
-    const imageInUse = await contract.methods
-      .isImageFileNameUsed(imageFileName)
-      .call();
-
-    // If the image file name is not in use, delete the file
-    if (!imageInUse) {
-      try {
-        await axios.delete("/deleteFile", {
-          data: { filename: imageFileName },
-        });
-      } catch (deleteError) {
-        console.error("Error deleting the file:", deleteError);
-      }
+    try {
+      await axios.delete("/deleteFile", {
+        data: { filename: imageFileName },
+      });
+    } catch (deleteError) {
+      console.error("Error deleting the file:", deleteError);
     }
   }
 

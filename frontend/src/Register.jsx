@@ -7,6 +7,7 @@ import Web3 from "web3";
 import votingContract from "../../build/contracts/VotingSystem.json";
 import { contractAddress } from "../../config";
 import cryptoRandomString from "crypto-random-string";
+import Swal from "sweetalert";
 
 function Register() {
   const [email, setEmail] = useState("");
@@ -23,6 +24,24 @@ function Register() {
     event.preventDefault();
 
     const errors = validateSignUp();
+
+    if (email.length > 40) {
+      Swal(
+        "Error!",
+        "Email cannot more than 40 characters.",
+        "error"
+      );
+      return;
+    }
+
+    if (password.length > 40) {
+      Swal(
+        "Error!",
+        "Password cannot more than 40 characters.",
+        "error"
+      );
+      return;
+    }
 
     // If there are no errors, proceed with form submission
     if (Object.keys(errors).length === 0) {

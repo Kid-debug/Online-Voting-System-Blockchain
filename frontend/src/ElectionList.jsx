@@ -79,7 +79,11 @@ function ElectionList() {
           .getAllCategoryEvent(categoryId)
           .call();
 
-        const eventPromises = eventList.map(async (event) => {
+        const availableEventList = eventList.filter(
+          (event) => Number(event.status) !== 1
+        );
+
+        const eventPromises = availableEventList.map(async (event) => {
           const category = await contract.methods
             .getCategoryById(event.categoryId)
             .call();
@@ -181,7 +185,10 @@ function ElectionList() {
       <Header />
       <div className="election-container mb-5">
         <h2 className="mt-5 mb-4">Election List : {categoryName}</h2>
-        <div className="input-group mb-3" style={{margin:"auto", width:"90%" }}>
+        <div
+          className="input-group mb-3"
+          style={{ margin: "auto", width: "90%" }}
+        >
           <div className="input-group-prepend">
             <span className="input-group-text">
               <i className="bi bi-search"></i>
@@ -195,7 +202,10 @@ function ElectionList() {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <table className="data-table election-table mt-4" style={{margin:"auto", width:"90%" }}>
+        <table
+          className="data-table election-table mt-4"
+          style={{ margin: "auto", width: "90%" }}
+        >
           <thead>
             <tr>
               <th>No.</th>

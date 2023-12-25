@@ -53,6 +53,15 @@ function ResetPassword() {
 
     const errors = validateResetPassword();
 
+    if (password.length > 40) {
+      Swal(
+        "Error!",
+        "Password cannot more than 40 characters.",
+        "error"
+      );
+      return;
+    }
+
     // If there are no errors, proceed with form submission
     if (Object.keys(errors).length === 0) {
       setBackendErrors([]);

@@ -69,7 +69,7 @@ function AddPosition() {
   }, []); // The empty dependency array ensures that this effect runs once, similar to componentDidMount
 
   const handlePositionChange = (event) => {
-    setPositionName(event.target.value);
+    setPositionName(event.target.value.toUpperCase());
   };
 
   const handleCategoryChange = (event) => {
@@ -108,13 +108,34 @@ function AddPosition() {
   };
 
   const handleCreatePosition = async () => {
-    // Your logic to create a position goes here
-    console.log("Position created:", positionName);
-    console.log("Selected Category ID:", selectedCategoryId);
     try {
       // Ensure that positionName and selectedCategoryId are not empty
-      if (!positionName || !positionDesc || !selectedCategoryId) {
+      if (
+        !positionName ||
+        !positionDesc ||
+        !selectedCategoryId ||
+        !startDateAndTime ||
+        !endDateAndTime
+      ) {
         Swal("Error!", "All input fields must be filled in.", "error");
+        return;
+      }
+
+      if (positionName.length > 20) {
+        Swal(
+          "Error!",
+          "Position name cannot more than 20 characters.",
+          "error"
+        );
+        return;
+      }
+
+      if (positionDesc.length > 100) {
+        Swal(
+          "Error!",
+          "Position description cannot more than 100 characters.",
+          "error"
+        );
         return;
       }
 
@@ -140,7 +161,6 @@ function AddPosition() {
       const startDateTime = new Date(startDateAndTime).getTime() / 1000;
       const endDateTime = new Date(endDateAndTime).getTime() / 1000;
 
-      
       //Check if the category exists
       const categoryExists = categories.some(
         (category) => Number(category.categoryId) === Number(selectedCategoryId)
