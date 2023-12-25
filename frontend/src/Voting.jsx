@@ -22,9 +22,11 @@ function Voting() {
   const [isVoted, setIsVoted] = useState(true);
   const [isClose, setIsClose] = useState(true);
   const [isEnd, setIsEnd] = useState(false);
+  const [isUser, setIsUser] = useState(false);
   const IMAGE_BASE_URL = "http://localhost:3000/uploads/";
   const authData = JSON.parse(sessionStorage.getItem("auth"));
   const userKey = authData ? authData.userKey : null;
+  const userRole = authData ? authData.userRole : null;
   const [isCandidatesExist, setIsCandidatesExist] = useState(false);
 
   // State for President candidates
@@ -32,6 +34,9 @@ function Voting() {
     useState({});
 
   useEffect(() => {
+    if (userRole === "U") {
+      setIsUser(true);
+    }
     // Function to run every second
     const everySecondFunction = async () => {
       const web3 = new Web3(window.ethereum);
@@ -75,7 +80,7 @@ function Voting() {
         console.log("allVoteEvent ", allVoteEvent);
         console.log("userKey ", userKey);
         console.log("isVoted  ", isVoted);
-        if (allVoteEvent.length !=0) {
+        if (allVoteEvent.length != 0) {
           for (let i = 0; i < allVoteEvent.length; i++) {
             if (
               Number(allVoteEvent[i].categoryId) === Number(categoryId) &&
@@ -87,11 +92,10 @@ function Voting() {
               setIsVoted(false);
             }
           }
-        }else{
+        } else {
           console.log("allVoteEvent :", allVoteEvent);
           setIsVoted(false);
         }
-
 
         // Call the getAllEvent function in smart contract
         const candidatesList = await contract.methods
@@ -220,9 +224,9 @@ function Voting() {
                   type="radio"
                   name="candidatePresident"
                   value={Number(candidate.id)}
-                  checked={selectedCandidateId === candidate.id}
+                  checked={isClose || isVoted?false:selectedCandidateId === candidate.id}
                   disabled={isClose || isVoted}
-                  hidden ={isClose || isVoted}
+                  hidden={isClose || isVoted}
                   onChange={() => handleRadioClickPresident(candidate.id)}
                   style={{ display: "none" }}
                 />
@@ -299,21 +303,19 @@ function Voting() {
             ))
           )}
         </div>
-          {/* Final Submit Button */}
-      <div className="form-actions">
-        <button
-          type="submit"
-          style={{ width: "270px" }}
-          className="vote-submit submit-btn"
-          onClick={handleShowConfirmationModal}
-          hidden={isVoted || isClose}
-        >
-          Submit
-        </button>
+        {/* Final Submit Button */}
+        <div className="form-actions">
+          <button
+            type="submit"
+            style={{ width: "270px" }}
+            className="vote-submit submit-btn"
+            onClick={handleShowConfirmationModal}
+            hidden={isVoted || isClose || !isUser}
+          >
+            Submit
+          </button>
+        </div>
       </div>
-      </div>
-
-    
 
       {/* Confirmation Modal */}
       {showConfirmationModal && (
