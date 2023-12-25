@@ -59,7 +59,7 @@ function Footer() {
         </div>
         <div className="center box">
           <h2>Address</h2>
-          <div className="content">
+          <div className="content" style={{ textAlign:"center" }}>
             <div className="phone">
               <span className="fas fa"></span>
               <span className="text">+011-1078 9007</span>
@@ -70,29 +70,6 @@ function Footer() {
               <span className="text">+011-2346 8376</span>
               <span className="text">woonzl-wm20@student.tarc.edu.my</span>
             </div>
-          </div>
-        </div>
-        <div className="right box">
-          <h2>Contact us</h2>
-          <div className="content">
-            <form action="#">
-              <div className="email">
-                <div className="text text-white">Email *</div>
-                <input className="text-white" type="email" required />
-              </div>
-              <div className="msg">
-                <div className="text text-white">Message *</div>
-                <textarea
-                  className="text-white"
-                  rows="2"
-                  cols="25"
-                  required
-                ></textarea>
-              </div>
-              <div className="btn">
-                <button type="submit">Send</button>
-              </div>
-            </form>
           </div>
         </div>
       </div>
