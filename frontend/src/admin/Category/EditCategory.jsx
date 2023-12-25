@@ -55,9 +55,6 @@ function EditCategory() {
       );
       const category = await contract.methods.getCategoryById(categoryId).call();
 
-<<<<<<< HEAD
-      category.categoryName = categoryName;
-=======
       // Fetch all categories
       const allCategories = await contract.methods.getAllCategory().call();
 

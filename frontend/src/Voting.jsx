@@ -19,7 +19,7 @@ function Voting() {
   const [eventStatus, setEventStatus] = useState(null);
   const [categoryName, setCategoryName] = useState(null);
   const [selectedCandidateId, setSelectedCandidateId] = useState("");
-  const [isVoted, setIsVoted] = useState();
+  const [isVoted, setIsVoted] = useState(true);
   const [isClose, setIsClose] = useState(true);
   const [isEnd, setIsEnd] = useState(false);
   const IMAGE_BASE_URL = "http://localhost:3000/uploads/";
@@ -70,15 +70,32 @@ function Voting() {
           contractAddress
         );
 
-        const isVoted = await contract.methods
-          .isVoted(categoryId, eventId, userKey)
-          .call();
+        const allVoteEvent = await contract.methods.getAllVotedHistory().call();
 
-        setIsVoted(isVoted);
+        console.log("allVoteEvent ", allVoteEvent);
+        console.log("userKey ", userKey);
+        console.log("isVoted  ", isVoted);
+        if (allVoteEvent.length !=0) {
+          for (let i = 0; i < allVoteEvent.length; i++) {
+            if (
+              Number(allVoteEvent[i].categoryId) === Number(categoryId) &&
+              Number(allVoteEvent[i].eventId) === Number(eventId) &&
+              allVoteEvent[i].voterKey === userKey
+            ) {
+              setIsVoted(true);
+            } else {
+              setIsVoted(false);
+            }
+          }
+        }else{
+          console.log("allVoteEvent :", allVoteEvent);
+          setIsVoted(false);
+        }
+
 
         // Call the getAllEvent function in smart contract
         const candidatesList = await contract.methods
-          .getVoteEventCandidate(categoryId, eventId)
+          .getAllCandidatesInEvent(categoryId, eventId)
           .call();
 
         const category = await contract.methods
@@ -88,7 +105,6 @@ function Voting() {
           .getEventById(categoryId, eventId)
           .call();
 
-        console.log("category : ", category);
         setCategoryName(category.categoryName);
         setEventName(event.eventName);
         setEventDesc(event.eventDesc);
@@ -195,7 +211,9 @@ function Voting() {
                   selectedCandidateId === candidate.id ? "selected" : ""
                 }`}
                 style={{
-                  backgroundColor: candidate.win ? "rgb(159, 252, 193)" : "initial",
+                  backgroundColor: candidate.win
+                    ? "rgb(159, 252, 193)"
+                    : "initial",
                 }}
               >
                 <input
@@ -203,11 +221,12 @@ function Voting() {
                   name="candidatePresident"
                   value={Number(candidate.id)}
                   checked={selectedCandidateId === candidate.id}
-                  disabled={isClose}
+                  disabled={isClose || isVoted}
+                  hidden ={isClose || isVoted}
                   onChange={() => handleRadioClickPresident(candidate.id)}
                   style={{ display: "none" }}
                 />
-                <div className="flex-row" style={{  width:"500px" }}>
+                <div className="flex-row" style={{ width: "500px" }}>
                   <div className="col">
                     {isEnd && (
                       <p style={{ fontSize: "19px" }}>
@@ -244,7 +263,14 @@ function Voting() {
                       <strong>{candidate.name}</strong>
                     </h4>
                     <h5>{Number(candidate.studentId)}</h5>
-                    <p className="description" style={{ fontSize: "17px", textAlign: "center", width:"100%"}}>
+                    <p
+                      className="description"
+                      style={{
+                        fontSize: "17px",
+                        textAlign: "center",
+                        width: "100%",
+                      }}
+                    >
                       {expandedDescriptionPresident[candidate.name] ||
                       candidate.description.length <= 50
                         ? candidate.description
@@ -273,9 +299,7 @@ function Voting() {
             ))
           )}
         </div>
-      </div>
-
-      {/* Final Submit Button */}
+          {/* Final Submit Button */}
       <div className="form-actions">
         <button
           type="submit"
@@ -287,6 +311,9 @@ function Voting() {
           Submit
         </button>
       </div>
+      </div>
+
+    
 
       {/* Confirmation Modal */}
       {showConfirmationModal && (

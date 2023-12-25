@@ -61,9 +61,6 @@ function Login() {
             });
             navigate(`/admin/home`);
           } else {
-            const userStatus = await contract.methods
-              .getVoterStatus(values.email, values.password)
-              .call();
             // user status; 0: no verify, 1: verified, 2:banned
             if (userStatus == 1) {
               // Login

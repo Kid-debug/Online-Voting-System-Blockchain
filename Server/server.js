@@ -38,15 +38,14 @@ const changeEventDateStatus = async () => {
   if (filteredEvents != null) {
     for (const event of filteredEvents) {
       try {
- 
-        if(event.status == 1 && event.candidates.length !=0){
+        if (event.status == 1 && event.candidates.length != 0) {
           console.log("change status to Up Comming");
           event.status = 2;
           await contract.methods.updateEvent(event).send({
             from: account.address,
             gas: 200000,
           });
-          break;          
+          break;
         }
 
         if (
@@ -67,7 +66,7 @@ const changeEventDateStatus = async () => {
           unixCurrentTime > event.endDateTime &&
           event.status != 4 &&
           event.status != 5 &&
-          event.status !=1
+          event.status != 1
         ) {
           console.log("change status to Marking Winner!");
           event.status = 4;
