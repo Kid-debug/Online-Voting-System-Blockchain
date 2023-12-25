@@ -75,7 +75,7 @@ function Voting() {
         console.log("allVoteEvent ", allVoteEvent);
         console.log("userKey ", userKey);
         console.log("isVoted  ", isVoted);
-        if (allVoteEvent.length !=0) {
+        if (allVoteEvent.length != 0) {
           for (let i = 0; i < allVoteEvent.length; i++) {
             if (
               Number(allVoteEvent[i].categoryId) === Number(categoryId) &&
@@ -87,11 +87,10 @@ function Voting() {
               setIsVoted(false);
             }
           }
-        }else{
+        } else {
           console.log("allVoteEvent :", allVoteEvent);
           setIsVoted(false);
         }
-
 
         // Call the getAllEvent function in smart contract
         const candidatesList = await contract.methods
@@ -222,7 +221,7 @@ function Voting() {
                   value={Number(candidate.id)}
                   checked={selectedCandidateId === candidate.id}
                   disabled={isClose || isVoted}
-                  hidden ={isClose || isVoted}
+                  hidden={isClose || isVoted}
                   onChange={() => handleRadioClickPresident(candidate.id)}
                   style={{ display: "none" }}
                 />
@@ -299,21 +298,19 @@ function Voting() {
             ))
           )}
         </div>
-          {/* Final Submit Button */}
-      <div className="form-actions">
-        <button
-          type="submit"
-          style={{ width: "270px" }}
-          className="vote-submit submit-btn"
-          onClick={handleShowConfirmationModal}
-          hidden={isVoted || isClose}
-        >
-          Submit
-        </button>
+        {/* Final Submit Button */}
+        <div className="form-actions">
+          <button
+            type="submit"
+            style={{ width: "270px" }}
+            className="vote-submit submit-btn"
+            onClick={handleShowConfirmationModal}
+            hidden={isVoted || isClose}
+          >
+            Submit
+          </button>
+        </div>
       </div>
-      </div>
-
-    
 
       {/* Confirmation Modal */}
       {showConfirmationModal && (

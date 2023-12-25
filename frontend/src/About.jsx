@@ -30,7 +30,6 @@ function About() {
       <div className="wrapper">
         <div className="background-container">
           <div className="bg-1"></div>
-          <div className="bg-2"></div>
         </div>
         <div className="about-container">
           <div className="image-container">

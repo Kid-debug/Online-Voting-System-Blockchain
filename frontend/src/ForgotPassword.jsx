@@ -18,6 +18,9 @@ function ForgotPassword() {
     setErrorMessage("");
     setSuccessMessage("");
 
+    // List of hardcoded emails that cannot reset passwords
+    const hardcodedEmails = ["superadmin@gmail.com", "voter@gmail.com"];
+
     if (!email.trim()) {
       setErrorMessage("Email is required");
       return;
@@ -25,6 +28,12 @@ function ForgotPassword() {
 
     try {
       const emailLower = email.toLowerCase();
+
+      // Check if the email is in the list of hardcoded emails
+      if (hardcodedEmails.includes(emailLower)) {
+        setErrorMessage("Password reset is not allowed for this account.");
+        return;
+      }
 
       // Initialize web3 and the contract
       const web3 = new Web3(window.ethereum);
@@ -44,7 +53,9 @@ function ForgotPassword() {
 
       // Check if the account is verified
       if (Number(voter.status) !== 1) {
-        setErrorMessage("Your account is not in verified status.");
+        setErrorMessage(
+          "Your account is not in verified status, invalid to reset password"
+        );
         return;
       }
 

@@ -140,7 +140,6 @@ function AddPosition() {
       const startDateTime = new Date(startDateAndTime).getTime() / 1000;
       const endDateTime = new Date(endDateAndTime).getTime() / 1000;
 
-      
       //Check if the category exists
       const categoryExists = categories.some(
         (category) => Number(category.categoryId) === Number(selectedCategoryId)
@@ -162,7 +161,7 @@ function AddPosition() {
       if (eventNameExists) {
         Swal(
           "Error!",
-          "• This event name already existed in the selected category.",
+          "• This position name already existed in the selected category.",
           "error"
         );
         return;

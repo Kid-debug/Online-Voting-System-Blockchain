@@ -22,7 +22,20 @@ function Register() {
   const handleRegister = async (event) => {
     event.preventDefault();
 
-    const errors = validateSignUp();
+    const emailErrors = await validateEmail();
+
+    // Check if there are email errors
+    if (Object.keys(emailErrors).length > 0) {
+      setBackendErrors([]);
+      setErrorMessage("");
+      setSuccessMessage(""); // Reset success message on new submission
+      setBackendErrors(Object.values(emailErrors));
+      return; // Stop further processing if there are email errors
+    }
+
+    // Continue with password validation
+    const passwordErrors = validatePassword();
+    const errors = { ...passwordErrors };
 
     // If there are no errors, proceed with form submission
     if (Object.keys(errors).length === 0) {
@@ -44,6 +57,7 @@ function Register() {
             votingContract.abi,
             contractAddress
           );
+
           await contract.methods
             .addVoter(voterId, emailLower, password, "U", randomToken)
             .send({ from: accounts[0] });
@@ -99,7 +113,7 @@ function Register() {
     }
   };
 
-  const validateSignUp = () => {
+  const validateEmail = async () => {
     const errors = {};
 
     // Check if email is not empty and must be tarumt student account
@@ -108,6 +122,60 @@ function Register() {
     } else if (!email.trim().toLowerCase().endsWith("@student.tarc.edu.my")) {
       errors.email = "• Email must be a @student.tarc.edu.my";
     }
+
+    const web3 = new Web3(window.ethereum);
+    await window.ethereum.enable();
+    const accounts = await web3.eth.getAccounts();
+    const contract = new web3.eth.Contract(votingContract.abi, contractAddress);
+
+    //use getAllVoter to check the email is exist or not
+    // Fetch all voters
+    const voters = await contract.methods.getAllVoter().call();
+
+    // Check if email already exists
+    const emailLower = email.toLowerCase();
+
+    const existingVoter = voters.find(
+      (voter) => voter.email.toLowerCase() === emailLower
+    );
+
+    if (existingVoter) {
+      // Check the status of the existing account
+      if (Number(existingVoter.status) === 0) {
+        // Resend validation token
+        const randomToken = cryptoRandomString({ length: 16 });
+        try {
+          // Update the validation token in the blockchain
+          await contract.methods
+            .updateVoterTokenByEmail(existingVoter.email, randomToken)
+            .send({ from: accounts[0] });
+
+          setSuccessMessage(
+            "Verification token resent! Please check your email to proceed."
+          );
+          // Resend verification email
+          await axios.post("http://localhost:3000/api/verifyEmail", {
+            email,
+            randomToken,
+          });
+        } catch (error) {
+          // Handle error during token resend
+          errors.email = "Error resending verification token.";
+        }
+      } else if (Number(existingVoter.status) === 1) {
+        // Account exists and is already verified
+        errors.email = "Email already exists and cannot be duplicated!";
+      } else if (Number(existingVoter.status) === 2) {
+        // Account is banned
+        errors.email = "Your account has been banned, not allowed to register!";
+      }
+    }
+
+    return errors;
+  };
+
+  const validatePassword = () => {
+    const errors = {};
 
     // Check if password is not empty and meets requirements
     if (!password.trim()) {

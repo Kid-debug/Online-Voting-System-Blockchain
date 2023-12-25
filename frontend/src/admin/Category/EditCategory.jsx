@@ -53,7 +53,9 @@ function EditCategory() {
         votingContract.abi,
         contractAddress
       );
-      const category = await contract.methods.getCategoryById(categoryId).call();
+      const category = await contract.methods
+        .getCategoryById(categoryId)
+        .call();
 
       // Fetch all categories
       const allCategories = await contract.methods.getAllCategory().call();
@@ -75,7 +77,7 @@ function EditCategory() {
       }
 
       await contract.methods
-        .updateCategory(category)
+        .updateCategory(categoryId, categoryName)
         .send({ from: accounts[0] });
 
       Swal("Success!", "Category updated successfully.", "success");

@@ -9,30 +9,36 @@ import jsPDF from "jspdf";
 const CanvasJSChart = CanvasJSReact.CanvasJSChart;
 
 const CategoryChart = () => {
-  const [selectedYear, setSelectedYear] = useState(
-    new Date().getFullYear().toString()
-  );
+  const [selectedYear, setSelectedYear] = useState("");
   const [categoryVoteData, setCategoryVoteData] = useState([]);
   const [availableYears, setAvailableYears] = useState([]);
 
   useEffect(() => {
     const fetchEventsAndExtractYears = async () => {
       const web3 = new Web3(window.ethereum);
-      await window.ethereum.request({ method: "eth_requestAccounts" });
+      await window.ethereum.enable();
       const contract = new web3.eth.Contract(
         votingContract.abi,
         contractAddress
       );
 
       const events = await contract.methods.getAllEvent().call();
+      const validEvents = events.filter(
+        (event) => Number(event.startDateTime) !== 0
+      ); // Filter out events with a timestamp of 0
       const years = new Set(
-        events.map((event) =>
+        validEvents.map((event) =>
           new Date(Number(event.startDateTime) * 1000).getFullYear()
         )
       );
-      setAvailableYears(Array.from(years).sort().reverse());
+      const yearsArray = Array.from(years).sort((a, b) => b - a); // Sort years in descending order
+      setAvailableYears(yearsArray);
 
-      fetchCategoryVotes(selectedYear);
+      if (yearsArray.length > 0) {
+        const latestYear = yearsArray[0].toString();
+        setSelectedYear(latestYear);
+        fetchCategoryVotes(latestYear);
+      }
     };
 
     fetchEventsAndExtractYears();
@@ -44,7 +50,7 @@ const CategoryChart = () => {
 
   const fetchCategoryVotes = async (year) => {
     const web3 = new Web3(window.ethereum);
-    await window.ethereum.request({ method: "eth_requestAccounts" }); // This is the modern way to request access to accounts
+    await window.ethereum.enable();
     const contract = new web3.eth.Contract(votingContract.abi, contractAddress);
 
     const categories = await contract.methods.getAllCategory().call();
@@ -57,13 +63,9 @@ const CategoryChart = () => {
         .call();
 
       for (let event of events) {
-        // Convert BigInt to Number, assuming the timestamp doesn't exceed the safe integer limit
-        const eventYear = new Date(
-          Number(event.startDateTime.toString()) * 1000
-        )
+        const eventYear = new Date(Number(event.startDateTime) * 1000)
           .getFullYear()
           .toString();
-
         if (eventYear === year) {
           const candidates = await contract.methods
             .getAllCandidatesInEvent(category.categoryId, event.eventId)
@@ -74,11 +76,13 @@ const CategoryChart = () => {
         }
       }
 
-      // Push the category with its total votes to the voteData array, even if it's zero
-      voteData.push({
-        label: category.categoryName,
-        y: totalVotesForCategory,
-      });
+      if (totalVotesForCategory > 0 || events.length > 0) {
+        // Include categories with total vote count > 0 or events created
+        voteData.push({
+          label: category.categoryName,
+          y: totalVotesForCategory,
+        });
+      }
     }
 
     setCategoryVoteData(voteData);
@@ -100,7 +104,7 @@ const CategoryChart = () => {
   const options = {
     animationEnabled: true,
     title: {
-      text: `Vote Counts by Category for ${selectedYear}`,
+      text: `${selectedYear} - Total Vote Counts of Categories`,
     },
     axisX: {
       title: "Categories",

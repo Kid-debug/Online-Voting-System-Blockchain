@@ -179,7 +179,7 @@ function UserFeedbackList() {
   return (
     <div className="voterhome">
       <Header />
-      <div className="feedback-container mb-5">
+      <div className="feedback-container">
         <h2 className="mt-5 mb-4">Feedback List</h2>
         <div className="mt-3"></div>
         <div className="input-group mb-3">

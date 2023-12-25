@@ -22,7 +22,10 @@ function Home() {
         votingContract.abi,
         contractAddress
       );
-      const result = await contract.methods.getAllCategory().call();
+      const categoryList = await contract.methods.getAllCategory().call();
+      const result = categoryList.filter(
+        (category) => Number(category.categoryId) !== 0
+      );
       const newCategoryCount = result.length;
       setCategoryCount(Number(newCategoryCount));
     } catch (error) {
@@ -42,7 +45,10 @@ function Home() {
         votingContract.abi,
         contractAddress
       );
-      const result = await contract.methods.getAllCandidates().call();
+      const candidatesList = await contract.methods.getAllCandidates().call();
+      const result = candidatesList.filter(
+        (candidate) => Number(candidate.id) !== 0
+      );
       const newCandidateCount = result.length;
       setCandidateCount(Number(newCandidateCount));
     } catch (error) {
@@ -63,7 +69,9 @@ function Home() {
         contractAddress
       );
       const allVoters = await contract.methods.getAllVoter().call();
-      const usersWithRoleU = allVoters.filter((voter) => voter.role === "U");
+      const usersWithRoleU = allVoters.filter(
+        (voter) => voter.role === "U" && Number(voter.id) !== 0
+      );
       const newVoterCount = usersWithRoleU.length;
       setVoterCount(Number(newVoterCount));
     } catch (error) {
@@ -83,7 +91,9 @@ function Home() {
         votingContract.abi,
         contractAddress
       );
-      const result = await contract.methods.getAllEvent().call();
+      const eventList = await contract.methods.getAllEvent().call();
+      const result = eventList.filter((event) => Number(event.eventId) !== 0);
+
       const newPositionCount = result.length;
       setPositionCount(Number(newPositionCount));
     } catch (error) {

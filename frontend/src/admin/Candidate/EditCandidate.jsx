@@ -64,14 +64,14 @@ function EditCandidate() {
         .getAllCandidatesInEvent(categoryId, eventId)
         .call();
 
-        let candidatesFound;
-      for(let i =0; i<candidates.length; i++){
-        if(candidates[i].id == candidateId){
+      let candidatesFound;
+      for (let i = 0; i < candidates.length; i++) {
+        if (candidates[i].id == candidateId) {
           candidatesFound = candidates[i];
           break;
         }
       }
-      
+
       setSelectedCategory(Number(candidatesFound.categoryId));
       setSelectedEvent(Number(candidatesFound.eventId));
       setCandidateName(candidatesFound.name);
@@ -210,7 +210,6 @@ function EditCandidate() {
           title: "Error Editing Candidate!",
           text: "Candidate not found.",
         });
-        await deleteImageFile(imageFileNameToUse);
         return;
       }
 
@@ -230,7 +229,6 @@ function EditCandidate() {
           "error"
         );
 
-        await deleteImageFile(imageFileNameToUse);
         return; // Exit the function if the student ID is taken
       }
 
@@ -241,11 +239,10 @@ function EditCandidate() {
       if (!isStatusValid) {
         Swal(
           "Error!",
-          "Cannot edit event when the event is processing, marking winner or completed.",
+          "Cannot edit candidates when the position is processing, marking winner or completed.",
           "error"
         );
 
-        await deleteImageFile(imageFileNameToUse);
         return;
       }
 
@@ -289,54 +286,8 @@ function EditCandidate() {
         title: "Error updating candidate!",
         text: errorMessage,
       });
-
-      // Check if the image file name is used by any candidate
-      const web3 = new Web3(window.ethereum);
-      await window.ethereum.enable();
-      const accounts = await web3.eth.getAccounts();
-      const contract = new web3.eth.Contract(
-        votingContract.abi,
-        contractAddress
-      );
-      const imageInUse = await contract.methods
-        .isImageFileNameUsed(imageFileNameToUse)
-        .call();
-
-      // If the image file name is not in use, delete the file
-      if (!imageInUse && error.message) {
-        try {
-          await axios.delete("/deleteFile", {
-            data: { filename: imageFileNameToUse },
-          });
-        } catch (deleteError) {
-          console.error("Error deleting the file:", deleteError);
-        }
-      }
     }
   };
-
-  // Define the function to delete the file
-  async function deleteImageFile(imageFileName) {
-    // Check if the image file name is used by any candidate
-    const web3 = new Web3(window.ethereum);
-    await window.ethereum.enable();
-    const accounts = await web3.eth.getAccounts();
-    const contract = new web3.eth.Contract(votingContract.abi, contractAddress);
-    const imageInUse = await contract.methods
-      .isImageFileNameUsed(imageFileName)
-      .call();
-
-    // If the image file name is not in use, delete the file
-    if (!imageInUse) {
-      try {
-        await axios.delete("/deleteFile", {
-          data: { filename: imageFileName },
-        });
-      } catch (deleteError) {
-        console.error("Error deleting the file:", deleteError);
-      }
-    }
-  }
 
   return (
     <div className="d-flex flex-column align-items-center pt-4">

@@ -227,15 +227,20 @@ function Voter() {
                 {columns.map((column, colIndex) => {
                   // If the column is 'Status', provide a dropdown to change status
                   if (column === "Status") {
+                    const isHardcodedVoter =
+                      voter.Email.toLowerCase() === "voter@gmail.com";
+                    const statusValue = isHardcodedVoter
+                      ? "1"
+                      : voter.Status.toString();
                     return (
                       <td key={colIndex} className="data-cell">
                         <select
                           className="form-select"
-                          value={voter.Status.toString()}
+                          value={statusValue}
                           onChange={(e) =>
                             updateVoterStatus(voter.ID, e.target.value)
                           }
-                          disabled={voter.Role !== "Voter"}
+                          disabled={voter.Role !== "Voter" || isHardcodedVoter}
                         >
                           <option value="0" disabled>
                             No Verified
