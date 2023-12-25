@@ -40,50 +40,44 @@ function Login() {
         );
 
         const accountFound = await contract.methods
-          .checkVoterEmailPassword(values.email, values.password)
+          .getVoterByEmailPassword(values.email, values.password)
           .call();
 
-        if (accountFound) {
+        if (accountFound.id != 0 ) { // id=0 mean not found
           //check role whether is S or not
-          const voterList = await contract.methods.getAllVoter().call();
-          const superAdminVoter = voterList.find(
-            (voter) => voter.email === values.email && voter.role === "S"
-          );
+          const superAdminVoter = accountFound.role === "S"?true:false;
 
           console.log(superAdminVoter);
 
           if (superAdminVoter) {
             setAuthData({
-              userKey: superAdminVoter.key,
-              userId: Number(superAdminVoter.id),
-              userRole: superAdminVoter.role,
-              email: superAdminVoter.email,
+              userKey: accountFound.key,
+              userId: Number(accountFound.id),
+              userRole: accountFound.role,
+              email: accountFound.email,
             });
             navigate(`/admin/home`);
           } else {
             // user status; 0: no verify, 1: verified, 2:banned
-            if (userStatus == 1) {
+            if (accountFound.status == 1) {
               // Login
-              const user = await contract.methods
-                .loginVoter(values.email, values.password)
-                .call();
-              sessionStorage.setItem("userKey", user.key);
-              console.log("user : ", user);
+              sessionStorage.setItem("userKey", accountFound.key);
+              console.log("user : ", accountFound);
 
               setAuthData({
-                userKey: user.key,
-                userId: Number(user.id),
-                userRole: user.role,
-                email: user.email,
+                userKey: accountFound.key,
+                userId: Number(accountFound.id),
+                userRole: accountFound.role,
+                email: accountFound.email,
               });
-              console.log(user.role);
+              console.log(accountFound.role);
               // navigate to home
-              if (user.role === "U") {
+              if (accountFound.role === "U") {
                 navigate(`/voterdashboard`);
               } else {
                 navigate(`/admin/home`);
               }
-            } else if (userStatus == 0) {
+            } else if (accountFound.status == 0) {
               errors.wrongPassord = "• Account haven't verify.";
             } else {
               errors.wrongPassord = "• Account has been banned.";

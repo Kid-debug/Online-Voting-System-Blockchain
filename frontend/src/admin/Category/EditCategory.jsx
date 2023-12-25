@@ -74,7 +74,6 @@ function EditCategory() {
         return;
       }
 
->>>>>>> d1445e04e38b3f6a0df4176b260abc31a897e4cd
       await contract.methods
         .updateCategory(category)
         .send({ from: accounts[0] });

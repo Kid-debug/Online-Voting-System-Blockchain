@@ -84,7 +84,7 @@ function ElectionList() {
             .getCategoryById(event.categoryId)
             .call();
           const candidates = await contract.methods
-            .getVoteEventCandidate(event.categoryId, event.eventId)
+            .getAllCandidatesInEvent(event.categoryId, event.eventId)
             .call();
 
           let votetotal = 0;
