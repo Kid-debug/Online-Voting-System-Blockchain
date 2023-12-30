@@ -44,7 +44,17 @@ function AddCandidate() {
   }, []);
 
   const handleFileChange = (event) => {
-    setFile(event.target.files[0]);
+    const selectedFile = event.target.files[0];
+    if (selectedFile && selectedFile.size > 1000000) {
+      // 1MB limit
+      Swal("Error!", "File size should be less than 1MB.", "error");
+      // Clear the file input
+      event.target.value = "";
+      // Optionally, if you need to reset the file state as well:
+      setFile(null);
+    } else {
+      setFile(selectedFile);
+    }
   };
 
   // Handle category change events

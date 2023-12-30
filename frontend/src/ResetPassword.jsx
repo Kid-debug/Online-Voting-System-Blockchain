@@ -5,6 +5,7 @@ import { Link, useParams } from "react-router-dom";
 import Web3 from "web3";
 import votingContract from "../../build/contracts/VotingSystem.json";
 import { contractAddress } from "../../config";
+import Swal from "sweetalert";
 
 function ResetPassword() {
   const [password, setPassword] = useState("");
@@ -54,11 +55,7 @@ function ResetPassword() {
     const errors = validateResetPassword();
 
     if (password.length > 40) {
-      Swal(
-        "Error!",
-        "Password cannot more than 40 characters.",
-        "error"
-      );
+      Swal("Error!", "Password cannot more than 40 characters.", "error");
       return;
     }
 

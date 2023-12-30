@@ -154,12 +154,6 @@ function EditPosition() {
 
   const handleEditPosition = async (event) => {
     event.preventDefault();
-    // check the event status
-
-    const eventFound = await contract.methods
-      .getEventById(categoryId, eventId)
-      .call();
-
     // Ensure that positionName and selectedCategoryId are not empty
     if (
       !positionName ||

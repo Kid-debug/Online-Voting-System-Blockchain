@@ -16,7 +16,7 @@ const votingContract = require("../build/contracts/VotingSystem.json");
 const { Web3 } = require("web3");
 const ganacheUrl = "HTTP://127.0.0.1:7545";
 const privateKey =
-  "0xcb71bdb9cc02160a426cd386c3af404a5750ec7128853330e851ea74f026c83c";
+  "0x9ed9b89492fcff97665f9b2d50ba27f06349c49e6e581b2c1559b80c3cfbdc4e";
 const { contractAddress } = require("../config-server");
 
 const web3 = new Web3(new Web3.providers.HttpProvider(ganacheUrl));
@@ -163,16 +163,21 @@ const upload = multer({
   fileFilter: function (req, file, cb) {
     const ext = path.extname(file.originalname).toLowerCase();
     const allowedExtensions = [".png", ".jpg", ".jpeg", ".gif"];
-    console.log("Detected file extension:", ext);
-    console.log("Detected MIME type:", file.mimetype);
+    // console.log("Detected file extension:", ext);
+    // console.log("Detected MIME type:", file.mimetype);
 
     if (allowedExtensions.includes(ext)) {
       cb(null, true);
-      console.log("hi");
     } else {
-      console.log("hi");
-      cb(new Error("Unsupported file type"));
+      cb(
+        new Error(
+          "Invalid file type. Only .png, .jpg, .jpeg, and .gif files are allowed."
+        )
+      );
     }
+  },
+  limits: {
+    fileSize: 1000000, // 1MB in bytes
   },
 });
 
@@ -222,22 +227,6 @@ app.post(
   "/upload",
   upload.single("file"),
   (req, res) => {
-    // File type is checked by Multer
-    if (!req.file) {
-      return res.status(400).json({
-        message:
-          "Invalid file type. Only .png, .jpg, .jpeg, and .gif files are allowed.",
-      });
-    }
-
-    // Manually check file size after file type is validated
-    // const fileSizeLimit = 1000000; // 1MB in bytes
-    // if (req.file.size > fileSizeLimit) {
-    //   return res.status(400).json({
-    //     message: "File size limit is 1MB",
-    //   });
-    // }
-
     // Proceed if file type and size are valid
     const filename = req.file.filename;
     res.status(200).json({ imageFileName: filename });

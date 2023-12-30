@@ -59,7 +59,7 @@ function Footer() {
         </div>
         <div className="center box">
           <h2>Address</h2>
-          <div className="content" style={{ textAlign:"center" }}>
+          <div className="content" style={{ textAlign: "center" }}>
             <div className="phone">
               <span className="fas fa"></span>
               <span className="text">+011-1078 9007</span>

@@ -184,7 +184,7 @@ function ElectionList() {
     <div className="voterhome">
       <Header />
       <div className="election-container">
-        <h2 className="mt-5 mb-4">Election List : {categoryName}</h2>
+        <h2 className="mt-5 pt-3 mb-4">Election List : {categoryName}</h2>
         <div
           className="input-group mb-3"
           style={{ margin: "auto", width: "90%" }}

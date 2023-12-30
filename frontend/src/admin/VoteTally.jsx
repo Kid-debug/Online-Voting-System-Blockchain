@@ -61,17 +61,21 @@ const VoteTally = () => {
       const response = await contract.methods
         .getAllCandidatesInEvent(selectedCategory, selectedPosition)
         .call();
-      const candidatesWithVotes = response.map((c) => ({
+      let candidatesWithVotes = response.map((c) => ({
         ...c,
         // Convert BigInt to String or Number
         voteCount: Number(c.voteCount) || 0,
       }));
+
+      // Sort candidates by vote count in descending order
+      candidatesWithVotes.sort((a, b) => b.voteCount - a.voteCount);
+
       setCandidates(candidatesWithVotes);
       setVotesData({
         series: [
           {
             name: "Vote Count",
-            data: candidatesWithVotes.map((c) => Number(c.voteCount)),
+            data: candidatesWithVotes.map((c) => c.voteCount),
           },
         ],
         categories: candidatesWithVotes.map((c) => c.name),

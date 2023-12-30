@@ -39,20 +39,12 @@ function Register() {
     const errors = { ...passwordErrors };
 
     if (email.length > 40) {
-      Swal(
-        "Error!",
-        "Email cannot more than 40 characters.",
-        "error"
-      );
+      Swal("Error!", "Email cannot more than 40 characters.", "error");
       return;
     }
 
     if (password.length > 40) {
-      Swal(
-        "Error!",
-        "Password cannot more than 40 characters.",
-        "error"
-      );
+      Swal("Error!", "Password cannot more than 40 characters.", "error");
       return;
     }
 

@@ -22,7 +22,7 @@ function AddCategory() {
       Swal("Error!", "Category name cannot more than 20 character.", "error");
       return;
     }
- 
+
     console.log("Length : ", categoryName.length);
 
     try {

@@ -133,16 +133,27 @@ const PositionChart = () => {
   };
 
   const exportChart = async (type) => {
-    const canvas = await html2canvas(
-      document.querySelector(".canvasjs-chart-canvas")
-    );
-    const image = canvas.toDataURL(`image/${type}`);
-    const downloadLink = document.createElement("a");
-    downloadLink.href = image;
-    downloadLink.download = `chart.${type}`;
-    document.body.appendChild(downloadLink);
-    downloadLink.click();
-    document.body.removeChild(downloadLink);
+    try {
+      const canvas = await html2canvas(
+        document.querySelector(".canvasjs-chart-canvas")
+      );
+
+      if (!canvas) {
+        console.error("Canvas is null or undefined.");
+        return;
+      }
+
+      // Create a new jsPDF instance
+      const pdf = new jsPDF("landscape");
+
+      // Add the canvas image to the PDF
+      pdf.addImage(canvas, "JPEG", 10, 10, 280, 150);
+
+      // Download the PDF
+      pdf.save(`chart.${type}`);
+    } catch (error) {
+      console.error("Error exporting chart to PDF:", error);
+    }
   };
 
   // Function to find the label of the selected category
@@ -164,7 +175,7 @@ const PositionChart = () => {
     axisY: {
       title: "Number of Votes",
       includeZero: true,
-      interval: 1, // Set interval as 1 for whole numbers
+      interval: 5, // Set interval as 1 for whole numbers
       valueFormatString: "#0", // Format labels as integers
     },
     data: [

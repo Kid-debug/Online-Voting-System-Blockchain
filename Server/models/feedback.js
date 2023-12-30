@@ -1,7 +1,6 @@
 //models/feedback.js
 const { Model, DataTypes } = require("sequelize");
-const sequelize = require("../config/sequelize"); // Adjust the path as necessary for your project
-const User = require("../models/user");
+const sequelize = require("../config/sequelize"); 
 
 class Feedback extends Model {}
 
@@ -49,13 +48,9 @@ Feedback.init(
     sequelize,
     modelName: "Feedback",
     tableName: "feedbacks",
-    timestamps: false, // This is set to false because we are defining the timestamp columns explicitly
-    underscored: true, // This option is used if the table column names are snake_case
+    timestamps: false, 
+    underscored: true, 
   }
 );
-
-// Define the associations directly after the model definitions
-// User.hasMany(Feedback, { foreignKey: "user_id" });
-// Feedback.belongsTo(User, { foreignKey: "user_id" });
 
 module.exports = Feedback;

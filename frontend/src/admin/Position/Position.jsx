@@ -92,8 +92,8 @@ function Position() {
   // Define a mapping between API keys and display names
   const columnMapping = {
     eventId: "ID",
-    eventName: "Event Name",
-    eventDesc: "Event Description",
+    eventName: "Position Name",
+    eventDesc: "Position Description",
     categoryName: "Category Name",
     candidatesCount: "Candidates",
     eventStatus: "Status",
@@ -461,7 +461,8 @@ function Position() {
                       </>
                     ) : column === "Action" ? (
                       row.eventStatus !== 5 &&
-                      row.eventStatus !== 4 && (
+                      row.eventStatus !== 4 &&
+                      row.eventStatus !== 3 && (
                         <>
                           <Link
                             to={`/admin/editPosition/${row.categoryId}/${row.eventId}`}

@@ -19,6 +19,7 @@
 .bg-1 {
   flex: 1;
   background-color: rgb(181, 218, 255);
+  margin-bottom: -15%;
 }
 .about-container {
   width: 85%;

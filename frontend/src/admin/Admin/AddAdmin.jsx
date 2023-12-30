@@ -36,6 +36,22 @@ function AddAdmin() {
             votingContract.abi,
             contractAddress
           );
+
+          // Use getAllVoter to check if the email exists
+          const voters = await contract.methods.getAllVoter().call();
+
+          // Check if email already exists
+          const emailLower = email.toLowerCase();
+
+          const existingVoter = voters.find(
+            (voter) => voter.email.toLowerCase() === emailLower
+          );
+
+          if (existingVoter) {
+            Swal("Error!", "This email already exists.", "error");
+            return;
+          }
+
           await contract.methods
             .addVoter(voterId, emailLower, password, "A", randomToken)
             .send({ from: accounts[0] });
@@ -120,6 +136,8 @@ function AddAdmin() {
     ) {
       errors.password =
         "•Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character";
+    } else if (password.length > 40) {
+      errors.password = "•Password cannot more than 40 characters.";
     }
 
     return errors;

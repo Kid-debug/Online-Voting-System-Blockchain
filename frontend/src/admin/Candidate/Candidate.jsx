@@ -59,7 +59,7 @@ function Candidate() {
           eventId: candidate.eventId,
           eventStartDate: event.startDateTime,
           eventEndDate: event.endDateTime,
-          eventStatus: event.status,
+          eventStatus: Number(event.status),
           eventName: event.eventName,
           imageFileName: candidate.imageFileName,
         };
@@ -80,7 +80,8 @@ function Candidate() {
   const columnMapping = {
     candidateId: "ID",
     categoryName: "Category Name",
-    eventName: "Event Name",
+    eventName: "Position Name",
+    eventStatus: "Position Status",
     candidateName: "Candidate Name",
     candidateDesc: "Description",
     candidateVoteCount: "Vote Count",
@@ -93,6 +94,7 @@ function Candidate() {
     "candidateId",
     "categoryName",
     "eventName",
+    "eventStatus",
     "candidateName",
     "candidateDesc",
     "candidateVoteCount",
@@ -120,6 +122,26 @@ function Candidate() {
     } else {
       setSortColumn(column);
       setSortDirection("asc");
+    }
+  };
+
+  const getElectionStatus = (election) => {
+    // 1: Upcoming, 2: In Progress, 3: Completed, 4： Cancel
+    const status = election.eventStatus;
+    if (status == 1) {
+      return "Not Enough Candidates";
+    }
+    if (status == 2) {
+      return "Up Comming";
+    }
+    if (status == 3) {
+      return "Processing";
+    }
+    if (status == 4) {
+      return "Marking Winner";
+    }
+    if (status == 5) {
+      return "Complete";
     }
   };
 
@@ -407,28 +429,34 @@ function Candidate() {
                         )}
                       </>
                     ) : column === "Action" ? (
-                      <>
-                        <Link
-                          to={`/admin/editCandidate/${row.categoryId}/${row.eventId}/${row.candidateId}`}
-                          className="btn btn-primary btn-sm"
-                        >
-                          <i className="fs-4 bi-pencil"></i>
-                        </Link>
+                      row.eventStatus !== 5 &&
+                      row.eventStatus !== 4 &&
+                      row.eventStatus !== 3 && (
+                        <>
+                          <Link
+                            to={`/admin/editCandidate/${row.categoryId}/${row.eventId}/${row.candidateId}`}
+                            className="btn btn-primary btn-sm"
+                          >
+                            <i className="fs-4 bi-pencil"></i>
+                          </Link>
 
-                        <button
-                          onClick={() =>
-                            handleDeleteCandidate(
-                              row.categoryId,
-                              row.eventId,
-                              row.candidateId,
-                              row.imageFileName
-                            )
-                          }
-                          className="btn btn-danger btn-sm"
-                        >
-                          <i className="fs-4 bi-trash"></i>
-                        </button>
-                      </>
+                          <button
+                            onClick={() =>
+                              handleDeleteCandidate(
+                                row.categoryId,
+                                row.eventId,
+                                row.candidateId,
+                                row.imageFileName
+                              )
+                            }
+                            className="btn btn-danger btn-sm"
+                          >
+                            <i className="fs-4 bi-trash"></i>
+                          </button>
+                        </>
+                      )
+                    ) : column === "eventStatus" ? (
+                      getElectionStatus(row)
                     ) : (
                       row[column]
                     )}

@@ -12,7 +12,7 @@ import { contractAddress } from "../../config";
 
 function UserFeedbackList() {
   const [feedbacks, setFeedbacks] = useState([]);
-  const [expandedFeedback, setExpandedFeedback] = useState(null);
+  const [expandedFeedback, setExpandedFeedback] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
@@ -159,12 +159,17 @@ function UserFeedbackList() {
   };
 
   const toggleExpand = (feedbackID) => {
-    if (expandedFeedback === feedbackID) {
-      setExpandedFeedback(null);
-    } else {
-      setExpandedFeedback(feedbackID);
-    }
+    setExpandedFeedback((currentExpandedFeedback) => {
+      if (currentExpandedFeedback.includes(feedbackID)) {
+        // If the ID is already in the array, remove it (collapse the item)
+        return currentExpandedFeedback.filter((id) => id !== feedbackID);
+      } else {
+        // If the ID is not in the array, add it (expand the item)
+        return [...currentExpandedFeedback, feedbackID];
+      }
+    });
   };
+
   const handleBlockClick = () => {
     // Call to SweetAlert to show the modal
     Swal({
@@ -234,12 +239,12 @@ function UserFeedbackList() {
                       ) : column === "content" ? (
                         <>
                           {row[column].length > 50 &&
-                          expandedFeedback !== row.feedback_id ? (
+                          !expandedFeedback.includes(row.feedback_id) ? (
                             <>
                               {`${row[column].substring(0, 50)}... `}
                               <button
                                 onClick={() => toggleExpand(row.feedback_id)}
-                                className="btn btn-link p-0"
+                                className="btn btn-link"
                               >
                                 Read More
                               </button>
@@ -250,7 +255,7 @@ function UserFeedbackList() {
                               {row[column].length > 50 && (
                                 <button
                                   onClick={() => toggleExpand(row.feedback_id)}
-                                  className="btn btn-link p-0"
+                                  className="btn btn-link"
                                 >
                                   Read Less
                                 </button>

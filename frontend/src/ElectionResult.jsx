@@ -191,7 +191,7 @@ function ElectionResult() {
     <div className="voterhome">
       <Header />
       <div style={{ margin: "20px" }}>
-        <h1>Elecetion Result</h1>
+        <h1>Election Result</h1>
       </div>
       <div className="col-md-12 filter-container">
         <form className="d-flex mb-3">
